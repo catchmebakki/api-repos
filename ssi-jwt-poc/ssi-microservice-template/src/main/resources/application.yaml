@@ -1,0 +1,109 @@
+server:
+  port: 9000
+  error:
+    include-stacktrace: never
+spring:
+  application:
+    name: domain_subDomain
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+
+springdoc:
+  swagger-ui:
+    path: "/swagger/ui.html"
+---
+
+spring:
+  config:
+    activate:
+      on-profile: sit
+  application:
+    name: domain_subDomain
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.92.10:1521:DEV1
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Dev1
+    jpa:
+    hibernate:
+      ddl-auto: validate
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 9001
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    metrics:
+      enabled: true
+    health:
+      enabled: true
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        # failure rate threshold in percentage
+        failureRateThreshold: 20
+        # number of calls for each sliding window period, before the CircuitBreaker can calculate the error rate
+        minimumNumberOfCalls: 2
+        # it can be TIME_BASED or COUNT_BASED
+        slidingWindowType: COUNT_BASED
+        # if the type is "TIME_BASED" window size is in seconds
+        slidingWindowSize: 10
+        # wait before transitioning from open to half-open
+        waitDurationInOpenState: 30s
+        # permitted number of calls when the CircuitBreaker is in half open.
+        permittedNumberOfCallsInHalfOpenState: 10
+    instances:
+      profileService:
+        baseConfig: default
+        recordFailurePredicate: com.ssi.service.core.platform.exception.resilience4j.RecordFailurePredicate
+
+  ratelimiter:
+    instances:
+      profile-service:
+        # number of permissions available during one limit refresh period
+        limitForPeriod: 10
+        # period of a limit refresh
+        limitRefreshPeriod: 1s
+        # default wait time a thread waits for a permission
+        timeoutDuration: 0
+        registerHealthIndicator: true
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: uat
+server:
+  port: 9002

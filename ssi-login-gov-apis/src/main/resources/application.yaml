@@ -1,0 +1,256 @@
+server:
+  port: 8094
+ #ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+  error:
+    include-stacktrace: never
+  compression:
+    enabled: true
+    # Mime types that should be compressed
+    mime-types: application/json
+  servlet:
+    context-path: /api/logingov
+
+spring:
+  application:
+    name: ssi-login-gov-apis
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        proc:
+          param_null_passing: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  jackson:
+    default-property-inclusion : NON_NULL
+  sleuth:
+    sampler:
+      probability: 1.0
+
+application:
+  file-processor:
+    thread:
+      pool-size: 2
+  local:
+    filepath: /opt/logingov/uploads/
+  expiry:
+    in-minutes:
+      access-token: 10
+      refresh-token: 50
+      exchange-token: 2
+  screen-id: 896
+  app-version: '@project.version@'
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger/ui.html
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.92.10:1521:DEV1
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Dev1
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8094
+  #ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    #key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    #key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    #key-store-type: PKCS12
+    #key-alias: ms.app.nhes.nhroot.int
+ 
+webservice-path: https://stage1-unemployment.dol.gov
+webservice-usps-path: https://stage-arpaui-ipp.dol.gov/api
+privatekey-path: /opt/msapps/certs/NH-stage-private.pem
+kid: aLqiNec2SzQ_UKr50pyjvalfrg4Sd-7vfVp9jv-E8tI
+
+logging:
+  level:
+    org:
+      springframework: info
+#client_version: 0.1.0
+#swa: NH
+---
+
+spring:
+  config:
+    activate:
+      on-profile: uat2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.93.22:1521:uat2
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Uat2
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8094
+  #ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    #key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    #key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    #key-store-type: PKCS12
+    #key-alias: ms.app.nhes.nhroot.int
+    
+webservice_path: https://stage1-unemployment.dol.gov
+webservice_usps_path: https://stage-arpaui-ipp.dol.gov/api
+privatekey_path: /opt/msapps/certs/NH-stage-private.pem
+kid: aLqiNec2SzQ_UKr50pyjvalfrg4Sd-7vfVp9jv-E8tI
+
+logging:
+  level:
+    org:
+      springframework: info
+      
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <prod_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <prod_db_user_name>
+    password: <prod_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8094
+  #ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    #key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    #key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    #key-store-type: PKCS12
+    #key-alias: ms.app.nhes.nhroot.int
+    
+webservice_path: https://unemployment.dol.gov
+webservice_usps_path: https://arpaui-ipp.dol.gov/api
+privatekey_path: /opt/msapps/certs/NH-prod-private.pem
+kid: QAIwhBDup1BWnIZgsNkDspd0wdgmp0b2I33bFusLpSc
+
+logging:
+  level:
+    org:
+      springframework: info
+      
+---
+
+spring:
+  config:
+    activate:
+      on-profile: POSPROD
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.93.14:1521:POST
+    driverClassName: oracle.jdbc.OracleDriver
+    username: POSPROD
+    password: POSPROD
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8094
+  #ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+webservice_path: https://stage1-unemployment.dol.gov
+webservice_usps_path: https://stage-arpaui-ipp.dol.gov/api
+privatekey_path: src\\main\\resources\\NH-prod-private.pem
+kid: aLqiNec2SzQ_UKr50pyjvalfrg4Sd-7vfVp9jv-E8tI
+
+logging:
+  level:
+    org:
+      springframework: info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: localuat2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.93.22:1521:uat2
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Uat2
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+---

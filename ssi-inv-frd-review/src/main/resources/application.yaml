@@ -1,0 +1,328 @@
+server:
+  port: 9001
+  error:
+    include-stacktrace: never
+  # Enable response compression
+  compression:
+     enabled: true
+     # Mime types that should be compressed
+     mime-types: application/json
+  servlet:
+    context-path: /api/fraudreview
+
+
+spring:
+  application:
+    name: ssi_fraudreview
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        proc:
+          param_null_passing: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  jackson:
+    default-property-inclusion : NON_NULL
+  sleuth:
+    sampler:
+      probability: 1.0
+
+application:
+  app-version: '@project.version@'
+  file-processor:
+    thread:
+      pool-size: 2
+  local:
+    filepath: /opt/msapps/uploads/
+  expiry:
+    in-minutes:
+      access-token: 40
+      refresh-token: 50
+      exchange-token: 2
+  screen-id: 894
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    properties:
+      hibernate:
+        proc:
+          param_null_passing: true
+  datasource:
+    url: jdbc:oracle:thin:@172.23.93.23:1521:uat3
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Uat3
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+application:
+  local:
+    filepath: C:/path/upload/
+  app-version: 0.0.1
+
+
+    
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger/ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    metrics:
+      enabled: true
+    health:
+      enabled: true
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+
+  #resilience4j:
+  #  circuitbreaker:
+  #    configs:
+  #      default:
+  #        registerHealthIndicator: true
+  #        # failure rate threshold in percentage
+  #        failureRateThreshold: 20
+  #        # number of calls for each sliding window period, before the CircuitBreaker can calculate the error rate
+  #        minimumNumberOfCalls: 2
+  #        # it can be TIME_BASED or COUNT_BASED
+  #        slidingWindowType: COUNT_BASED
+  #        # if the type is "TIME_BASED" window size is in seconds
+  #        slidingWindowSize: 10
+  #        # wait before transitioning from open to half-open
+  #        waitDurationInOpenState: 30s
+  #        # permitted number of calls when the CircuitBreaker is in half open.
+  #        permittedNumberOfCallsInHalfOpenState: 10
+  #    instances:
+  #      profileService:
+  #        baseConfig: default
+  #        recordFailurePredicate: com.ssi.service.core.platform.exception.resilience4j.RecordFailurePredicate
+
+  ratelimiter:
+    instances:
+      profile-service:
+        # number of permissions available during one limit refresh period
+        limitForPeriod: 10
+        # period of a limit refresh
+        limitRefreshPeriod: 1s
+        # default wait time a thread waits for a permission
+        timeoutDuration: 0
+        registerHealthIndicator: true
+---
+spring:
+  config:
+    activate:
+      on-profile: uat3
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    properties:
+      hibernate:
+        proc:
+          param_null_passing: true
+  datasource:
+    url: jdbc:oracle:thin:@172.23.93.23:1521:uat3
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Uat3
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+application:
+  local:
+    filepath: /opt/msapps/uploads/
+
+server:
+  port: 8095
+  ssl:
+    key-store: classpath:ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+---
+spring:
+  config:
+    activate:
+      on-profile: uat2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    properties:
+      hibernate:
+        proc:
+          param_null_passing: true
+  datasource:
+    url: <uat2_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <uat2_db_user_name>
+    password: <uat2_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+application:
+  local:
+    filepath: /opt/msapps/uploads/
+
+server:
+  port: 8095
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    key-store: classpath:ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+---
+spring:
+  config:
+    activate:
+      on-profile: sit1
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <sit1_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <sit1_db_user_name>
+    password: <sit1_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+application:
+  local:
+    filepath: /opt/msapps/uploads/
+
+server:
+  port: 8095
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    key-store: classpath:ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+---
+spring:
+  config:
+    activate:
+      on-profile: localuat2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    properties:
+      hibernate:
+        proc:
+          param_null_passing: true
+  datasource:
+    url: jdbc:oracle:thin:@172.23.93.22:1521:uat2
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Uat2
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+application:
+  local:
+    filepath: /opt/msapps/uploads/
+  app-version: 0.0.1
+
+server:
+  port: 9000
+  ssl:
+    key-store: classpath:ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger/ui.html
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <prod_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <prod_db_user_name>
+    password: <prod_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+application:
+  local:
+    filepath: /opt/msapps/uploads/
+
+server:
+  port: 8095
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    key-store: classpath:ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int

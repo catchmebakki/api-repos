@@ -1,0 +1,403 @@
+server:
+  port: 8097
+  error:
+    include-stacktrace: never
+  compression:
+    enabled: true
+    # Mime types that should be compressed
+    mime-types: application/json
+  servlet:
+    context-path: /api/staffcollecticase
+
+spring:
+  application:
+    name: ssi_collecticase
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jackson:
+    default-property-inclusion : NON_NULL
+  sleuth:
+    sampler:
+      probability: 1.0
+
+application:
+  expiry:
+    in-minutes:
+      access-token: 30
+      refresh-token: 50
+      exchange-token: 2
+  screen-id: 903
+  app-version: '@project.version@'
+  file-processor:
+    thread:
+      pool-size: 2
+  local:
+    filepath: /opt/collecticaseapps/uploads/
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      show-sql: true
+    properties:
+      hibernate.dialect: com.ssi.ms.collecticase.database.repository.custom.CustomOracleDialect
+      hibernate.format_sql: true
+      hibernate.proc.param_null_passing: true
+
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521:FREE
+    driverClassName: oracle.jdbc.OracleDriver
+    username: SYSTEM
+    password: admin
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+application:
+  app-version: 0.0.1
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger/ui.html
+
+ccf-view-certified-clm:
+      url: 'https://sit1.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+
+---
+spring:
+  config:
+    activate:
+      on-profile: uat1
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <uat1_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <uat1_db_user_name>
+    password: <uat1_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8097
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+ccf-view-certified-clm:
+  url: 'https://uat1.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+---
+spring:
+  config:
+    activate:
+      on-profile: uat2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <uat2_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <uat2_db_user_name>
+    password: <uat2_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8097
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+ccf-view-certified-clm:
+  url: 'https://uat2.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+---
+spring:
+  config:
+    activate:
+      on-profile: uat3
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <uat3_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <uat3_db_user_name>
+    password: <uat3_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8097
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+ccf-view-certified-clm:
+  url: 'https://uat3.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+---
+spring:
+  config:
+    activate:
+      on-profile: uat4
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <uat4_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <uat4_db_user_name>
+    password: <uat4_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8097
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+ccf-view-certified-clm:
+  url: 'https://uat4.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+---
+spring:
+  config:
+    activate:
+      on-profile: sit1
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <sit1_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <sit1_db_user_name>
+    password: <sit1_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8097
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+ccf-view-certified-clm:
+  url: 'https://sit1.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: sit2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <sit2_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <sit2_db_user_name>
+    password: <sit2_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8097
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+ccf-view-certified-clm:
+  url: 'https://sit2.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+---
+
+spring:
+  config:
+    activate:
+      on-profile: localuat2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.93.22:1521:uat2
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Uat2
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  ssl:
+    key-store: classpath:ms.app.nhes.nhroot.int.pfx
+    #key-store: C:\Users\Praveenraja.A.P\work\Temp\newCert\ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger/ui.html
+
+ccf-view-certified-clm:
+  url: 'https://uat2.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <prod_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <prod_db_user_name>
+    password: <prod_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8097
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+ccf-view-certified-clm:
+  url: 'https://nhuis-staff.nhes.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+
+---
+spring:
+  config:
+    activate:
+      on-profile: rheldev2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.92.27:1521:DEV2
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Dev2
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8097
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+ccf-view-certified-clm:
+  url: 'https://sit2.nhuis.nh.gov/staffcmt/contdClmViewCertifiedCCF/'
+
+---

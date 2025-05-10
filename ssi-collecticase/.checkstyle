@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fileset-config file-format-version="1.2.0" simple-config="false" sync-formatter="false">
+  <local-check-config name="maven-checkstyle-plugin check-style-check" location="file:/C:/Seetha/workspaces/api_repos_resea-filecheckin/ssi-resea/checkstyle_check.xml" type="remote" description="maven-checkstyle-plugin configuration check-style-check">
+    <property name="checkstyle.header.file" value="C:\Seetha\workspaces\microservices\.metadata\.plugins\org.eclipse.core.resources\.projects\ssi-resea\com.basistech.m2e.code.quality.checkstyleConfigurator\checkstyle-header-check-style-check.txt"/>
+    <property name="checkstyle.cache.file" value="${project_loc}/target/checkstyle-cachefile"/>
+  </local-check-config>
+  <fileset name="java-sources-check-style-check" enabled="true" check-config-name="maven-checkstyle-plugin check-style-check" local="true">
+    <file-match-pattern match-pattern="^src/main/java/.*\.java" include-pattern="true"/>
+    <file-match-pattern match-pattern="^src/main/java.*com/ssi/ms/configuration/database/dao/.*" include-pattern="false"/>
+    <file-match-pattern match-pattern="^src/main/resources/.*\.properties" include-pattern="true"/>
+    <file-match-pattern match-pattern="^src/main/resources/.*\.properties" include-pattern="true"/>
+    <file-match-pattern match-pattern="^src/test/resources.*\.properties" include-pattern="true"/>
+  </fileset>
+</fileset-config>

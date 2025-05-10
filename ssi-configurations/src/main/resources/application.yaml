@@ -1,0 +1,197 @@
+server:
+  port: 8092
+  error:
+    include-stacktrace: never
+  compression:
+    enabled: true
+    # Mime types that should be compressed
+    mime-types: application/json
+  servlet:
+    context-path: /api/config
+
+spring:
+  application:
+    name: ssi_configurations
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jackson:
+    default-property-inclusion : NON_NULL
+  sleuth:
+    sampler:
+      probability: 1.0
+
+application:
+  expiry:
+    in-minutes:
+      access-token: 10
+      refresh-token: 50
+      exchange-token: 2
+  screen-id: 895
+  app-version: '@project.version@'
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.92.10:1521:DEV1
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM2
+    password: Uim2#Dev1
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+application:
+  app-version: 0.0.1
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger/ui.html
+---
+spring:
+  config:
+    activate:
+      on-profile: uat2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <uat2_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <uat2_db_user_name>
+    password: <uat2_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8092
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+---
+spring:
+  config:
+    activate:
+      on-profile: sit1
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <sit1_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <sit1_db_user_name>
+    password: <sit1_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8092
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: localuat2
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: jdbc:oracle:thin:@172.23.93.22:1521:uat2
+    driverClassName: oracle.jdbc.OracleDriver
+    username: UIM1
+    password: Uim1#Uat2
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  ssl:
+    key-store: classpath:ms.app.nhes.nhroot.int.pfx
+    #key-store: C:\Users\Praveenraja.A.P\work\Temp\newCert\ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger/ui.html
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+  datasource:
+    url: <prod_db_URL>
+    driverClassName: oracle.jdbc.OracleDriver
+    username: <prod_db_user_name>
+    password: <prod_db_password>
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 20
+      idleTimeout: 30000
+      maxLifetime: 2000000
+      connectionTimeout: 30000
+      poolName: HikariPoolBooks
+
+server:
+  port: 8092
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int

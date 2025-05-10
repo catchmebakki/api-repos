@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.ssi</groupId>
+    <artifactId>ssi-parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>ssi-microservice-common</module>
+		<module>ssi-collecticase</module>
+		<module>ssi-masslayoff</module>
+        <module>ssi-configurations</module>
+		<module>ssi-uuid-generate</module>
+		<module>ssi-login-gov-apis</module>
+        <module>ssi-resea</module>
+    </modules>
+
+</project>

@@ -1,0 +1,138 @@
+server:
+  port: 8086
+ #ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+  error:
+    include-stacktrace: never
+  compression:
+    enabled: true
+    # Mime types that should be compressed
+    mime-types: application/json
+  servlet:
+    context-path: /api/swa
+
+spring:
+  application:
+    name: ssi_uuid_generate
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jackson:
+    default-property-inclusion : NON_NULL
+  sleuth:
+    sampler:
+      probability: 1.0
+
+application:
+  expiry:
+    in-minutes:
+      access-token: 10
+      refresh-token: 50
+      exchange-token: 2
+  screen-id: 895
+  app-version: '@project.version@'
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger/ui.html
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+server:
+  port: 8093
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+---
+
+spring:
+  config:
+    activate:
+      on-profile: uat2
+
+server:
+  port: 8093
+  ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    key-store-type: PKCS12
+    key-alias: ms.app.nhes.nhroot.int
+    
+---
+spring:
+  config:
+    activate:
+      on-profile: devhttp
+
+server:
+  port: 8093
+  #ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    #key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    #key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    #key-store-type: PKCS12
+    #key-alias: ms.app.nhes.nhroot.int
+---
+
+spring:
+  config:
+    activate:
+      on-profile: uat2http
+
+server:
+  port: 8093
+  #ssl:
+    #key-store: classpath:keystore.jks
+    #key-store-password: changeit
+    #key-store-type: JKS
+    #key-alias: mycert
+    
+    #key-store: /opt/msapps/certs/ms.app.nhes.nhroot.int.pfx
+    #key-store-password: L29RONme41FceDe4Hq1nvWgO9MvmozW+d25sW2piCns
+    #key-store-type: PKCS12
+    #key-alias: ms.app.nhes.nhroot.int
+---
+spring:
+  config:
+    activate:
+      on-profile: localuat2
+  ssl:
+    key-store: classpath:keystore.jks
+    key-store-password: changeit
+    key-store-type: JKS
+    key-alias: mycert
+    
+---
