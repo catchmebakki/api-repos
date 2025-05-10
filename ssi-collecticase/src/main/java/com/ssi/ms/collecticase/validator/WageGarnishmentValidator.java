@@ -308,13 +308,13 @@ public class WageGarnishmentValidator {
             errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_COURT_ORDERED_DATE_FUTURE);
         }
 
-        if(wageGarnishmentActivityDTO.getActivityCorrespondence() != null)
+        if(wageGarnishmentActivityDTO.getActivitySendCorrespondence() != null)
         {
             List<String> activityCorrespondenceList = Arrays
-                    .stream(wageGarnishmentActivityDTO.getActivityCorrespondence())
+                    .stream(wageGarnishmentActivityDTO.getActivitySendCorrespondence())
                     .map(String::toUpperCase) // Transformation
                     .toList();
-            List<CcaseCraCorrespondenceCrcDAO> ccaseCraCorrespondenceCrcDAOList = ccaseCraCorrespondenceCrcRepository.getSendCorrespondenceForRemedy(
+            List<CcaseCraCorrespondenceCrcDAO> ccaseCraCorrespondenceCrcDAOList = ccaseCraCorrespondenceCrcRepository.getManualCorrespondenceForRemedy(
                     List.of(CollecticaseConstants.INDICATOR.Y.name()),
                     List.of(CollecticaseConstants.INDICATOR.N.name()),
                     List.of(wageGarnishmentActivityDTO.getActivityRemedyTypeCd()));

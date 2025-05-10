@@ -1519,8 +1519,8 @@ public class CaseService extends CollecticaseBaseService {
         List<Map<String, Object>> correspMapList = new ArrayList<Map<String, Object>>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
         CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO = null;
-        if (generalActivityDTO.getActivityCorrespondence() != null) {
-            for (String sendNotice : generalActivityDTO.getActivityCorrespondence()) {
+        if (generalActivityDTO.getActivitySendCorrespondence() != null) {
+            for (String sendNotice : generalActivityDTO.getActivitySendCorrespondence()) {
                 paramMap = new HashMap<String, Object>();
                 ccaseCraCorrespondenceCrcDAO = ccaseCraCorrespondenceCrcRepository.findById(UtilFunction.stringToLong.apply(sendNotice))
                     .orElseThrow(() -> new NotFoundException("Invalid CRC ID:" + UtilFunction.stringToLong.apply(sendNotice), CRC_ID_NOT_FOUND));

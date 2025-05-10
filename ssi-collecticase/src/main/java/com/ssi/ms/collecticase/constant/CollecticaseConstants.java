@@ -427,4 +427,10 @@ public interface CollecticaseConstants {
     String PAR_COLC_NO_OF_LKUP_REC = "COLC_NO_OF_LKUP_REC";
 
     String COLC_NO_OF_LKUP_REC = "COLC_NO_OF_LKUP_REC";
+
+    String STATE_OF_NEW_HAMPSHIRE = "NH";
+
+    String YES = "Y";
+
+    String NO = "N";
 }

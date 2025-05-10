@@ -253,13 +253,13 @@ public class PaymentPlanActivityValidator {
             }
         }
 
-        if(paymentPlanActivityDTO.getActivityCorrespondence() != null)
+        if(paymentPlanActivityDTO.getActivitySendCorrespondence() != null)
         {
             List<String> activityCorrespondenceList = Arrays
-                    .stream(paymentPlanActivityDTO.getActivityCorrespondence())
+                    .stream(paymentPlanActivityDTO.getActivitySendCorrespondence())
                     .map(String::toUpperCase) // Transformation
                     .toList();
-            List<CcaseCraCorrespondenceCrcDAO> ccaseCraCorrespondenceCrcDAOList = ccaseCraCorrespondenceCrcRepository.getSendCorrespondenceForRemedy(
+            List<CcaseCraCorrespondenceCrcDAO> ccaseCraCorrespondenceCrcDAOList = ccaseCraCorrespondenceCrcRepository.getManualCorrespondenceForRemedy(
                     List.of(CollecticaseConstants.INDICATOR.Y.name()),
                     List.of(CollecticaseConstants.INDICATOR.N.name()),
                     List.of(paymentPlanActivityDTO.getActivityRemedyTypeCd()));
