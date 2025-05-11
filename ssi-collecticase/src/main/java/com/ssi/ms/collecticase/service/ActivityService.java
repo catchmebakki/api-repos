@@ -68,7 +68,33 @@ public class ActivityService extends CollecticaseBaseService {
         if (shortDescByActivityCd != null && shortDescByRemedyCd != null) {
             activityHeaderName = shortDescByRemedyCd.getDesc() + " - " + shortDescByActivityCd.getDesc();
         }
+
+        // Follow up - Short Note call
+        CcaseRemedyActivityCraDAO caseRemedyActivityInfo = ccaseRemedyActivityCraRepository
+                .getCaseRemedyActivityInfo(activityTypeCd, activityRemedyCd);
+        // Property Lien
+        CcaseCaseRemedyCmrDAO caseRemedyByCaseRemedy = ccaseCaseRemedyCmrRepository
+                .getCaseRemedyByCaseRemedy(caseId, List.of(activityRemedyCd));
+
         // Setting in Response
+        if (caseRemedyActivityInfo != null) {
+            if (caseRemedyActivityInfo.getCraFollowUpDays() != null
+                    && caseRemedyActivityInfo.getCraFollowUpDays() > 0) {
+                Date currDate = commonRepository.getCurrentDate();
+                activityGeneralPageResponse.setActivityFollowupDate(CollectionUtility
+                        .addDaysToDate(currDate,
+                                caseRemedyActivityInfo.getCraFollowUpDays()));
+            }
+            activityGeneralPageResponse.setActivityFollowupShortNote(caseRemedyActivityInfo
+                    .getCraFollowUpShNote());
+        }
+        if (CollectionUtility.compareLongValue(activityTypeCd,
+                CollecticaseConstants.ACTIVITY_TYPE_RESEARCH_IB8606)) {
+            activityGeneralPageResponse.setDisableFollowupDate(true);
+            activityGeneralPageResponse.setDisableFollowupShNote(true);
+        }
+        activityGeneralPageResponse.setPropertyLien(caseRemedyByCaseRemedy != null ?
+                caseRemedyByCaseRemedy.getCmrGnFkCtyCd() : null);
         activityGeneralPageResponse.setActivityHeaderName(activityHeaderName);
         activityGeneralPageResponse.setActivityDate(commonRepository.getCurrentDate());
         activityGeneralPageResponse.setActivityTime(CollecticaseConstants.TIME_FORMAT

@@ -15,5 +15,15 @@ public class ActivityGeneralPageResponse {
     Long activityClaimantRepresentative;
     // Activity Details : <Remedy desc> - <Activity Name>
     String activityHeaderName;
+    // Follow-up Date
+    Date activityFollowupDate;
+    // Follow-up showInd
+    boolean disableFollowupDate;
+    // Short Note
+    String activityFollowupShortNote;
+    // Short Note showInd
+    boolean disableFollowupShNote;
+    // Property Lien
+    Long propertyLien;
 
 }
