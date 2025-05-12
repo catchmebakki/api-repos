@@ -6,6 +6,8 @@ import com.ssi.ms.collecticase.outputpayload.ActivitySendReSendResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityEntityContactResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityPropertyLienResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityFollowUpShortNoteResponse;
+import com.ssi.ms.collecticase.outputpayload.ActivityPaymentPlanPageResponse;
+import com.ssi.ms.collecticase.outputpayload.ActivityWageGarnishmentPageResponse;
 import com.ssi.ms.collecticase.service.ActivityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +73,26 @@ public class ActivityController {
         Long caseId = activityInputPayload.getCaseId();
 
         return activityService.getSendReSendActivityPage(caseId, activityRemedyCd, activityTypeCd);
+    }
+
+    @GetMapping(path = "/getPaymentPlan", produces = "application/json")
+    public ActivityPaymentPlanPageResponse getPaymentPlanActivityPage(@ModelAttribute ActivityInputPayload
+                                                                      activityInputPayload) {
+        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
+        Long caseId = activityInputPayload.getCaseId();
+
+        return activityService.getPaymentPlanActivityPage(caseId, activityRemedyCd, activityTypeCd);
+    }
+
+    @GetMapping(path = "/getWageGarnishment", produces = "application/json")
+    public ActivityWageGarnishmentPageResponse getWageGarnishmentActivityPage(@ModelAttribute ActivityInputPayload
+                                                                              activityInputPayload) {
+        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
+        Long caseId = activityInputPayload.getCaseId();
+
+        return activityService.getWageGarnishmentActivityPage(caseId, activityRemedyCd, activityTypeCd);
     }
 
 }

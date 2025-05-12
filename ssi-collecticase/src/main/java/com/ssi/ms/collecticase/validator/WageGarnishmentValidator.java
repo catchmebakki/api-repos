@@ -259,11 +259,11 @@ public class WageGarnishmentValidator {
         if(UtilFunction.compareLongObject.test(ACTIVITY_TYPE_SENT_NOTICE_OF_WG,
                     wageGarnishmentActivityDTO.getActivityTypeCd()))
         {
-            List<CcaseWageGarnishmentCwgDAO> ccaseWageGarnishmentCwgDAOList =
+            CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAOList =
                     ccaseWageGarnishmentCwgDAORepo.getWageInfoForCaseEmployerRemedy(wageGarnishmentActivityDTO.getCaseId(),
-                    wageGarnishmentActivityDTO.getEmployerId(), List.of(wageGarnishmentActivityDTO.getActivityRemedyTypeCd()));
+                    wageGarnishmentActivityDTO.getEmployerId(), wageGarnishmentActivityDTO.getActivityRemedyTypeCd());
             CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO = null;
-            if(CollectionUtils.isNotEmpty(ccaseWageGarnishmentCwgDAOList))
+            if(ccaseWageGarnishmentCwgDAOList != null)
             {
                 if(CollecticaseConstants.INDICATOR.Y.name().equals(ccaseWageGarnishmentCwgDAO.getCwgSuspended()))
                 {

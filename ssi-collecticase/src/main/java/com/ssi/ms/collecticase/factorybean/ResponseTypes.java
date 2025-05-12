@@ -5,5 +5,7 @@ public enum ResponseTypes {
     ActivityFollowUpShortNoteResponse,
     ActivityGeneralPageResponse,
     ActivityPropertyLienResponse,
-    ActivitySendReSendResponse
+    ActivitySendReSendResponse,
+    ActivityPaymentPlanPageResponse,
+    ActivityWageGarnishmentPageResponse
 }

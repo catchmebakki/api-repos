@@ -29,11 +29,11 @@ public interface CcaseWageGarnishmentCwgRepository extends CrudRepository<CcaseW
 			from CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO 
 			where ccaseWageGarnishmentCwgDAO.ccaseCaseRemedyCmrDAO.ccaseCasesCmcDAO.cmcId = :caseId
 			and ccaseWageGarnishmentCwgDAO.employerEmpDAO.empId = :employerId
-			and ccaseWageGarnishmentCwgDAO.ccaseCaseRemedyCmrDAO.cmrRemedyCd IN (:remedyList)
+			and ccaseWageGarnishmentCwgDAO.ccaseCaseRemedyCmrDAO.cmrRemedyCd = :remedy
 			ORDER BY ccaseWageGarnishmentCwgDAO.cwgId
 			""")
-	List<CcaseWageGarnishmentCwgDAO> getWageInfoForCaseEmployerRemedy(Long caseId, Long employerId,
-																	 List<Long> remedyList);
+	CcaseWageGarnishmentCwgDAO getWageInfoForCaseEmployerRemedy(Long caseId, Long employerId,
+																	 Long remedy);
 
 	@Query("""          
 			from CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO 
