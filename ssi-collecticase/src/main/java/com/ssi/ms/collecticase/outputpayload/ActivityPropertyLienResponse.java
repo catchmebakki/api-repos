@@ -6,7 +6,6 @@ import java.util.List;
 
 @Data
 public class ActivityPropertyLienResponse {
-
     // Property Lein
     List<CcaseCountyCtyDTO> countyCodesCtyList;
 

@@ -5,7 +5,6 @@ import java.util.Date;
 
 @Data
 public class ActivityGeneralPageResponse {
-
     //Date
     Date activityDate;
     //Time
@@ -25,5 +24,4 @@ public class ActivityGeneralPageResponse {
     boolean disableFollowupShNote;
     // Property Lien
     Long propertyLien;
-
 }

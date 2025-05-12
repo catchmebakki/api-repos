@@ -13,5 +13,4 @@ public class ActivityFollowUpShortNoteResponse {
     String activityFollowupShortNote;
     // Short Note showInd
     boolean disableFollowupShNote;
-
 }

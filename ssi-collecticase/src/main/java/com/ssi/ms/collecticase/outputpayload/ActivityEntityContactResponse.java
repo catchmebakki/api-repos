@@ -10,7 +10,6 @@ import java.util.Map;
 public class ActivityEntityContactResponse {
     // Entity Contact showInd
     boolean disableEntityContact;
-        // Entity Contact
-        List<VwCcaseEntityDTO> entityList;
-
+    // Entity Contact
+    List<VwCcaseEntityDTO> entityList;
 }

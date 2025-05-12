@@ -51,5 +51,4 @@ public class ActivityPaymentPlanPageResponse {
 
     // paymentPlanEffectiveUntilDate showInd
     boolean disablePPEffUntilDate;
-
 }
