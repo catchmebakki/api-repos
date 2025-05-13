@@ -58,7 +58,18 @@ public class GeneralActivityDTO {
     @Size(max = 750, message = "Activity Notes in NHUIS cannot be more than 750 Characters")
     private String activityNHUISNotes;
 
-    private String[] activityCorrespondence;
+    private String[] activitySendCorrespondence;
+    private String[] activityReSendCorrespondence;
+
+    public String[] getActivityManualCorrespondence() {
+        return activityManualCorrespondence;
+    }
+
+    public void setActivityManualCorrespondence(String[] activityManualCorrespondence) {
+        this.activityManualCorrespondence = activityManualCorrespondence;
+    }
+
+    private String[] activityManualCorrespondence;
 
     private Long activityTypeCd;
 
@@ -184,15 +195,7 @@ public class GeneralActivityDTO {
         this.activityNHUISNotes = activityNHUISNotes;
     }
 
-    public String[] getActivityCorrespondence() {
-        return activityCorrespondence;
-    }
-
-    public void setActivityCorrespondence(String[] activityCorrespondence) {
-        this.activityCorrespondence = activityCorrespondence;
-    }
-
-    public Long getActivityTypeCd() {
+        public Long getActivityTypeCd() {
         return activityTypeCd;
     }
 

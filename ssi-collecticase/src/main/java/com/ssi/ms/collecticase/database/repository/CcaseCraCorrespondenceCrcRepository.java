@@ -1,7 +1,7 @@
 package com.ssi.ms.collecticase.database.repository;
 
+import com.ssi.ms.collecticase.database.dao.CcaseCmaNoticesCmnDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseCraCorrespondenceCrcDAO;
-import com.ssi.ms.collecticase.database.dao.CorrespondenceCorDAO;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -27,9 +27,9 @@ public interface CcaseCraCorrespondenceCrcRepository extends CrudRepository<Ccas
 			            and ccaseCraCorrespondenceCrc.ccaseRemedyActivityCraDAO.craRemedyCd IN (:remedyCdList)           
 			""")
     List<CcaseCraCorrespondenceCrcDAO> getSendCorrespondenceForActivityRemedy(List<String> activeCorrespondenceList,
-                                                                              List<String> manualCorrespondenceList,
-                                                                              List<Long> activityCdList,
-                                                                              List<Long> remedyCdList);
+																			  List<String> manualCorrespondenceList,
+																			  List<Long> activityCdList,
+																			  List<Long> remedyCdList);
 
     @Query("""          
 			from CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrc
@@ -37,9 +37,25 @@ public interface CcaseCraCorrespondenceCrcRepository extends CrudRepository<Ccas
 			            and ccaseCraCorrespondenceCrc.crcManual IN (:manualCorrespondenceList)			            
 			            and ccaseCraCorrespondenceCrc.ccaseRemedyActivityCraDAO.craRemedyCd IN (:remedyCdList)           
 			""")
-    List<CcaseCraCorrespondenceCrcDAO> getSendCorrespondenceForRemedy(List<String> activeCorrespondenceList,
-                                                                      List<String> manualCorrespondenceList,
-                                                                      List<Long> remedyCdList);
+    List<CcaseCraCorrespondenceCrcDAO> getManualCorrespondenceForRemedy(List<String> activeCorrespondenceList,
+																		List<String> manualCorrespondenceList,
+																		List<Long> remedyCdList);
 
+	@Query("""          
+from CcaseCmaNoticesCmnDAO ccaseCmaNoticesCmn
+           where ccaseCmaNoticesCmn.ccaseActivitiesCmaDAO.ccaseCasesCmcDAO.cmcId = :caseId
+           and ccaseCmaNoticesCmn.correspondenceCorDAO is not null
+           and ccaseCmaNoticesCmn.ccaseActivitiesCmaDAO.cmaRemedyType = :remedyTypeCd
+           and ccaseCmaNoticesCmn.cmnResendReq = :activeIndicator
+           and (ccaseCmaNoticesCmn.cmnCreatedTs, ccaseCmaNoticesCmn.ccaseCraCorrespondenceCrcDAO.crcId) IN
+            (select max(innerCcaseCmaNoticesCmn.cmnCreatedTs), innerCcaseCmaNoticesCmn.ccaseCraCorrespondenceCrcDAO.crcId
+            from CcaseCmaNoticesCmnDAO innerCcaseCmaNoticesCmn
+where innerCcaseCmaNoticesCmn.ccaseActivitiesCmaDAO.ccaseCasesCmcDAO.cmcId = :caseId      
+and innerCcaseCmaNoticesCmn.ccaseActivitiesCmaDAO.cmaRemedyType = :remedyTypeCd
+group by innerCcaseCmaNoticesCmn.ccaseCraCorrespondenceCrcDAO.crcId)
+           order by ccaseCmaNoticesCmn.ccaseCraCorrespondenceCrcDAO.crcRptName
+           
+""")
+	List<CcaseCmaNoticesCmnDAO> getResendNoticesByCaseId(Long caseId, Long remedyTypeCd, String activeIndicator);
 
 }

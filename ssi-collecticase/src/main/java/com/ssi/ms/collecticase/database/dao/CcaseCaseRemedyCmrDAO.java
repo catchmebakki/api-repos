@@ -110,7 +110,7 @@ public class CcaseCaseRemedyCmrDAO implements Serializable {
 	private Long cmrStatusCd;
 
 	//	bi-directional many-to-one association to ccaseCasesCmcDAO
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="FK_CMC_ID")
 	private CcaseCasesCmcDAO ccaseCasesCmcDAO;
 

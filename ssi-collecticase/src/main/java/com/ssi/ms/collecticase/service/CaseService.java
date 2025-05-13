@@ -1375,24 +1375,24 @@ public class CaseService extends CollecticaseBaseService {
 
     private CcaseWageGarnishmentCwgDAO processWageGarnish(
             CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
-        List<CcaseWageGarnishmentCwgDAO> ccaseWageGarnishmentCwgList = null;
+        CcaseWageGarnishmentCwgDAO existingCcaseWageGarnishmentCwg = null;
         CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = null;
         CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO = null;
         Map<String, Object> paramValueMap = new HashMap<String, Object>();
         if (CollecticaseUtilFunction.greaterThanLongObject.test(ccaseActivitiesCmaDAO.getFkEmpIdWg(), 0L)) {
-            ccaseWageGarnishmentCwgList = ccaseWageGarnishmentCwgRepository.getWageInfoForCaseEmployerRemedy(
+            existingCcaseWageGarnishmentCwg = ccaseWageGarnishmentCwgRepository.getWageInfoForCaseEmployerRemedy(
                     ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(), ccaseActivitiesCmaDAO.getFkEmpIdWg(),
-                    List.of(ccaseActivitiesCmaDAO.getCmaRemedyType()));
+                    ccaseActivitiesCmaDAO.getCmaRemedyType());
             ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository.getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
                     List.of(ccaseActivitiesCmaDAO.getCmaRemedyType()));
-            if (CollectionUtils.isEmpty(ccaseWageGarnishmentCwgList)) {
+            if (existingCcaseWageGarnishmentCwg == null) {
                 //  Create Wage Garnish Data
                 ccaseWageGarnishmentCwgDAO = createWageGarnish(ccaseActivitiesCmaDAO,
                         ccaseCaseRemedyCmrDAO);
             } else {
                 //  Update Wage Garnish Data
                 ccaseWageGarnishmentCwgDAO = updateWageGarnish(ccaseActivitiesCmaDAO,
-                        ccaseWageGarnishmentCwgList, ccaseCaseRemedyCmrDAO);
+                        existingCcaseWageGarnishmentCwg, ccaseCaseRemedyCmrDAO);
             }
         }
         return ccaseWageGarnishmentCwgDAO;
@@ -1476,9 +1476,8 @@ public class CaseService extends CollecticaseBaseService {
 
     private CcaseWageGarnishmentCwgDAO updateWageGarnish(
             CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO,
-            List<CcaseWageGarnishmentCwgDAO> ccaseWageGarnishmentCwgList,
+            CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO ,
             CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO) {
-        CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO = ccaseWageGarnishmentCwgList.get(0);
         populateWageData(ccaseWageGarnishmentCwgDAO, ccaseCaseRemedyCmrDAO, ccaseActivitiesCmaDAO);
         ccaseWageGarnishmentCwgDAO.setCwgLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
         ccaseWageGarnishmentCwgDAO.setCwgLastUpdUsing(ccaseActivitiesCmaDAO
@@ -1519,8 +1518,8 @@ public class CaseService extends CollecticaseBaseService {
         List<Map<String, Object>> correspMapList = new ArrayList<Map<String, Object>>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
         CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO = null;
-        if (generalActivityDTO.getActivityCorrespondence() != null) {
-            for (String sendNotice : generalActivityDTO.getActivityCorrespondence()) {
+        if (generalActivityDTO.getActivitySendCorrespondence() != null) {
+            for (String sendNotice : generalActivityDTO.getActivitySendCorrespondence()) {
                 paramMap = new HashMap<String, Object>();
                 ccaseCraCorrespondenceCrcDAO = ccaseCraCorrespondenceCrcRepository.findById(UtilFunction.stringToLong.apply(sendNotice))
                     .orElseThrow(() -> new NotFoundException("Invalid CRC ID:" + UtilFunction.stringToLong.apply(sendNotice), CRC_ID_NOT_FOUND));

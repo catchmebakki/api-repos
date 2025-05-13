@@ -259,11 +259,11 @@ public class WageGarnishmentValidator {
         if(UtilFunction.compareLongObject.test(ACTIVITY_TYPE_SENT_NOTICE_OF_WG,
                     wageGarnishmentActivityDTO.getActivityTypeCd()))
         {
-            List<CcaseWageGarnishmentCwgDAO> ccaseWageGarnishmentCwgDAOList =
+            CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAOList =
                     ccaseWageGarnishmentCwgDAORepo.getWageInfoForCaseEmployerRemedy(wageGarnishmentActivityDTO.getCaseId(),
-                    wageGarnishmentActivityDTO.getEmployerId(), List.of(wageGarnishmentActivityDTO.getActivityRemedyTypeCd()));
+                    wageGarnishmentActivityDTO.getEmployerId(), wageGarnishmentActivityDTO.getActivityRemedyTypeCd());
             CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO = null;
-            if(CollectionUtils.isNotEmpty(ccaseWageGarnishmentCwgDAOList))
+            if(ccaseWageGarnishmentCwgDAOList != null)
             {
                 if(CollecticaseConstants.INDICATOR.Y.name().equals(ccaseWageGarnishmentCwgDAO.getCwgSuspended()))
                 {
@@ -308,13 +308,13 @@ public class WageGarnishmentValidator {
             errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_COURT_ORDERED_DATE_FUTURE);
         }
 
-        if(wageGarnishmentActivityDTO.getActivityCorrespondence() != null)
+        if(wageGarnishmentActivityDTO.getActivitySendCorrespondence() != null)
         {
             List<String> activityCorrespondenceList = Arrays
-                    .stream(wageGarnishmentActivityDTO.getActivityCorrespondence())
+                    .stream(wageGarnishmentActivityDTO.getActivitySendCorrespondence())
                     .map(String::toUpperCase) // Transformation
                     .toList();
-            List<CcaseCraCorrespondenceCrcDAO> ccaseCraCorrespondenceCrcDAOList = ccaseCraCorrespondenceCrcRepository.getSendCorrespondenceForRemedy(
+            List<CcaseCraCorrespondenceCrcDAO> ccaseCraCorrespondenceCrcDAOList = ccaseCraCorrespondenceCrcRepository.getManualCorrespondenceForRemedy(
                     List.of(CollecticaseConstants.INDICATOR.Y.name()),
                     List.of(CollecticaseConstants.INDICATOR.N.name()),
                     List.of(wageGarnishmentActivityDTO.getActivityRemedyTypeCd()));

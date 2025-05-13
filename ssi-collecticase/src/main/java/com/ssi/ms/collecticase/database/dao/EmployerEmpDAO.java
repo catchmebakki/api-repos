@@ -114,11 +114,11 @@ public class EmployerEmpDAO implements Serializable {
 	@Column(name = "EMP_UI_ACCT_NBR")
 	private String empUiAcctNbr;
 
-	@Column(name = "EMP_UI_ACCT_NBR1")
-	private String empUiAcctNbr1;
-
-	@Column(name = "EMP_UI_ACCT_NBRLOC")
-	private String empUiAcctNbrloc;
+//	@Column(name = "EMP_UI_ACCT_NBR1")
+//	private String empUiAcctNbr1;
+//
+//	@Column(name = "EMP_UI_ACCT_NBRLOC")
+//	private String empUiAcctNbrloc;
 
 	@Column(name = "EMP_YTD_CHG_AMT")
 	private Long empYtdChgAmt;

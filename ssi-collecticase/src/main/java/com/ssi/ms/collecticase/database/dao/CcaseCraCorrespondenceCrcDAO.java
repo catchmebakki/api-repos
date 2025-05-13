@@ -44,7 +44,7 @@ public class CcaseCraCorrespondenceCrcDAO implements Serializable {
 	private String crcRptName;
 	
 	@Column(name="CRC_ENABLE")
-	private String crcEnable;
+		private String crcEnable;
 	
 	@Column(name="CRC_PMT_CATEGORY")
 	private Long crcPmtCategory;
@@ -71,12 +71,12 @@ public class CcaseCraCorrespondenceCrcDAO implements Serializable {
 	private String crcLastUpdUsing;
 
 	//bi-directional many-to-one association to reportsRptDAO
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="FK_RPT_ID")
 	private ReportsRptDAO reportsRptDAO;
 
 	//bi-directional many-to-one association to ccaseRemedyActivityCraDAO
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="FK_CRA_ID")
 	private CcaseRemedyActivityCraDAO ccaseRemedyActivityCraDAO;
 

@@ -2,6 +2,9 @@ package com.ssi.ms.collecticase.database.repository;
 
 import com.ssi.ms.collecticase.constant.CollecticaseConstants;
 import com.ssi.ms.collecticase.database.dao.CcaseCasesCmcDAO;
+import com.ssi.ms.collecticase.database.dao.CcaseCmaNoticesCmnDAO;
+import com.ssi.ms.collecticase.dto.CcaseCasesCmcDTO;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -23,5 +27,14 @@ public interface CcaseCasesCmcRepository extends CrudRepository<CcaseCasesCmcDAO
 											   @Param(CollecticaseConstants.PIN_ACTIVITY_CD) Long caseActivityCd,
 											   @Param(CollecticaseConstants.PIN_USER) String callingUser,
 											   @Param(CollecticaseConstants.PIN_USING) String usingProgramName);
+
+
+	@Query("""
+            SELECT new com.ssi.ms.collecticase.dto.CcaseCasesCmcDTO(
+            cmcCaseCharacteristics as caseCharacteristics, cmcCmtRepTypeCd as cmtRepTypeCd)
+            from CcaseCasesCmcDAO cCaseCasesCmcDAO
+			where cCaseCasesCmcDAO.cmcId = :caseId
+			""")
+	CcaseCasesCmcDTO getCaseCmcByCaseId(Long caseId);
 
 	}

@@ -6,8 +6,6 @@ import com.ssi.ms.collecticase.database.dao.CcaseCraCorrespondenceCrcDAO;
 import com.ssi.ms.collecticase.database.dao.VwCcaseHeaderDAO;
 import com.ssi.ms.collecticase.database.dao.VwCcaseOpmDAO;
 import com.ssi.ms.collecticase.database.repository.CcaseCraCorrespondenceCrcRepository;
-import com.ssi.ms.collecticase.database.repository.CorrespondenceCorRepository;
-import com.ssi.ms.collecticase.database.repository.CcaseCasesCmcRepository;
 import com.ssi.ms.collecticase.database.repository.VwCcaseCaseloadRepository;
 import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
 import com.ssi.ms.collecticase.util.CollecticaseErrorEnum;
@@ -74,10 +72,10 @@ public class GeneralActivityValidator {
 
         if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
                 CollecticaseConstants.ACTIVITY_TYPE_RESEARCH_NH_PROPERTY)) {
-            if(generalActivityDTO.getActivityCorrespondence() != null)
+            if(generalActivityDTO.getActivitySendCorrespondence() != null)
             {
                 List<String> activityCorrespondenceList = Arrays
-                        .stream(generalActivityDTO.getActivityCorrespondence())
+                        .stream(generalActivityDTO.getActivitySendCorrespondence())
                         .map(String::toUpperCase) // Transformation
                         .toList();
                 List<CcaseCraCorrespondenceCrcDAO> ccaseCraCorrespondenceCrcDAOList = ccaseCraCorrespondenceCrcRepository.getSendCorrespondenceForActivityRemedy(

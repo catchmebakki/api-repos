@@ -25,6 +25,7 @@ public class CollecticaseBaseService {
 
     @Autowired
     CcaseCaseRemedyCmrRepository ccaseCaseRemedyCmrRepository;
+
     @Autowired
     CcaseCasesCmcRepository ccaseCasesCmcRepository;
 
