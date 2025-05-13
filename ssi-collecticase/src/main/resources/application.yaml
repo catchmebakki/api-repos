@@ -1,5 +1,5 @@
 server:
-  port: 9097
+  port: 7097
   error:
     include-stacktrace: never
   compression:
@@ -58,7 +58,7 @@ spring:
     url: jdbc:oracle:thin:@localhost:1521:FREE
     driverClassName: oracle.jdbc.OracleDriver
     username: SYSTEM
-    password: admin
+    password: adminpassword
     hikari:
       minimumIdle: 5
       maximumPoolSize: 20
