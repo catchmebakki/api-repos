@@ -434,4 +434,5 @@ public interface CollecticaseConstants {
     String NO = "N";
 
     Long MERRIMACK_COUNTY_DISTRICT_COURT = 23L;
+    Long CATEGORY_CCASE_EMPLOYER_REP = 635L;
 }

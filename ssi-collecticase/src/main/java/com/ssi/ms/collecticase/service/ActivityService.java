@@ -14,6 +14,8 @@ import com.ssi.ms.collecticase.dto.VwCcaseEntityDTO;
 import com.ssi.ms.collecticase.dto.CcaseCraCorrespondenceCrcDTO;
 import com.ssi.ms.collecticase.dto.EmployerListDTO;
 import com.ssi.ms.collecticase.dto.EmployerContactListDTO;
+import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
+import com.ssi.ms.collecticase.dto.AllowValAlvResDTO;
 import com.ssi.ms.collecticase.factorybean.ResponseFactory;
 import com.ssi.ms.collecticase.factorybean.ResponseTypes;
 import com.ssi.ms.collecticase.outputpayload.ActivityPaymentPlanPageResponse;
@@ -315,129 +317,195 @@ public class ActivityService extends CollecticaseBaseService {
 
     public ActivityWageGarnishmentPageResponse getWageGarnishmentActivityPage(Long caseId, Long activityRemedyCd,
                                                                               Long activityTypeCd) {
-
+        // getGeneralActivityPage call
         ActivityGeneralPageResponse activityGeneralPageResponse =
                 getGeneralActivityPage(caseId, activityRemedyCd, activityTypeCd);
+        // ActivityWageGarnishmentPageResponse get bean object
         ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse =
                 getResponse(ResponseTypes.ActivityWageGarnishmentPageResponse);
+
+        // Employer call
+        List<EmployerListDTO> employerListForWageGarnish = ccaseEntityCmeRepository
+                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES);
+
+        // Setting in Response
         activityWageGarnishmentPageResponse.setActivityGeneralPageResponse(activityGeneralPageResponse);
+        activityWageGarnishmentPageResponse.setEmployerList(employerListForWageGarnish);
+
+        return activityWageGarnishmentPageResponse;
+    }
+
+    public ActivityWageGarnishmentPageResponse getEmployerContactWageGarnish(Long caseId, Long employerId) {
+
+        ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse =
+                getResponse(ResponseTypes.ActivityWageGarnishmentPageResponse);
+
+        List<EmployerContactListDTO> employerContactListForWageGarnish = ccaseEntityCmeRepository
+                .getEmployerContactListForWageGarnish(caseId, employerId, CollecticaseConstants.YES);
+
+        activityWageGarnishmentPageResponse.setEmployerContactList(employerContactListForWageGarnish);
+
+        return activityWageGarnishmentPageResponse;
+    }
+
+    public ActivityWageGarnishmentPageResponse getEmployerRepWageGarnish(Long caseId, Long employerId) {
+
+        ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse =
+                getResponse(ResponseTypes.ActivityWageGarnishmentPageResponse);
+
+        List<OrganizationIndividualDTO> organizationInfoList = ccaseEntityCmeRepository.getOrganizationInfo(caseId,
+                CollecticaseConstants.YES, List.of(3943L,3944L,3945L), employerId);
+
+        List<OrganizationIndividualDTO> inidividualInfoList = ccaseEntityCmeRepository.getIndividualInfo(caseId,
+                CollecticaseConstants.YES);
+
+        List<AllowValAlvResDTO> alvValList = allowValAlvRepository.getActiveAlvsByAlc(CollecticaseConstants.CATEGORY_CCASE_EMPLOYER_REP).stream()
+                .map(dao -> allowValAlvMapper.daoToShortDescDto(dao)).toList();
+
+        List<OrganizationIndividualDTO> empRepList = new ArrayList<>();
+        empRepList.addAll(organizationInfoList);
+        empRepList.addAll(inidividualInfoList);
+        for(AllowValAlvResDTO allowValAlvResDTO : alvValList ) {
+            empRepList.add(new OrganizationIndividualDTO
+                    (allowValAlvResDTO.getConstId().toString(),allowValAlvResDTO.getConstShortDesc()));
+        }
+
+        activityWageGarnishmentPageResponse.setEmployerRepList(empRepList);
+
+        return activityWageGarnishmentPageResponse;
+    }
+
+    public ActivityWageGarnishmentPageResponse getEmployerWageGarnish(Long caseId, Long employerId) {
+
+        ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse =
+                getResponse(ResponseTypes.ActivityWageGarnishmentPageResponse);
 
         List<EmployerListDTO> employerListForWageGarnish = ccaseEntityCmeRepository
                 .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES);
-        List<EmployerContactListDTO> employerContactListForWageGarnish = ccaseEntityCmeRepository
-                .getEmployerContactListForWageGarnish(caseId, 2028137L, CollecticaseConstants.YES);
 
+        activityWageGarnishmentPageResponse.setEmployerList(employerListForWageGarnish);
+        return activityWageGarnishmentPageResponse;
+    }
+
+    public ActivityWageGarnishmentPageResponse getWageGarnishOther(Long caseId, Long employerId, Long activityTypeCd,
+                                                                   Long activityRemedyCd) {
+
+        ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse =
+                getResponse(ResponseTypes.ActivityWageGarnishmentPageResponse);
 
         CcaseWageGarnishmentCwgDAO wageInfoForCaseEmployerRemedy = ccaseWageGarnishmentCwgRepository
-                .getWageInfoForCaseEmployerRemedy(caseId, 2028137L, activityRemedyCd);
+                .getWageInfoForCaseEmployerRemedy(caseId, employerId, activityRemedyCd);
 
+        if(wageInfoForCaseEmployerRemedy != null) {
 //
-        activityWageGarnishmentPageResponse.setWageAmount(wageInfoForCaseEmployerRemedy
-                .getCwgWgAmount());
-        if (!UtilFunction.compareLongObject.test(activityTypeCd,
-                CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT)) {
-            activityWageGarnishmentPageResponse.setDisableWageAmount(true);
-        }
+            activityWageGarnishmentPageResponse.setWageAmount(wageInfoForCaseEmployerRemedy
+                    .getCwgWgAmount());
+            if (!UtilFunction.compareLongObject.test(activityTypeCd,
+                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT)) {
+                activityWageGarnishmentPageResponse.setDisableWageAmount(true);
+            }
 //
-        activityWageGarnishmentPageResponse.setDoNotGarnishInd(wageInfoForCaseEmployerRemedy.getCwgDoNotGarnish());
-        activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(true);
-
-        List<Long> emplmntWGAmtChangeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_RESEARCH_FOR_EMPLOYMENT,
-                CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE);
-
-        if (emplmntWGAmtChangeList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(false);
-        } else if (UtilFunction.compareLongObject.test(activityTypeCd,
-                CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT) &&
-                activityWageGarnishmentPageResponse.getDoNotGarnishInd() != null) {
-            activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(false);
-        }
-
-        if (UtilFunction.compareLongObject.test(activityTypeCd,
-                CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT)) {
+            activityWageGarnishmentPageResponse.setDoNotGarnishInd(wageInfoForCaseEmployerRemedy.getCwgDoNotGarnish());
             activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(true);
-            activityWageGarnishmentPageResponse.setDoNotGarnishInd(CollecticaseConstants.YES);
-        }
-//
-        activityWageGarnishmentPageResponse.setWageFrequency(wageInfoForCaseEmployerRemedy
-                .getCwgFreqCd());
-//
-        if (!UtilFunction.compareLongObject.test(activityTypeCd,
-                CollecticaseConstants.ACTIVITY_TYPE_EMPLOYER_NON_COMPLIANCE)) {
-            activityWageGarnishmentPageResponse.setDisableWageNonCompliance(true);
-        }
-//
-        List<Long> wageAmtSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE,
-                CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
 
-        if (wageAmtSuspendWageList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setWageMotionFiledOn(null);
-        } else if (UtilFunction.compareLongObject.test(activityTypeCd,
-                CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT)) {
-            activityWageGarnishmentPageResponse
-                    .setWageMotionFiledOn(wageInfoForCaseEmployerRemedy
-                            .getCwgChangeReqDt());
-        }
+            List<Long> emplmntWGAmtChangeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_RESEARCH_FOR_EMPLOYMENT,
+                    CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE);
 
-        List<Long> wageAmtChangeSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE,
-                CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
-                CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
+            if (emplmntWGAmtChangeList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(false);
+            } else if (UtilFunction.compareLongObject.test(activityTypeCd,
+                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT) &&
+                    activityWageGarnishmentPageResponse.getDoNotGarnishInd() != null) {
+                activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(false);
+            }
 
-        if (wageAmtChangeSuspendWageList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setDisableWageMotionFiledOn(false);
-        }
+            if (UtilFunction.compareLongObject.test(activityTypeCd,
+                    CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT)) {
+                activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(true);
+                activityWageGarnishmentPageResponse.setDoNotGarnishInd(CollecticaseConstants.YES);
+            }
 //
-        List<Long> changeWGSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
-                CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
-
-        if (changeWGSuspendWageList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setWageEffectiveFrom(null);
-            activityWageGarnishmentPageResponse.setWageEffectiveUntil(null);
-
-        } else {
-            activityWageGarnishmentPageResponse.setDisableWageEffectiveFrom(true);
-            activityWageGarnishmentPageResponse.setDisableWageEffectiveUntil(true);
-        }
+            activityWageGarnishmentPageResponse.setWageFrequency(wageInfoForCaseEmployerRemedy
+                    .getCwgFreqCd());
 //
-        activityWageGarnishmentPageResponse.setCourtId(wageInfoForCaseEmployerRemedy.getFkCmoIdCourt());
-
-        List<Long> motionChangeSendWageNoticeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_FILED_MOTION_PERIODIC_PYMTS,
-                CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
-                CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG);
-        if (CollecticaseConstants.YES.equals(wageInfoForCaseEmployerRemedy.getCwgCourtOrdered())
-                && motionChangeSendWageNoticeList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setCourtId(wageInfoForCaseEmployerRemedy
-                    .getFkCmoIdCourt());
-        }
-        if (activityWageGarnishmentPageResponse.getCourtId() == null) {
-            activityWageGarnishmentPageResponse
-                    .setCourtId(CollecticaseConstants.MERRIMACK_COUNTY_DISTRICT_COURT);
-        }
+            if (!UtilFunction.compareLongObject.test(activityTypeCd,
+                    CollecticaseConstants.ACTIVITY_TYPE_EMPLOYER_NON_COMPLIANCE)) {
+                activityWageGarnishmentPageResponse.setDisableWageNonCompliance(true);
+            }
 //
-        List<Long> changeSendWageNoticeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
-                CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG);
-        if (!changeSendWageNoticeList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setDisableCourtOrderedInd(true);
-        }
-        if (changeSendWageNoticeList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setCourtOrderedInd(null);
-        }
-//
-        activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(true);
+            List<Long> wageAmtSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE,
+                    CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
 
-        List<Long> sendWageNoticeChangeWGList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG,
-                CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT);
+            if (wageAmtSuspendWageList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setWageMotionFiledOn(null);
+            } else if (UtilFunction.compareLongObject.test(activityTypeCd,
+                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT)) {
+                activityWageGarnishmentPageResponse
+                        .setWageMotionFiledOn(wageInfoForCaseEmployerRemedy
+                                .getCwgChangeReqDt());
+            }
 
-        if (activityWageGarnishmentPageResponse.getCourtId() != null
-                && CollecticaseConstants.YES.equals(activityWageGarnishmentPageResponse.getCourtOrderedInd())
-                && sendWageNoticeChangeWGList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setCourtOrderedDate(null);
-            activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(false);
-        } else if (sendWageNoticeChangeWGList.contains(activityTypeCd)) {
-            activityWageGarnishmentPageResponse.setCourtOrderedDate(null);
-            activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(false);
-        }
+            List<Long> wageAmtChangeSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE,
+                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
+                    CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
+
+            if (wageAmtChangeSuspendWageList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setDisableWageMotionFiledOn(false);
+            }
 //
+            List<Long> changeWGSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
+                    CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
+
+            if (changeWGSuspendWageList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setWageEffectiveFrom(null);
+                activityWageGarnishmentPageResponse.setWageEffectiveUntil(null);
+
+            } else {
+                activityWageGarnishmentPageResponse.setDisableWageEffectiveFrom(true);
+                activityWageGarnishmentPageResponse.setDisableWageEffectiveUntil(true);
+            }
+//
+            activityWageGarnishmentPageResponse.setCourtId(wageInfoForCaseEmployerRemedy.getFkCmoIdCourt());
+
+            List<Long> motionChangeSendWageNoticeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_FILED_MOTION_PERIODIC_PYMTS,
+                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
+                    CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG);
+            if (CollecticaseConstants.YES.equals(wageInfoForCaseEmployerRemedy.getCwgCourtOrdered())
+                    && motionChangeSendWageNoticeList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setCourtId(wageInfoForCaseEmployerRemedy
+                        .getFkCmoIdCourt());
+            }
+            if (activityWageGarnishmentPageResponse.getCourtId() == null) {
+                activityWageGarnishmentPageResponse
+                        .setCourtId(CollecticaseConstants.MERRIMACK_COUNTY_DISTRICT_COURT);
+            }
+//
+            List<Long> changeSendWageNoticeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
+                    CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG);
+            if (!changeSendWageNoticeList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setDisableCourtOrderedInd(true);
+            }
+            if (changeSendWageNoticeList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setCourtOrderedInd(null);
+            }
+//
+            activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(true);
+
+            List<Long> sendWageNoticeChangeWGList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG,
+                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT);
+
+            if (activityWageGarnishmentPageResponse.getCourtId() != null
+                    && CollecticaseConstants.YES.equals(activityWageGarnishmentPageResponse.getCourtOrderedInd())
+                    && sendWageNoticeChangeWGList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setCourtOrderedDate(null);
+                activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(false);
+            } else if (sendWageNoticeChangeWGList.contains(activityTypeCd)) {
+                activityWageGarnishmentPageResponse.setCourtOrderedDate(null);
+                activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(false);
+            }
+//
+        }
+
         return activityWageGarnishmentPageResponse;
     }
 }

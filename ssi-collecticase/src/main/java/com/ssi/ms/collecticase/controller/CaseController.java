@@ -3,6 +3,7 @@ package com.ssi.ms.collecticase.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ssi.ms.collecticase.constant.CollecticaseConstants;
 import com.ssi.ms.collecticase.dto.*;
+import com.ssi.ms.collecticase.service.AlvService;
 import com.ssi.ms.collecticase.service.CaseService;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,9 @@ public class CaseController {
 
     @Autowired
     private CaseService caseService;
+
+    @Autowired
+    private AlvService alvService;
 
     @Autowired
     private GeneralActivityValidator generalActivityValidator;
@@ -206,9 +210,17 @@ public class CaseController {
     @GetMapping(path = "/getCaseRemedyActivity/{caseId}", produces = "application/json")
     public ResponseEntity getCaseRemedyActivity(@Valid @PathVariable("caseId") Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
-                caseService.getRemedyActivityByCaseRemedyId
+                alvService.getAlvsByAlvIds(caseService.getRemedyActivityByCaseRemedyId
                         (caseService.getCaseRemedyActivityByCaseId(caseId, CollecticaseConstants.INDICATOR.Y.name()),
-                                CollecticaseConstants.INDICATOR.Y.name()));
+                                CollecticaseConstants.INDICATOR.Y.name())));
+    }
+
+    @GetMapping(path = "/getCaseActivityByRemedyType/{caseId}/{remedyTypeCd}", produces = "application/json")
+    public ResponseEntity getCaseActivityByRemedyType(@Valid @PathVariable("caseId") Long caseId, @Valid @PathVariable("remedyTypeCd") Long remedyTypeCd) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
+                alvService.getAlvsByAlvIds(caseService.getCaseActivityByRemedyType
+                        (caseService.getCaseRemedyActivityByCaseId(caseId, CollecticaseConstants.INDICATOR.Y.name()),
+                                CollecticaseConstants.INDICATOR.Y.name(), remedyTypeCd)));
     }
 
 }
