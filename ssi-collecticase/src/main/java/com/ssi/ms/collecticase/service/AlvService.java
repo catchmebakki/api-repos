@@ -14,4 +14,11 @@ public class AlvService extends  CollecticaseBaseService {
          return allowValAlvRepository.getActiveAlvsByAlc(alcId).stream()
                 .map(dao -> allowValAlvMapper.daoToShortDescDto(dao)).toList();
     }
+
+    public List<AllowValAlvResDTO> getAlvsByAlvIds(List<Long> alvIdList) {
+        return allowValAlvRepository.getAlvsByAlvIds(alvIdList).stream()
+                .map(dao -> allowValAlvMapper.daoToShortDescDto(dao)).toList();
+    }
+
+
 }

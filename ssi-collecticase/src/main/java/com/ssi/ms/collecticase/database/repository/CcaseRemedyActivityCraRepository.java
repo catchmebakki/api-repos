@@ -31,41 +31,73 @@ public interface CcaseRemedyActivityCraRepository extends CrudRepository<CcaseRe
 			""")
 	List<Long> getCaseRemedyActivityByCaseId(Long cmcId, String activeInd);
 
+
 	@Query("""    
-			SELECT new com.ssi.ms.collecticase.dto.RemedyActivityDTO
-			(ccaseRemedyActivityCraDAO.craRemedyCd as remedyCd,
-			fnInvGetAlvDescription(ccaseRemedyActivityCraDAO.craRemedyCd) as remedyDesc,
-			ccaseRemedyActivityCraDAO.craActivityCd as activityTypeCd,
-			fnInvGetAlvDescription(ccaseRemedyActivityCraDAO.craActivityCd) as activityTypeDesc)		
-			from CcaseRemedyActivityCraDAO ccaseRemedyActivityCraDAO 
-			where (ccaseRemedyActivityCraDAO.fkCraIdPreMust1 IS NULL 
-						OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust1 IS NOT NULL 
-								AND ccaseRemedyActivityCraDAO.fkCraIdPreMust1 in (:caseRemedyId)))
-			AND (ccaseRemedyActivityCraDAO.fkCraIdPreMust2 IS NULL 
-						OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust2 IS NOT NULL 
-								AND ccaseRemedyActivityCraDAO.fkCraIdPreMust2 in (:caseRemedyId)))
-			AND (ccaseRemedyActivityCraDAO.fkCraIdPreMust3 IS NULL 
-						OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust3 IS NOT NULL 
-								AND ccaseRemedyActivityCraDAO.fkCraIdPreMust3 in (:caseRemedyId)))			
-			AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 IS NULL 
-						OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 IS NOT NULL 
-								AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
-										OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
-										  OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))
-			AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 IS NULL 
-						OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 IS NOT NULL 
-								AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
-										OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
-										  OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))
-			AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 IS NULL 
-						OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 IS NOT NULL 
-								AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
-										OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
-										  OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))			
-			AND ccaseRemedyActivityCraDAO.craUserInitiated = :activeInd
-			AND ccaseRemedyActivityCraDAO.craActiveInd = :activeInd
-				order by ccaseRemedyActivityCraDAO.craRemedyCd,ccaseRemedyActivityCraDAO.craActivityCd
-			""")
-	List<RemedyActivityDTO> getCaseRemedyActivityByCaseRemedyId(List<Long> caseRemedyId, String activeInd);
+       SELECT DISTINCT ccaseRemedyActivityCraDAO.craRemedyCd as remedyCd     
+       from CcaseRemedyActivityCraDAO ccaseRemedyActivityCraDAO 
+       where (ccaseRemedyActivityCraDAO.fkCraIdPreMust1 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust1 IS NOT NULL 
+                      AND ccaseRemedyActivityCraDAO.fkCraIdPreMust1 in (:caseRemedyId)))
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreMust2 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust2 IS NOT NULL 
+                      AND ccaseRemedyActivityCraDAO.fkCraIdPreMust2 in (:caseRemedyId)))
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreMust3 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust3 IS NOT NULL 
+                      AND ccaseRemedyActivityCraDAO.fkCraIdPreMust3 in (:caseRemedyId)))       
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 IS NOT NULL 
+                      AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
+                            OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
+                              OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 IS NOT NULL 
+                      AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
+                            OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
+                              OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 IS NOT NULL 
+                      AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
+                            OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
+                              OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))        
+       AND ccaseRemedyActivityCraDAO.craUserInitiated = :activeInd
+       AND ccaseRemedyActivityCraDAO.craActiveInd = :activeInd
+          order by ccaseRemedyActivityCraDAO.craRemedyCd
+       """)
+	List<Long> getCaseRemedyActivityByCaseRemedyId(List<Long> caseRemedyId, String activeInd);
+
+	@Query("""    
+       SELECT DISTINCT ccaseRemedyActivityCraDAO.craActivityCd as activityTypeCd     
+       from CcaseRemedyActivityCraDAO ccaseRemedyActivityCraDAO 
+       where (ccaseRemedyActivityCraDAO.fkCraIdPreMust1 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust1 IS NOT NULL 
+                      AND ccaseRemedyActivityCraDAO.fkCraIdPreMust1 in (:caseRemedyId)))
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreMust2 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust2 IS NOT NULL 
+                      AND ccaseRemedyActivityCraDAO.fkCraIdPreMust2 in (:caseRemedyId)))
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreMust3 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreMust3 IS NOT NULL 
+                      AND ccaseRemedyActivityCraDAO.fkCraIdPreMust3 in (:caseRemedyId)))       
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 IS NOT NULL 
+                      AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
+                            OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
+                              OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 IS NOT NULL 
+                      AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
+                            OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
+                              OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))
+       AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 IS NULL 
+                OR (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 IS NOT NULL 
+                      AND (ccaseRemedyActivityCraDAO.fkCraIdPreOneOf1 in (:caseRemedyId)
+                            OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf2 in (:caseRemedyId)
+                              OR ccaseRemedyActivityCraDAO.fkCraIdPreOneOf3 in (:caseRemedyId))))        
+       AND ccaseRemedyActivityCraDAO.craUserInitiated = :activeInd
+       AND ccaseRemedyActivityCraDAO.craActiveInd = :activeInd
+       AND ccaseRemedyActivityCraDAO.craRemedyCd = :remedyTypeCd
+          order by ccaseRemedyActivityCraDAO.craActivityCd
+       """)
+	List<Long> getCaseActivityByCaseRemedyId(List<Long> caseRemedyId, String activeInd, Long remedyTypeCd);
+
 
 }

@@ -28,7 +28,7 @@ public class ActivityController {
     @Autowired
     private ActivityService activityService;
 
-    @GetMapping(path = "/getGeneral", produces = "application/json")
+    @GetMapping(path = "/getGeneralActivity", produces = "application/json")
     public ActivityGeneralPageResponse getGeneralActivityPage(@ModelAttribute ActivityInputPayload
                                                                       activityInputPayload) {
         Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
@@ -75,7 +75,7 @@ public class ActivityController {
         return activityService.getSendReSendActivityPage(caseId, activityRemedyCd, activityTypeCd);
     }
 
-    @GetMapping(path = "/getPaymentPlan", produces = "application/json")
+    @GetMapping(path = "/getPaymentPlanActivity", produces = "application/json")
     public ActivityPaymentPlanPageResponse getPaymentPlanActivityPage(@ModelAttribute ActivityInputPayload
                                                                       activityInputPayload) {
         Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
@@ -85,7 +85,7 @@ public class ActivityController {
         return activityService.getPaymentPlanActivityPage(caseId, activityRemedyCd, activityTypeCd);
     }
 
-    @GetMapping(path = "/getWageGarnishment", produces = "application/json")
+    @GetMapping(path = "/getWageGarnishmentActivity", produces = "application/json")
     public ActivityWageGarnishmentPageResponse getWageGarnishmentActivityPage(@ModelAttribute ActivityInputPayload
                                                                               activityInputPayload) {
         Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
@@ -93,6 +93,45 @@ public class ActivityController {
         Long caseId = activityInputPayload.getCaseId();
 
         return activityService.getWageGarnishmentActivityPage(caseId, activityRemedyCd, activityTypeCd);
+    }
+
+    @GetMapping(path = "/getWGEmployerContact", produces = "application/json")
+    public ActivityWageGarnishmentPageResponse getEmployerContactWageGarnish(@ModelAttribute ActivityInputPayload
+                                                                                     activityInputPayload) {
+        Long employerId = activityInputPayload.getEmployerId();
+        Long caseId = activityInputPayload.getCaseId();
+
+        return activityService.getEmployerContactWageGarnish(caseId, employerId);
+    }
+
+
+    @GetMapping(path = "/getWGEmployer", produces = "application/json")
+    public ActivityWageGarnishmentPageResponse getEmployerWageGarnish(@ModelAttribute ActivityInputPayload
+                                                                                      activityInputPayload) {
+        Long employerId = activityInputPayload.getEmployerId();
+        Long caseId = activityInputPayload.getCaseId();
+
+        return activityService.getEmployerWageGarnish(caseId, employerId);
+    }
+
+    @GetMapping(path = "/getWGEmployerRep", produces = "application/json")
+    public ActivityWageGarnishmentPageResponse getEmployerRepWageGarnish(@ModelAttribute ActivityInputPayload
+                                                                                     activityInputPayload) {
+        Long employerId = activityInputPayload.getEmployerId();
+        Long caseId = activityInputPayload.getCaseId();
+
+        return activityService.getEmployerRepWageGarnish(caseId, employerId);
+    }
+
+    @GetMapping(path = "/getWGOther", produces = "application/json")
+    public ActivityWageGarnishmentPageResponse getWageGarnishOther(@ModelAttribute ActivityInputPayload
+                                                                                 activityInputPayload) {
+        Long employerId = activityInputPayload.getEmployerId();
+        Long caseId = activityInputPayload.getCaseId();
+        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
+        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
+
+        return activityService.getWageGarnishOther(caseId, employerId, activityTypeCd, activityRemedyCd);
     }
 
 }

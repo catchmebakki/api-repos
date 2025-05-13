@@ -1616,9 +1616,14 @@ public class CaseService extends CollecticaseBaseService {
         return ccaseRemedyActivityCraRepository.getCaseRemedyActivityByCaseId(caseId, activeIndicator);
     }
 
-    public List<RemedyActivityDTO> getRemedyActivityByCaseRemedyId(List<Long> caseRemedyId, String activeIndicator)
+    public List<Long> getRemedyActivityByCaseRemedyId(List<Long> caseRemedyId, String activeIndicator)
     {
         return ccaseRemedyActivityCraRepository.getCaseRemedyActivityByCaseRemedyId(caseRemedyId, activeIndicator);
+    }
+
+    public List<Long> getCaseActivityByRemedyType(List<Long> caseRemedyId, String activeIndicator, Long remedyTypeCd)
+    {
+        return ccaseRemedyActivityCraRepository.getCaseActivityByCaseRemedyId(caseRemedyId, activeIndicator, remedyTypeCd);
     }
 
 }

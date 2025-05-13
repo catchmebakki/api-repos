@@ -27,4 +27,11 @@ public interface AllowValAlvRepository extends CrudRepository<AllowValAlvDAO, Lo
             """)
 	AlvDescResDTO getShortDescByAlc(Long alvId);
 
+	@Query("""
+       from AllowValAlvDAO alv where alv.alvActiveInd = 'Y'
+       and alv.alvId in (:alvIdList)
+       ORDER BY alv.alvSortOrderNbr asc, alv.alvId asc
+       """)
+	List<AllowValAlvDAO> getAlvsByAlvIds(List<Long> alvIdList);
+
 }
