@@ -375,7 +375,7 @@ public class ActivityService extends CollecticaseBaseService {
         return activityWageGarnishmentPageResponse;
     }
 
-    public ActivityWageGarnishmentPageResponse getEmployerWageGarnish(Long caseId, Long employerId) {
+    public ActivityWageGarnishmentPageResponse getEmployerWageGarnish(Long caseId) {
 
         ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse =
                 getResponse(ResponseTypes.ActivityWageGarnishmentPageResponse);

@@ -108,10 +108,9 @@ public class ActivityController {
     @GetMapping(path = "/getWGEmployer", produces = "application/json")
     public ActivityWageGarnishmentPageResponse getEmployerWageGarnish(@ModelAttribute ActivityInputPayload
                                                                                       activityInputPayload) {
-        Long employerId = activityInputPayload.getEmployerId();
         Long caseId = activityInputPayload.getCaseId();
 
-        return activityService.getEmployerWageGarnish(caseId, employerId);
+        return activityService.getEmployerWageGarnish(caseId);
     }
 
     @GetMapping(path = "/getWGEmployerRep", produces = "application/json")

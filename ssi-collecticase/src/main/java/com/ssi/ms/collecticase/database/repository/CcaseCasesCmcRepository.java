@@ -28,6 +28,10 @@ public interface CcaseCasesCmcRepository extends CrudRepository<CcaseCasesCmcDAO
 											   @Param(CollecticaseConstants.PIN_USER) String callingUser,
 											   @Param(CollecticaseConstants.PIN_USING) String usingProgramName);
 
+	@Transactional
+	@Procedure(name = "getCaseLoadSummary")
+	Map<String, Object> getCaseLoadSummary(@Param(CollecticaseConstants.PIN_STF_ID) Long staffId);
+
 
 	@Query("""
             SELECT new com.ssi.ms.collecticase.dto.CcaseCasesCmcDTO(

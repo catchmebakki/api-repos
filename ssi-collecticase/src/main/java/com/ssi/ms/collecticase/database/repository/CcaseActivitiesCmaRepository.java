@@ -37,7 +37,7 @@ public interface CcaseActivitiesCmaRepository extends CrudRepository<CcaseActivi
                                                                    Long remedyTypeCd);
     @Query("""   
             SELECT new com.ssi.ms.collecticase.dto.ActivitiesSummaryDTO(
-            ccaseActivitiesCma.cmaId, ccaseActivitiesCma.cmaActivityDt,
+            ccaseActivitiesCma.cmaId, ccaseActivitiesCma.cmaId, ccaseActivitiesCma.cmaActivityDt,
             fnInvGetAlvDescription(ccaseActivitiesCma.cmaActivityTypeCd) as activityTypeDesc,
             ccaseActivitiesCma.cmaActivitySpecifics,
             fnInvGetAlvDescription(ccaseActivitiesCma.cmaRemedyType) as remedyTypeDesc,
