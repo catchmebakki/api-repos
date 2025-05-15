@@ -130,7 +130,7 @@ public class CaseController {
     @GetMapping(path = "/caseload/{staffId}", produces = "application/json")
     public ResponseEntity getCaseLoadByStaffId(@Valid @PathVariable("staffId") Long staffId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
-                caseService.getCaseLoadByStaffId(staffId, 1, 10, "caseNo", true));
+                caseService.getCaseLoadByStaffId(staffId, 0, 9, "caseNo", true));
     }
 
     @GetMapping(path = "/getActivitiesDataByCaseId/{caseId}", produces = "application/json")
