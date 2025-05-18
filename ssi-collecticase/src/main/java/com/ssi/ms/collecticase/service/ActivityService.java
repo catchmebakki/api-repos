@@ -6,6 +6,7 @@ import com.ssi.ms.collecticase.database.dao.CcaseRemedyActivityCraDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseCmaNoticesCmnDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseWageGarnishmentCwgDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseCraCorrespondenceCrcDAO;
+import com.ssi.ms.collecticase.database.repository.StateRepository;
 import com.ssi.ms.collecticase.database.repository.VwCcaseCountyCtyRepository;
 import com.ssi.ms.collecticase.dto.CcaseCasesCmcDTO;
 import com.ssi.ms.collecticase.dto.AlvDescResDTO;
@@ -15,16 +16,20 @@ import com.ssi.ms.collecticase.dto.CcaseCraCorrespondenceCrcDTO;
 import com.ssi.ms.collecticase.dto.EmployerListDTO;
 import com.ssi.ms.collecticase.dto.EmployerContactListDTO;
 import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
+import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
 import com.ssi.ms.collecticase.dto.AllowValAlvResDTO;
+import com.ssi.ms.collecticase.dto.StateDTO;
 import com.ssi.ms.collecticase.factorybean.ResponseFactory;
 import com.ssi.ms.collecticase.factorybean.ResponseTypes;
 import com.ssi.ms.collecticase.outputpayload.ActivityPaymentPlanPageResponse;
+import com.ssi.ms.collecticase.outputpayload.ActivityUpdateContactPageResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityGeneralPageResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityWageGarnishmentPageResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityFollowUpShortNoteResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityPropertyLienResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivitySendReSendResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityEntityContactResponse;
+import com.ssi.ms.collecticase.util.CollecticaseHelper;
 import com.ssi.ms.collecticase.util.CollectionUtility;
 import com.ssi.ms.platform.util.UtilFunction;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +43,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 @Slf4j
 @Service
@@ -47,6 +53,9 @@ public class ActivityService extends CollecticaseBaseService {
 
     @Autowired
     VwCcaseCountyCtyRepository vwCcaseCountyCtyRepository;
+
+    @Autowired
+    StateRepository stateRepository;
 
     public ActivityService(List<ResponseFactory<?>> factories) {
         for (ResponseFactory<?> factory : factories) {
@@ -67,7 +76,7 @@ public class ActivityService extends CollecticaseBaseService {
                                                               Long activityTypeCd) {
         // Initialize
         ActivityGeneralPageResponse activityGeneralPageResponse =
-                                                            getResponse(ResponseTypes.ActivityGeneralPageResponse);
+                getResponse(ResponseTypes.ActivityGeneralPageResponse);
         String activityHeaderName = null;
 
         // Characteristics Details
@@ -138,7 +147,7 @@ public class ActivityService extends CollecticaseBaseService {
     public ActivityPropertyLienResponse getPropertyLienActivityPage(Long activityRemedyCd, Long caseId) {
         // Initialize
         ActivityPropertyLienResponse activityPropertyLienResponse =
-                                                            getResponse(ResponseTypes.ActivityPropertyLienResponse);
+                getResponse(ResponseTypes.ActivityPropertyLienResponse);
         // Property Lien Details
         List<CcaseCountyCtyDTO> propertyLienActivityPage = vwCcaseCountyCtyRepository
                 .getPropertyLienActivityPage(CollecticaseConstants.STATE_OF_NEW_HAMPSHIRE);
@@ -203,6 +212,7 @@ public class ActivityService extends CollecticaseBaseService {
 
         // Setting/Overwrite for Manual Correspondence
         manualCorrespondenceList = List.of(CollecticaseConstants.YES);
+
         List<CcaseCraCorrespondenceCrcDTO> manualCorrespondenceForActivityList = ccaseCraCorrespondenceCrcRepository
                 .getManualCorrespondenceForRemedy(activeCorrespondenceList, manualCorrespondenceList,
                         remedyCdList).stream()
@@ -234,7 +244,7 @@ public class ActivityService extends CollecticaseBaseService {
                 activityTypeCd);
 
         ActivityPaymentPlanPageResponse activityPaymentPlanPageResponse =
-                                                            getResponse(ResponseTypes.ActivityPaymentPlanPageResponse);
+                getResponse(ResponseTypes.ActivityPaymentPlanPageResponse);
         activityPaymentPlanPageResponse.setActivityGeneralPageResponse(activityGeneralPageResponse);
 
         CcaseCaseRemedyCmrDAO caseRemedyByCaseRemedy = ccaseCaseRemedyCmrRepository
@@ -261,56 +271,18 @@ public class ActivityService extends CollecticaseBaseService {
             }
             activityPaymentPlanPageResponse.setDisablePPGuideLineAmount(false);
         }
-/// //////
-        List<Long> signedOffsetPPList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_PP_OFFSET,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_SIGNED_PP_PAYMENT,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_SIGNED_PP_ONLY);
-
-        if (signedOffsetPPList.contains(activityTypeCd)) {
-            activityPaymentPlanPageResponse.setPaymentPlanSignedDate(caseRemedyByCaseRemedy.getCmrPpPpSignedDt());
-        } else {
-            activityPaymentPlanPageResponse.setDisablePPSignedDate(true);
-        }
-/// /////
-        activityPaymentPlanPageResponse.setPaymentPlanFinAffidavitSignedDate(caseRemedyByCaseRemedy.getCmrPpFaSignedDt());
-        if (!UtilFunction.compareLongObject.test(activityTypeCd,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_COMPLETE_FIN_AFFIDAVIT)) {
-            activityPaymentPlanPageResponse.setDisablePPFASignedDate(true);
-        }
-/// /////
-        List<Long> finAffList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_INITIATE_FINANCIAL_AFFIDAVIT,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_COMPLETE_FIN_AFFIDAVIT);
-
-        List<Long> guideLineDecFinAffList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_INITIATE_GUIDELINE_BASED_PP,
-                CollecticaseConstants.ACTIVITY_TYPE_RECORD_DECISION_FIN_AFFIDAVIT);
-
-        List<Long> signedOffsetList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_SIGNED_PP_PAYMENT,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_SIGNED_PP_ONLY,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_PAYMENT_NO_SIGNED_PP,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_PP_OFFSET);
-
-        if (finAffList.contains(activityTypeCd)) {
-            activityPaymentPlanPageResponse.setDisablePPPaymentAmount(true);
-            activityPaymentPlanPageResponse.setDisablePPPaymentCategory(true);
-            activityPaymentPlanPageResponse.setDisablePPEffUntilDate(true);
-        }
-        if (guideLineDecFinAffList.contains(activityTypeCd)) {
-            activityPaymentPlanPageResponse.setPaymentPlanPaymentAmount(BigDecimal.ZERO);
-        } else if (signedOffsetList.contains(activityTypeCd)) {
-            activityPaymentPlanPageResponse.setPaymentPlanPaymentAmount(caseRemedyByCaseRemedy.getCmrPpPaymentAmt());
-            activityPaymentPlanPageResponse.setDisablePPPaymentAmount(true);
-        }
-/// ////
-        List<Long> ppSignedOffsetList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_SIGNED_PP_PAYMENT,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_SIGNED_PP_ONLY,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_PAYMENT_NO_SIGNED_PP,
-                CollecticaseConstants.ACTIVITY_TYPE_RECIEVED_PP_OFFSET);
-
-        if (ppSignedOffsetList.contains(activityTypeCd)) {
-            activityPaymentPlanPageResponse.setPaymentPlanPaymentCategory(caseRemedyByCaseRemedy.getCmrPpPaymentCatgCd());
-            activityPaymentPlanPageResponse.setPaymentPlanEffectiveUntilDate(caseRemedyByCaseRemedy.getCmrPpEffUntilDt());
-        }
-/// ////
+        //populateEnableDisablePPSignedDt
+        CollecticaseHelper.populateEnableDisablePPSignedDt(activityTypeCd, activityPaymentPlanPageResponse,
+                caseRemedyByCaseRemedy);
+        //populateEnableDisableFASignedOn
+        CollecticaseHelper.populateEnableDisableFASignedOn(activityTypeCd, activityPaymentPlanPageResponse,
+                caseRemedyByCaseRemedy);
+        //populateEnableDisablePPPaymentAmt
+        CollecticaseHelper.populateEnableDisablePPPaymentAmt(activityTypeCd, activityPaymentPlanPageResponse,
+                caseRemedyByCaseRemedy);
+        //populatePPPaymentCatCd
+        CollecticaseHelper.populatePPPaymentCatCd(activityTypeCd, activityPaymentPlanPageResponse,
+                caseRemedyByCaseRemedy);
 
         return activityPaymentPlanPageResponse;
     }
@@ -326,7 +298,8 @@ public class ActivityService extends CollecticaseBaseService {
 
         // Employer call
         List<EmployerListDTO> employerListForWageGarnish = ccaseEntityCmeRepository
-                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES);
+                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_EMP);
 
         // Setting in Response
         activityWageGarnishmentPageResponse.setActivityGeneralPageResponse(activityGeneralPageResponse);
@@ -353,21 +326,26 @@ public class ActivityService extends CollecticaseBaseService {
         ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse =
                 getResponse(ResponseTypes.ActivityWageGarnishmentPageResponse);
 
-        List<OrganizationIndividualDTO> organizationInfoList = ccaseEntityCmeRepository.getOrganizationInfo(caseId,
-                CollecticaseConstants.YES, List.of(3943L,3944L,3945L), employerId);
+        List<OrganizationIndividualDTO> organizationInfoList = ccaseEntityCmeRepository.getOrganizationInfoByEmpId(caseId,
+                CollecticaseConstants.YES, List.of(CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_ATTY,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMO), employerId);
 
         List<OrganizationIndividualDTO> inidividualInfoList = ccaseEntityCmeRepository.getIndividualInfo(caseId,
-                CollecticaseConstants.YES);
+                CollecticaseConstants.YES, List.of(CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_EMP,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_ATTY,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMI,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMO));
 
-        List<AllowValAlvResDTO> alvValList = allowValAlvRepository.getActiveAlvsByAlc(CollecticaseConstants.CATEGORY_CCASE_EMPLOYER_REP).stream()
+        List<AllowValAlvResDTO> alvValList = allowValAlvRepository.getActiveAlvsByAlc(
+                CollecticaseConstants.CATEGORY_CCASE_EMPLOYER_REP).stream()
                 .map(dao -> allowValAlvMapper.daoToShortDescDto(dao)).toList();
 
         List<OrganizationIndividualDTO> empRepList = new ArrayList<>();
         empRepList.addAll(organizationInfoList);
         empRepList.addAll(inidividualInfoList);
-        for(AllowValAlvResDTO allowValAlvResDTO : alvValList ) {
+        for (AllowValAlvResDTO allowValAlvResDTO : alvValList) {
             empRepList.add(new OrganizationIndividualDTO
-                    (allowValAlvResDTO.getConstId().toString(),allowValAlvResDTO.getConstShortDesc()));
+                    (allowValAlvResDTO.getConstId().toString(), allowValAlvResDTO.getConstShortDesc()));
         }
 
         activityWageGarnishmentPageResponse.setEmployerRepList(empRepList);
@@ -381,7 +359,8 @@ public class ActivityService extends CollecticaseBaseService {
                 getResponse(ResponseTypes.ActivityWageGarnishmentPageResponse);
 
         List<EmployerListDTO> employerListForWageGarnish = ccaseEntityCmeRepository
-                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES);
+                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_EMP);
 
         activityWageGarnishmentPageResponse.setEmployerList(employerListForWageGarnish);
         return activityWageGarnishmentPageResponse;
@@ -396,116 +375,217 @@ public class ActivityService extends CollecticaseBaseService {
         CcaseWageGarnishmentCwgDAO wageInfoForCaseEmployerRemedy = ccaseWageGarnishmentCwgRepository
                 .getWageInfoForCaseEmployerRemedy(caseId, employerId, activityRemedyCd);
 
-        if(wageInfoForCaseEmployerRemedy != null) {
-//
-            activityWageGarnishmentPageResponse.setWageAmount(wageInfoForCaseEmployerRemedy
-                    .getCwgWgAmount());
-            if (!UtilFunction.compareLongObject.test(activityTypeCd,
-                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT)) {
-                activityWageGarnishmentPageResponse.setDisableWageAmount(true);
-            }
-//
-            activityWageGarnishmentPageResponse.setDoNotGarnishInd(wageInfoForCaseEmployerRemedy.getCwgDoNotGarnish());
-            activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(true);
-
-            List<Long> emplmntWGAmtChangeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_RESEARCH_FOR_EMPLOYMENT,
-                    CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE);
-
-            if (emplmntWGAmtChangeList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(false);
-            } else if (UtilFunction.compareLongObject.test(activityTypeCd,
-                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT) &&
-                    activityWageGarnishmentPageResponse.getDoNotGarnishInd() != null) {
-                activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(false);
-            }
-
-            if (UtilFunction.compareLongObject.test(activityTypeCd,
-                    CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT)) {
-                activityWageGarnishmentPageResponse.setDisableDoNotGarnishInd(true);
-                activityWageGarnishmentPageResponse.setDoNotGarnishInd(CollecticaseConstants.YES);
-            }
-//
-            activityWageGarnishmentPageResponse.setWageFrequency(wageInfoForCaseEmployerRemedy
-                    .getCwgFreqCd());
-//
-            if (!UtilFunction.compareLongObject.test(activityTypeCd,
-                    CollecticaseConstants.ACTIVITY_TYPE_EMPLOYER_NON_COMPLIANCE)) {
-                activityWageGarnishmentPageResponse.setDisableWageNonCompliance(true);
-            }
-//
-            List<Long> wageAmtSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE,
-                    CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
-
-            if (wageAmtSuspendWageList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setWageMotionFiledOn(null);
-            } else if (UtilFunction.compareLongObject.test(activityTypeCd,
-                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT)) {
-                activityWageGarnishmentPageResponse
-                        .setWageMotionFiledOn(wageInfoForCaseEmployerRemedy
-                                .getCwgChangeReqDt());
-            }
-
-            List<Long> wageAmtChangeSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE,
-                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
-                    CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
-
-            if (wageAmtChangeSuspendWageList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setDisableWageMotionFiledOn(false);
-            }
-//
-            List<Long> changeWGSuspendWageList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
-                    CollecticaseConstants.ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT);
-
-            if (changeWGSuspendWageList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setWageEffectiveFrom(null);
-                activityWageGarnishmentPageResponse.setWageEffectiveUntil(null);
-
-            } else {
-                activityWageGarnishmentPageResponse.setDisableWageEffectiveFrom(true);
-                activityWageGarnishmentPageResponse.setDisableWageEffectiveUntil(true);
-            }
-//
-            activityWageGarnishmentPageResponse.setCourtId(wageInfoForCaseEmployerRemedy.getFkCmoIdCourt());
-
-            List<Long> motionChangeSendWageNoticeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_FILED_MOTION_PERIODIC_PYMTS,
-                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
-                    CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG);
-            if (CollecticaseConstants.YES.equals(wageInfoForCaseEmployerRemedy.getCwgCourtOrdered())
-                    && motionChangeSendWageNoticeList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setCourtId(wageInfoForCaseEmployerRemedy
-                        .getFkCmoIdCourt());
-            }
-            if (activityWageGarnishmentPageResponse.getCourtId() == null) {
-                activityWageGarnishmentPageResponse
-                        .setCourtId(CollecticaseConstants.MERRIMACK_COUNTY_DISTRICT_COURT);
-            }
-//
-            List<Long> changeSendWageNoticeList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
-                    CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG);
-            if (!changeSendWageNoticeList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setDisableCourtOrderedInd(true);
-            }
-            if (changeSendWageNoticeList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setCourtOrderedInd(null);
-            }
-//
-            activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(true);
-
-            List<Long> sendWageNoticeChangeWGList = Arrays.asList(CollecticaseConstants.ACTIVITY_TYPE_SENT_NOTICE_OF_WG,
-                    CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT);
-
-            if (activityWageGarnishmentPageResponse.getCourtId() != null
-                    && CollecticaseConstants.YES.equals(activityWageGarnishmentPageResponse.getCourtOrderedInd())
-                    && sendWageNoticeChangeWGList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setCourtOrderedDate(null);
-                activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(false);
-            } else if (sendWageNoticeChangeWGList.contains(activityTypeCd)) {
-                activityWageGarnishmentPageResponse.setCourtOrderedDate(null);
-                activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(false);
-            }
-//
+        if (wageInfoForCaseEmployerRemedy != null) {
+            //populateEnableDisableWGAmount
+            CollecticaseHelper.populateEnableDisableWGAmount(activityTypeCd, activityWageGarnishmentPageResponse,
+                        wageInfoForCaseEmployerRemedy);
+            //populateEnableDisableDoNotGarnish
+            CollecticaseHelper.populateEnableDisableDoNotGarnish(activityTypeCd, activityWageGarnishmentPageResponse,
+                        wageInfoForCaseEmployerRemedy);
+            //populateEnableDisableWGFreq
+            CollecticaseHelper.populateEnableDisableWGFreq(activityWageGarnishmentPageResponse,
+                        wageInfoForCaseEmployerRemedy);
+            //populateEnableDisableNonComp
+            CollecticaseHelper.populateEnableDisableNonComp(activityTypeCd, activityWageGarnishmentPageResponse);
+            //populateEnableDisableReqDate
+            CollecticaseHelper.populateEnableDisableReqDate(activityTypeCd, activityWageGarnishmentPageResponse,
+                        wageInfoForCaseEmployerRemedy);
+            //populateEnableDisableEffDate
+            CollecticaseHelper.populateEnableDisableEffDate(activityTypeCd, activityWageGarnishmentPageResponse);
+            //populateEnableDisableCourt
+            CollecticaseHelper.populateEnableDisableCourt(activityTypeCd, activityWageGarnishmentPageResponse,
+                        wageInfoForCaseEmployerRemedy);
+            //populateEnableDisableCourtOrder
+            CollecticaseHelper.populateEnableDisableCourtOrder(activityTypeCd, activityWageGarnishmentPageResponse);
+            //populateEnableDisableCourtOrderDt
+            CollecticaseHelper.populateEnableDisableCourtOrderDt(activityTypeCd, activityWageGarnishmentPageResponse);
         }
 
         return activityWageGarnishmentPageResponse;
+    }
+
+    public ActivityUpdateContactPageResponse getUpdateContactActivityPage(Long caseId, Long activityRemedyCd,
+                                                                          Long activityTypeCd) {
+        // Bak TODO need to decide and push all the calls here - static drop down list
+        return null;
+    }
+
+    public FollowupActivityDTO getActivityInfoForFollowup(Long activityId) {
+        return ccaseActivitiesCmaRepository.getActivityInfoForFollowup(activityId);
+    }
+
+    public List<Map<String, String>> getUpdateContactCountry() {
+        return CollecticaseHelper.getUpdateContactCountry();
+    }
+
+    public List<StateDTO> getUpdateContactState(Long countryId) {
+        String countryValue = CollecticaseConstants.NO;
+        if (CollectionUtility.compareLongValue(
+                CollecticaseConstants.UNITED_STATES, countryId)) {
+            countryValue = CollecticaseConstants.NO;
+        } else if (CollectionUtility.compareLongValue(
+                CollecticaseConstants.CANANDA, countryId)) {
+            countryValue = CollecticaseConstants.YES;
+        }
+        return stateRepository.getStates(countryValue);
+    }
+
+    public Map<String, String> getUpdateContactEntity(Long caseId, Long activityTypeCd) {
+
+        List<EmployerListDTO> employerListForWageGarnish = ccaseEntityCmeRepository
+                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_EMP);
+
+        Map<String, String> entityMap = new LinkedHashMap<>();
+
+        if (UtilFunction.compareLongObject.test(activityTypeCd,
+                CollecticaseConstants.ACTIVITY_TYPE_ADD_UPD_EMP_CONTACT)) {
+            populateEntityForEmp(employerListForWageGarnish, entityMap);
+        } else if (UtilFunction.compareLongObject.test(activityTypeCd,
+                CollecticaseConstants.ACTIVITY_TYPE_ADD_UPD_ATTY_CONTACT)) {
+            populateEntityForAtty(caseId, entityMap);
+        } else if (UtilFunction.compareLongObject.test(activityTypeCd,
+                CollecticaseConstants.ACTIVITY_TYPE_ADD_UPD_OTHER_REP_CONTACT)) {
+            populateEntityForRep(caseId, entityMap);
+        } else if (UtilFunction.compareLongObject.test(activityTypeCd,
+                CollecticaseConstants.ACTIVITY_TYPE_DISASSOCIATE_ORG_FROM_CASE)) {
+            populateEntityForCaseDisassociate(caseId, entityMap);
+        } else if (UtilFunction.compareLongObject.test(activityTypeCd,
+                CollecticaseConstants.ACTIVITY_TYPE_DISASSOCIATE_ORG_CONTACT)) {
+            populateEntityForOrgDisassociate(caseId, entityMap);
+        }
+
+        return entityMap;
+    }
+
+    public List<EmployerListDTO> getUpdateContactRep(Long caseId) {
+        return ccaseEntityCmeRepository
+                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_EMP);
+    }
+
+    public List<OrganizationIndividualDTO> getUpdateContactContacts(Long caseId, Long entityId) {
+        return ccaseEntityCmeRepository.getIndividualInfoByEntityId(caseId, CollecticaseConstants.YES, entityId);
+    }
+
+    public Map<String, String> getGeneralActivityGo(Long activityTypeCd, Long activityRemedyCd) {
+        Map<String, String> templateMap = new HashMap<>();
+        CcaseRemedyActivityCraDAO caseRemedyActivityInfo = ccaseRemedyActivityCraRepository
+                                                        .getCaseRemedyActivityInfo(activityTypeCd, activityRemedyCd);
+        if (caseRemedyActivityInfo != null) {
+            templateMap.put(CollecticaseConstants.ACTIVITY_TEMPLATE_NAME, caseRemedyActivityInfo.getCraTemplatePage());
+        }
+        return templateMap;
+    }
+
+    private void populateEntityForOrgDisassociate(Long caseId, Map<String, String> entityMap) {
+        //        DISASSOCIATE_ORGANIZATIONAL_CONTACT_ACTIVITY
+        List<EmployerListDTO> employerListGarnish = ccaseEntityCmeRepository
+                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_EMP);
+        List<OrganizationIndividualDTO> orgInfoList = ccaseEntityCmeRepository.getOrganizationInfo(caseId,
+                CollecticaseConstants.YES, List.of(CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_ATTY,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMO));
+
+        for (EmployerListDTO employerListDTO : employerListGarnish) {
+            entityMap.put(CollecticaseConstants.EMP_STRING
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR
+                            + employerListDTO.getEmployerName()
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR + employerListDTO.getEmployerId(),
+                    CollecticaseConstants.EMP_STRING
+                            + CollecticaseConstants.COLON
+                            + employerListDTO.getEmployerName());
+        }
+        for (OrganizationIndividualDTO organizationDTO : orgInfoList) {
+            entityMap.put(organizationDTO.getEmpRepName()
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR + organizationDTO.getEmpRepId(),
+                    organizationDTO.getEmpRepName());
+        }
+    }
+
+    private void populateEntityForCaseDisassociate(Long caseId, Map<String, String> entityMap) {
+        //        ACT_TYPE_DISASSOCIATE_ORG_FROM_CASE
+        List<EmployerListDTO> employerListForWageGarnishDis = ccaseEntityCmeRepository
+                .getEmployerListForWageGarnish(caseId, CollecticaseConstants.YES,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_EMP);
+        List<OrganizationIndividualDTO> organizationInfoListDis = ccaseEntityCmeRepository.getOrganizationInfo(caseId,
+                CollecticaseConstants.YES, List.of(CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_ATTY,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMO));
+        List<OrganizationIndividualDTO> iniInfoListDis = ccaseEntityCmeRepository.getIndividualInfo(caseId,
+                CollecticaseConstants.YES, List.of(CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_EMP,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_ATTY,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMI,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMO));
+        for (EmployerListDTO employerListDTO : employerListForWageGarnishDis) {
+            entityMap.put(CollecticaseConstants.EMP_STRING
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR
+                            + employerListDTO.getEmployerName()
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR + employerListDTO.getEmployerId(),
+                    CollecticaseConstants.EMP_STRING
+                            + CollecticaseConstants.COLON
+                            + employerListDTO.getEmployerName());
+        }
+        for (OrganizationIndividualDTO organizationIndividualDTO : organizationInfoListDis) {
+            entityMap.put(
+                    organizationIndividualDTO.getEmpRepName()
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR + organizationIndividualDTO.getEmpRepId(),
+                    organizationIndividualDTO.getEmpRepName());
+        }
+        for (OrganizationIndividualDTO organizationDTO : iniInfoListDis) {
+            entityMap.put(
+                    organizationDTO.getEmpRepName()
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR + organizationDTO.getEmpRepId(),
+                    organizationDTO.getEmpRepName());
+        }
+    }
+
+    private void populateEntityForRep(Long caseId, Map<String, String> entityMap) {
+        //        ACT_TYPE_ADD_UPD_OTHER_REP_CONTACT
+        List<OrganizationIndividualDTO> organizationInfoList = ccaseEntityCmeRepository.getOrganizationInfo(caseId,
+                CollecticaseConstants.YES, List.of(CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMO));
+        List<OrganizationIndividualDTO> inidividualInfoList = ccaseEntityCmeRepository.getIndividualInfo(caseId,
+                CollecticaseConstants.YES, List.of(CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMO,
+                        CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_REP_CMI));
+
+        for (OrganizationIndividualDTO organizationIndividualDTO : organizationInfoList) {
+            entityMap.put(
+                    organizationIndividualDTO.getEmpRepName()
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR + organizationIndividualDTO.getEmpRepId(),
+                    organizationIndividualDTO.getEmpRepName());
+        }
+
+        for (OrganizationIndividualDTO organizationIndividualDTO : inidividualInfoList) {
+            entityMap.put(
+                    organizationIndividualDTO.getEmpRepName() + CollecticaseConstants.NON_REGEX_SEPARATOR
+                            + organizationIndividualDTO.getEmpRepId(),
+                    organizationIndividualDTO.getEmpRepName());
+        }
+    }
+
+    private void populateEntityForAtty(Long caseId, Map<String, String> entityMap) {
+        //        ACT_TYPE_ADD_UPD_ATTY_CONTACT
+        List<OrganizationIndividualDTO> attorneyInfoList = ccaseEntityCmeRepository.getOrganizationInfo(caseId,
+                CollecticaseConstants.YES, List.of(CollecticaseConstants.CASE_ENTITY_CONTACT_TYPE_ATTY));
+        for (OrganizationIndividualDTO organizationIndividualDTO : attorneyInfoList) {
+            entityMap.put(
+                    organizationIndividualDTO.getEmpRepName()
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR
+                            + organizationIndividualDTO.getEmpRepId(),
+                    organizationIndividualDTO.getEmpRepName());
+        }
+    }
+
+    private static void populateEntityForEmp(List<EmployerListDTO> employerListForWageGarnish,
+                                             Map<String, String> entityMap) {
+        //ACT_TYPE_ADD_UPD_EMP_CONTACT
+        for (EmployerListDTO employerListDTO : employerListForWageGarnish) {
+            entityMap.put(CollecticaseConstants.EMP_STRING
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR
+                            + employerListDTO.getEmployerName()
+                            + CollecticaseConstants.NON_REGEX_SEPARATOR + employerListDTO.getEmployerId(),
+                    CollecticaseConstants.EMP_STRING
+                            + CollecticaseConstants.COLON
+                            + employerListDTO.getEmployerName());
+        }
     }
 }

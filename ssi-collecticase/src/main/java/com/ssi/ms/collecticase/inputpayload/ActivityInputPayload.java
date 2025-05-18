@@ -7,7 +7,9 @@ public class ActivityInputPayload {
 
     private Long activityRemedyTypeCd;
     private Long activityTypeCd;
+    private Long activityId;
     private Long caseId;
     private Long employerId;
+    private Long entityId;
 
 }

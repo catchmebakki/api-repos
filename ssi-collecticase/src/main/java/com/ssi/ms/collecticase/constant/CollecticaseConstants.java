@@ -29,7 +29,10 @@ public interface CollecticaseConstants {
     //Country
     Long UNITED_STATES = 47L;
     Long CANANDA = 48L;
-
+    String COUNTRY_ID = "countryId";
+    String COUNTRY_NAME = "countryName";
+    String UNITED_STATES_NAME = "United States";
+    String CANADA_NAME = "Canada";
 
     Long ENTITY_PREFERENCE_FAX = 4079L;
     Long ENTITY_CONTACT_PREFERENCE_WORK_PHONE = 4083L;
@@ -74,7 +77,7 @@ public interface CollecticaseConstants {
     Long ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT = 3915L;
 
     Long ACTIVITY_TYPE_ADD_UPD_ATTY_CONTACT = 3916L;
-
+    Long ACTIVITY_TYPE_ADD_UPD_EMP_CONTACT = 3918L;
     Long ACTIVITY_TYPE_ADD_UPD_OTHER_REP_CONTACT = 3919L;
 
     Long ACTIVITY_TYPE_USER_ALERT_INITIATE_EMP_NC = 3922L;
@@ -442,4 +445,46 @@ public interface CollecticaseConstants {
     Long BANKRUPTCY_SPECIALIST = 88L;
 
     Long USR_STATUS_CD = 1724L;
+    String COLON = ":";
+
+    String FRAUD_STATUS_FRAUD = "Fraud Only";
+    String FRAUD_STATUS_NF_EARNING = "Non-Fraud Earnings Only";
+    String FRAUD_STATUS_FRAUD_NF_EARNING = "Fraud and Non-Fraud Earnings Only";
+    String FRAUD_STATUS_NF = "Non-Fraud Only";
+    String BANKRUPTCY = "Bankruptcy";
+
+    // Case Load Fraud Status Value
+    String FRAUD_STATUS_FRAUD_VALUE = "FRD";
+    String FRAUD_STATUS_NF_EARNING_VALUE = "NFE";
+    String FRAUD_STATUS_FRAUD_NF_EARNING_VALUE = "F-NFE";
+    String FRAUD_STATUS_NF_VALUE = "NF";
+    String BANKRUPTCY_VALUE = "B";
+
+    String NEXT_FOLLOWUP_OVERDUE = "Overdue";
+    String NEXT_FOLLOWUP_DUE_WITHIN_WEEK = "Due within a week";
+    String NEXT_FOLLOWUP_DUE_WITHIN_MONTH = "Due within a month";
+    String NEXT_FOLLOWUP_DUE_TODAY = "Due Today";
+    String NEXT_FOLLOWUP_OVERDUE_ONE_WEEK = "1 week Overdue";
+    String NEXT_FOLLOWUP_OVERDUE_ONE_MONTH = "1 month Overdue";
+
+    String NEXT_FOLLOWUP_OVERDUE_VALUE = "OD";
+    String NEXT_FOLLOWUP_DUE_WITHIN_WEEK_VALUE = "DW";
+    String NEXT_FOLLOWUP_DUE_WITHIN_MONTH_VALUE = "DM";
+    String NEXT_FOLLOWUP_DUE_TODAY_VALUE = "DT";
+    String NEXT_FOLLOWUP_OVERDUE_ONE_WEEK_VALUE = "ODW";
+    String NEXT_FOLLOWUP_OVERDUE_ONE_MONTH_VALUE = "ODM";
+
+    String ZERO_TO_NINE_NINE_NINE = "0-999";
+    String THOUSAND_TO_TWO_FOUR_NINE_NINE = "1000-2499";
+    String TWO_FIVE_ZERO_ZERO_TO_FOUR_NINE_NINE_NINE = "2500-4999";
+    String FIVE_THOUSAND_TO_ABOVE = "5000-above";
+
+    String ZERO_TO_NINE_NINE_NINE_DOLLAR = "$0 - $999";
+    String THOUSAND_TO_TWO_FOUR_NINE_NINE_DOLLAR = "$1000 - $2499";
+    String TWO_FIVE_ZERO_ZERO_TO_FOUR_NINE_NINE_NINE_DOLLAR = "$2500 - $4999";
+    String FIVE_THOUSAND_TO_ABOVE_DOLLAR = "$5000 and above";
+
+    String DISASSOCIATE_ORGANIZATIONAL_CONTACT_ACTIVITY = "Disassociate Organizational Contact from Case";
+
+    String ACTIVITY_TEMPLATE_NAME = "templateName";
 }
