@@ -113,22 +113,7 @@ public class CaseController {
         }
     }
 
-    @PostMapping(path = "/createCollecticaseActivity", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> createCollecticaseCase(
-            @Valid @RequestBody final CreateActivityDTO createActivityDTO, HttpServletRequest request) {
-
-        final Map<String, Object> createCollecticaseActivity = caseService.createCollecticaseActivity(createActivityDTO);
-
-        if (createCollecticaseActivity != null
-                && createCollecticaseActivity.get(CollecticaseConstants.POUT_SUCCESS) != null
-                && createCollecticaseActivity.get(CollecticaseConstants.POUT_CMA_ID) != null) {
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(createCollecticaseActivity);
-        } else {
-            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
-        }
-    }
-
-    @GetMapping(path = "/getCaseRemedyActivity/{caseId}", produces = "application/json")
+    @GetMapping(path = "/get-remedy/{caseId}", produces = "application/json")
     public ResponseEntity<List<AllowValAlvResDTO>> getCaseRemedyActivity(@Valid @PathVariable("caseId") Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 alvService.getAlvsByAlvIds(caseService.getRemedyActivityByCaseRemedyId
@@ -136,7 +121,7 @@ public class CaseController {
                                 CollecticaseConstants.INDICATOR.Y.name())));
     }
 
-    @GetMapping(path = "/getCaseActivityByRemedyType/{caseId}/{remedyTypeCd}", produces = "application/json")
+    @GetMapping(path = "/get-activity/{caseId}/{remedyTypeCd}", produces = "application/json")
     public ResponseEntity<List<AllowValAlvResDTO>> getCaseActivityByRemedyType(@Valid @PathVariable("caseId") Long caseId,
                                                       @Valid @PathVariable("remedyTypeCd") Long remedyTypeCd) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(

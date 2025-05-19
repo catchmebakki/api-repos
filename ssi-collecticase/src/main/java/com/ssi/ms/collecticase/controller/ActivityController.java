@@ -235,7 +235,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/orglookup", produces = "application/json")
-    public ResponseEntity caseLookup(
+    public ResponseEntity orgLookup(
             @Valid @RequestBody final OrgLookupDTO orgLookupDTO) {
         //Test Purpose
         /*orgLookupDTO.setEntityType(CollecticaseConstants.EMPLOYER_ENTITY_TYPE);
@@ -245,6 +245,13 @@ public class ActivityController {
         orgLookupDTO.setFein("764747611");*/
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 activityService.searchOrgLookup(orgLookupDTO));
+    }
+
+    @PostMapping(path = "/orglookup-reset", produces = "application/json")
+    public ResponseEntity<OrgLookupDTO> orgLookupReset() {
+        //Bak TODO need to check whether hit DB and reset the org based on caseId or simply pass new OrgLookupDTO
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
+                activityService.resetOrgLookup());
     }
 
     @PostMapping(path = "/complete-followup", produces = "application/json")

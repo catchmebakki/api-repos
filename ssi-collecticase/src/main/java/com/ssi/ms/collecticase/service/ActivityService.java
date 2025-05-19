@@ -2068,5 +2068,8 @@ public class ActivityService extends CollecticaseBaseService {
         return caseOrganizationCmoDAO;
     }
 
+    public OrgLookupDTO resetOrgLookup() {
+        return OrgLookupDTO.builder().build();
+    }
 
 }
