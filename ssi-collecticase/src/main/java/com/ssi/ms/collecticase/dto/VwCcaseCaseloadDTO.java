@@ -28,4 +28,5 @@ public class VwCcaseCaseloadDTO {
     private String claimantFraudStatus;
     private String nextFollowupDate;
     private String nextFollowupRemedy;
+
 }

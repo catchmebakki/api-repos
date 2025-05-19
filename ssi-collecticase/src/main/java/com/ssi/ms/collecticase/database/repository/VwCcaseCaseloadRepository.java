@@ -1,10 +1,6 @@
 package com.ssi.ms.collecticase.database.repository;
 
-import com.ssi.ms.collecticase.database.dao.VwCcaseCaseloadDAO;
-import com.ssi.ms.collecticase.database.dao.VwCcaseHeaderDAO;
-import com.ssi.ms.collecticase.database.dao.VwCcaseOpmDAO;
-import com.ssi.ms.collecticase.database.dao.VwCcaseRemedyDAO;
-import com.ssi.ms.collecticase.database.dao.VwCcaseHeaderEntityDAO;
+import com.ssi.ms.collecticase.database.dao.*;
 import com.ssi.ms.collecticase.dto.CaseReassignDTO;
 import com.ssi.ms.collecticase.dto.VwCcaseCaseloadDTO;
 import org.springframework.data.domain.Page;
@@ -96,4 +92,11 @@ public interface VwCcaseCaseloadRepository extends CrudRepository<VwCcaseCaseloa
 			from VwCcaseHeaderDAO vwCcaseHeader where vwCcaseHeader.caseNo IN (:caseIdList)
 			""")
 	List<CaseReassignDTO> getCaseReassignInfoByCaseIds(List<Long> caseIdList);
+
+	@Query("""
+       from VwCcaseCaseloadDAO vwCcaseCaseloadDAO
+       join GttForCaselookupDAO gttForCaselookupDAO on gttForCaselookupDAO.caseNum = vwCcaseCaseloadDAO.caseNo
+       """)
+	List<VwCcaseCaseloadDAO> getCaseLookupData();
+
 }

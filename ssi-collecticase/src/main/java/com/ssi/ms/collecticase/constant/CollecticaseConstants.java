@@ -487,4 +487,66 @@ public interface CollecticaseConstants {
     String DISASSOCIATE_ORGANIZATIONAL_CONTACT_ACTIVITY = "Disassociate Organizational Contact from Case";
 
     String ACTIVITY_TEMPLATE_NAME = "templateName";
+
+    public static final String CASE_PRIORITY_IMMEDIATE = "IM";
+
+    String SPACE = " ";
+
+    String BLANK_SPACE = "";
+
+    public static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat(
+            "MM/dd/yyyy hh:mm a");
+
+    public static final String SQUARE_BRACKET_START = "[";
+
+    public static final String SQUARE_BRACKET_END = "]";
+
+    public static final String BREAK = "<br />";
+
+    public static final String RETURN_NEW_LINE = "\r\n";
+
+    public static final String ACTIVITY_FOLLOWUP_NOTES1 = "Follow-up has been Completed for the activity ";
+
+    public static final String ACTIVITY_FOLLOWUP_NOTES2 = " that was logged on ";
+
+    public static final String ACTIVITY_FOLLOWUP_NOTES3 = " by ";
+
+    public static final String ACTIVITY_FOLLOWUP_NOTES4 = " on ";
+
+    public static final String ACTIVITY_SHORT_NOTE = "Short Note: ";
+
+    String INSERT_GTT_NHUIS_EMP_DATA = "insert into GTT_FOR_ORGLOOKUP select distinct empl.emp_Id, UPPER(empl.emp_Name), UPPER(empl.EMP_DBA_NAME), empl.EMP_UI_ACCT_NBR ,'EMP' AS ORIGIN,'NHUIS' AS SOURCE,TO_CHAR(empl.EMP_FEIN_NBR ),'EMP' as ENTITY_TYPE, CASE WHEN empl.EMP_KILLED_DT is null THEN 'A' ELSE 'T' END AS STATUS  from EMPLOYER_EMP empl,EMP_ADDRESS_EAD ead left outer join CCASE_ORGANIZATION_CMO cmo on ead.FK_EMP_ID != cmo.FK_EMP_ID where empl.emp_id = ead.fk_emp_id and (empl.EMP_DELETE_IND  is null or empl.EMP_DELETE_IND  <> 'Y') and empl.EMP_UI_ACCT_NBR is not null and empl.EMP_ID not in (SELECT cme.fk_emp_id FROM CCASE_ENTITY_CME  cme WHERE cme.fk_emp_id IS NOT NULL AND cme.fk_cmc_id = :cmcId and cme.cme_Active_Ind = :activeInd) and ead.EAD_TYPE_CD  in (:eadTypeList)";
+    String INSERT_GTT_CMO_DATA = "insert into GTT_FOR_ORGLOOKUP select distinct empl.emp_Id, UPPER(empl.emp_Name), UPPER(empl.EMP_DBA_NAME),empl.EMP_UI_ACCT_NBR ,'CMO' AS ORIGIN,'NHUIS' AS SOURCE,TO_CHAR(empl.EMP_FEIN_NBR ),'EMP' as ENTITY_TYPE, CASE WHEN empl.EMP_KILLED_DT is null THEN 'A' ELSE 'T' END AS STATUS from EMPLOYER_EMP empl,EMP_ADDRESS_EAD ead left outer join CCASE_ORGANIZATION_CMO cmo on ead.FK_EMP_ID != cmo.FK_EMP_ID where empl.emp_id = ead.fk_emp_id and (empl.EMP_DELETE_IND  is null or empl.EMP_DELETE_IND  <> 'Y') and empl.EMP_UI_ACCT_NBR  is not null and empl.EMP_ID not in (SELECT cme.fk_emp_id FROM CCASE_ENTITY_CME  cme WHERE cme.fk_emp_id IS NOT NULL AND cme.fk_cmc_id = :cmcId) and ead.EAD_TYPE_CD in (:eadTypeList) UNION SELECT DISTINCT CMO_ID,CMO_NAME,'' AS DBA_NAME,CMO_UI_ACCT_NBR,'CMO' AS ORIGIN, 'COLLECTICASE:'|| CASE WHEN CMO.FK_EMP_ID is not null THEN 'ATTY/REP, EMP' ELSE 'ATTY/REP' END AS SOURCE,CMO_FEIN_NBR,FN_GET_SEC_ALV_DESC(CME_ROLE) AS ENTITY_TYPE,'' AS STATUS FROM CCASE_ENTITY_CME CME JOIN CCASE_ORGANIZATION_CMO CMO ON CMO.CMO_ID = CME.FK_CMO_ID and CME.CME_ROLE in(:cmeRoleList) and CMO.CMO_ID not in (select DISTINCT FK_CMO_ID from CCASE_ENTITY_CME where FK_CMC_ID = :cmcId and FK_CMO_ID is not null)";
+
+
+    //Employer Corporate Address
+    public static final Long EMP_ADDRESS_CORPORATE = 492L;
+
+    //Employer Mailing Address
+    public static final Long EMP_ADDRESS_MAILING = 493L;
+
+    //Organization Lookup Parameters
+    public static final String ENTITY_NAME = "entityName";
+
+    public static final String ENTITY_UI_ACC_NBR = "entityUIAccNbr";
+
+    public static final String ENTITY_FEIN_NBR = "entityFEINNbr";
+
+    public static final String ENTITY_TYPE = "entityType";
+
+    public static final String ENTITY_SOURCE = "entitySource";
+
+    public static final String ENTITY_DBA_NAME = "entityDBAName";
+
+    public static final String LIKE_OPERATOR = "%";
+    public static final String EMPLOYER_ENTITY_TYPE = "Employer";
+    public static final String ATTORNEY_ENTITY_TYPE = "Attorney";
+
+    public static final String REPRESENTATIVE_ENTITY_TYPE = "Representative";
+
+    Long ACTIVITY_TYPE_USER_ALERT_DISCHARGE_LIEN = 3921L;
+    Long ACTIVITY_TYPE_COMPLETE_DOCKET_MARKING = 3890L;
+    String PAGE_ASC_ENABLE_NAME = "pageAscendingEnable";
+    String PAGE_SIZE_NAME = "pageSize";
+    String PAGE_NO_NAME = "pageNo";
 }

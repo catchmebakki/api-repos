@@ -4,6 +4,8 @@ import com.ssi.ms.collecticase.constant.CollecticaseConstants;
 import com.ssi.ms.collecticase.database.dao.CcaseActivitiesCmaDAO;
 import com.ssi.ms.collecticase.dto.ActivitiesSummaryDTO;
 import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.CrudRepository;
@@ -50,7 +52,7 @@ public interface CcaseActivitiesCmaRepository extends CrudRepository<CcaseActivi
             from CcaseActivitiesCmaDAO ccaseActivitiesCma
             where ccaseActivitiesCma.ccaseCasesCmcDAO.cmcId = :caseId
             """)
-    List<ActivitiesSummaryDTO> getActivitiesDataByCaseId(Long caseId);
+    Page<ActivitiesSummaryDTO> getActivitiesDataByCaseId(Long caseId, Pageable pageable);
 
     @Query("""   
             SELECT fnInvGetAlvDescription(ccaseActivitiesCma.cmaActivityTypeCd) as activityTypeDesc

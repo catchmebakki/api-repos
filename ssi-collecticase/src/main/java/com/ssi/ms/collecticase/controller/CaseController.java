@@ -2,22 +2,12 @@ package com.ssi.ms.collecticase.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ssi.ms.collecticase.constant.CollecticaseConstants;
-import com.ssi.ms.collecticase.dto.VwCcaseHeaderEntityDTO;
-import com.ssi.ms.collecticase.dto.CreateActivityDTO;
-import com.ssi.ms.collecticase.dto.CreateCaseDTO;
-import com.ssi.ms.collecticase.dto.ActivitiesSummaryDTO;
-import com.ssi.ms.collecticase.dto.VwCcaseRemedyDTO;
-import com.ssi.ms.collecticase.dto.VwCcaseOpmDTO;
-import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
-import com.ssi.ms.collecticase.dto.CaseReassignDTO;
-import com.ssi.ms.collecticase.dto.StaffDTO;
-import com.ssi.ms.collecticase.dto.AllowValAlvResDTO;
-import com.ssi.ms.collecticase.dto.UpdateContactActivityDTO;
-import com.ssi.ms.collecticase.dto.VwCcaseHeaderDTO;
-import com.ssi.ms.collecticase.dto.CcaseActivitiesCmaDTO;
-import com.ssi.ms.collecticase.dto.VwCcaseCaseloadDTO;
+import com.ssi.ms.collecticase.dto.*;
+import com.ssi.ms.collecticase.inputpayload.CcaseInputPayload;
+import com.ssi.ms.collecticase.outputpayload.PaginationResponse;
 import com.ssi.ms.collecticase.service.AlvService;
 import com.ssi.ms.collecticase.service.CaseService;
+import com.ssi.ms.collecticase.util.CollecticaseHelper;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -86,26 +77,33 @@ public class CaseController {
                 caseService.getCaseNotesByCaseId(caseId));
     }
 
-    @GetMapping(path = "/caseload/{staffId}", produces = "application/json")
-    public ResponseEntity<List<VwCcaseCaseloadDTO>> getCaseLoadByStaffId(@Valid @PathVariable("staffId") Long staffId) {
+    @GetMapping(path = "/caseload", produces = "application/json")
+    public ResponseEntity<PaginationResponse<VwCcaseCaseloadDTO>> getCaseLoadByStaffId(@ModelAttribute CcaseInputPayload
+                                                                                     ccaseInputPayload) {
+        Long staffId = ccaseInputPayload.getStaffId();
+        Map<String, Object> pageInputs = CollecticaseHelper.getPageInputs(ccaseInputPayload);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
-                caseService.getCaseLoadByStaffId(staffId, 0, 9, "caseNo", true));
+                caseService.getCaseLoadByStaffId(staffId, (Integer) pageInputs.get("pageNo"),
+                        (Integer) pageInputs.get("pageSize"), "caseNo",
+                        (Boolean) pageInputs.get("pageAscendingEnable")));
     }
 
-    @GetMapping(path = "/getActivitiesDataByCaseId/{caseId}", produces = "application/json")
-    public ResponseEntity<List<ActivitiesSummaryDTO>> getActivitiesDataByCaseId(@Valid @PathVariable("caseId") Long caseId) {
+    @GetMapping(path = "/case-activities", produces = "application/json")
+    public ResponseEntity<PaginationResponse<ActivitiesSummaryDTO>>
+                                        getActivitiesDataByCaseId(@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long caseId = ccaseInputPayload.getCaseId();
+        Map<String, Object> pageInputs = CollecticaseHelper.getPageInputs(ccaseInputPayload);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
-                caseService.getActivitiesDataByCaseId(caseId, 1, 2, "cmaId", true));
+                caseService.getActivitiesDataByCaseId(caseId, (Integer) pageInputs.get("pageNo"),
+                        (Integer) pageInputs.get("pageSize"), "cmaId",
+                        (Boolean) pageInputs.get("pageAscendingEnable")));
     }
 
-    @PostMapping(path = "/createCollecticaseCase", produces = "application/json")
+    @PostMapping(path = "/create-case", produces = "application/json")
     public ResponseEntity<Map<String, Object>> createCollecticaseCase(
             @Valid @RequestBody final CreateCaseDTO createCaseDTO, HttpServletRequest request) {
         final Map<String, Object> createCollecticaseActivity = caseService
-                                                                .createCollecticaseCase(createCaseDTO.getClaimantId(),
-                createCaseDTO.getStaffId(), createCaseDTO.getCasePriority(),
-                createCaseDTO.getCaseRemedyCd(), createCaseDTO.getCaseActivityCd(),
-                createCaseDTO.getCallingUser(), createCaseDTO.getUsingProgramName());
+                                                                .createCollecticaseCase(createCaseDTO);
         if (createCollecticaseActivity != null
                 && createCollecticaseActivity.get(CollecticaseConstants.POUT_SUCCESS) != null
                 && createCollecticaseActivity.get(CollecticaseConstants.POUT_CMC_ID) != null) {
@@ -119,52 +117,13 @@ public class CaseController {
     public ResponseEntity<Map<String, Object>> createCollecticaseCase(
             @Valid @RequestBody final CreateActivityDTO createActivityDTO, HttpServletRequest request) {
 
-        final Map<String, Object> createCollecticaseActivity = caseService.createCollecticaseActivity(
-                createActivityDTO.getCaseId(), createActivityDTO.getEmployerId(),
-                createActivityDTO.getActivityTypeCd(),
-                createActivityDTO.getRemedyTypeCd(), createActivityDTO.getActivityDt(),
-                createActivityDTO.getActivityTime(),
-                createActivityDTO.getActivitySpecifics(), createActivityDTO.getActivityNotes(),
-                createActivityDTO.getActivityNotesAdditional(), createActivityDTO.getActivityNotesNHUIS(),
-                createActivityDTO.getCommunicationMethod(), createActivityDTO.getCaseCharacteristics(),
-                createActivityDTO.getActivityCmtRepCd(), createActivityDTO.getActivityCasePriority(),
-                createActivityDTO.getFollowupDt(), createActivityDTO.getFollowupShortNote(),
-                createActivityDTO.getFollowupCompleteShortNote(), createActivityDTO.getCallingUser(),
-                createActivityDTO.getUsingProgramName());
+        final Map<String, Object> createCollecticaseActivity = caseService.createCollecticaseActivity(createActivityDTO);
 
         if (createCollecticaseActivity != null
                 && createCollecticaseActivity.get(CollecticaseConstants.POUT_SUCCESS) != null
                 && createCollecticaseActivity.get(CollecticaseConstants.POUT_CMA_ID) != null) {
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(createCollecticaseActivity);
         } else {
-            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
-        }
-    }
-
-    @PostMapping(path = "/addGeneralActivity", produces = "application/json")
-    public ResponseEntity<GeneralActivityDTO> addGeneralActivity(
-            @Valid @RequestBody final GeneralActivityDTO generalActivityDTO, HttpServletRequest request,
-            BindingResult result) {
-        if(!result.hasErrors())
-        {
-            caseService.createGeneralActivity(generalActivityDTO);
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(generalActivityDTO);
-        }
-        else {
-            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
-        }
-    }
-
-    @PostMapping(path = "/addUpdateContactActivity", produces = "application/json")
-    public ResponseEntity<UpdateContactActivityDTO> addUpdateContactActivity(
-            @Valid @RequestBody final UpdateContactActivityDTO updateContactActivityDTO, HttpServletRequest request,
-            BindingResult result) {
-        if(!result.hasErrors())
-        {
-            caseService.createGeneralActivity(updateContactActivityDTO);
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(updateContactActivityDTO);
-        }
-        else {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
         }
     }
@@ -228,6 +187,35 @@ public class CaseController {
     public ResponseEntity<Map<String, String>> getCLFollowUpValue() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.getCLFollowUpValue());
+    }
+
+    @PostMapping(path = "/caselookup", produces = "application/json")
+    public ResponseEntity caseLookup(
+            @Valid @RequestBody final CaseLookupDTO caseLookupDTO) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
+                caseService.searchCaseLookup(caseLookupDTO));
+    }
+
+    @PostMapping(path = "/reassign-case", produces = "application/json")
+    public ResponseEntity reassignCase(@Valid @RequestBody final ReassignDTO reassignDTO, BindingResult result) {
+        if (!result.hasErrors()) {
+            caseService.reassignCase(reassignDTO);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(reassignDTO);
+        } else {
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
+        }
+    }
+
+    @PostMapping(path = "/validate-ssn/{encryptSSN}", produces = "application/json")
+    public ResponseEntity validateSSN(@Valid @PathVariable("ssn") String encryptSSN) {
+        // Bak TODO Need to think and write Encryption for ssn, which get from UI - refer CollecticaseHelper
+        // TODO encrypt and decrypt method
+        String ssn = encryptSSN;
+        Long claimantId = caseService.validateSSN(ssn);
+        if (claimantId != null)
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(claimantId);
+        else
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
     }
 
 }

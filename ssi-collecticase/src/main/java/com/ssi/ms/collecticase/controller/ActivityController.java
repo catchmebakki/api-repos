@@ -1,10 +1,17 @@
 package com.ssi.ms.collecticase.controller;
 
-import com.ssi.ms.collecticase.dto.EmployerListDTO;
 import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
-import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
+import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
+import com.ssi.ms.collecticase.dto.WageGarnishmentActivityDTO;
 import com.ssi.ms.collecticase.dto.StateDTO;
-import com.ssi.ms.collecticase.inputpayload.ActivityInputPayload;
+import com.ssi.ms.collecticase.dto.UpdateContactActivityDTO;
+import com.ssi.ms.collecticase.dto.EmployerListDTO;
+import com.ssi.ms.collecticase.dto.PaymentPlanActivityDTO;
+import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
+import com.ssi.ms.collecticase.dto.OrgLookupDTO;
+import com.ssi.ms.collecticase.dto.CompleteFollowupActivityDTO;
+import com.ssi.ms.collecticase.dto.AppendNotesDTO;
+import com.ssi.ms.collecticase.inputpayload.CcaseInputPayload;
 import com.ssi.ms.collecticase.outputpayload.ActivityGeneralPageResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivitySendReSendResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityEntityContactResponse;
@@ -18,13 +25,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +46,11 @@ public class ActivityController {
     private ActivityService activityService;
 
     @GetMapping(path = "/actvitygeneral", produces = "application/json")
-    public ResponseEntity<ActivityGeneralPageResponse> getGeneralActivityPage(@ModelAttribute ActivityInputPayload
-                                                                                      activityInputPayload) {
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
-        Long caseId = activityInputPayload.getCaseId();
+    public ResponseEntity<ActivityGeneralPageResponse> getGeneralActivityPage(@ModelAttribute CcaseInputPayload
+                                                                                      ccaseInputPayload) {
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getGeneralActivityPage(caseId, activityRemedyCd, activityTypeCd));
@@ -54,9 +59,9 @@ public class ActivityController {
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/ag-entitycontact", produces = "application/json")
     public ResponseEntity<ActivityEntityContactResponse> getEntityContactActivityPage
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
-        Long caseId = activityInputPayload.getCaseId();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getEntityContactActivityPage(caseId, activityTypeCd));
@@ -64,10 +69,10 @@ public class ActivityController {
 
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/ag-propertylien", produces = "application/json")
-    public ResponseEntity<ActivityPropertyLienResponse> getPropertyLienActivityPage(@ModelAttribute ActivityInputPayload
-                                                                                            activityInputPayload) {
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
-        Long caseId = activityInputPayload.getCaseId();
+    public ResponseEntity<ActivityPropertyLienResponse> getPropertyLienActivityPage(@ModelAttribute CcaseInputPayload
+                                                                                            ccaseInputPayload) {
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getPropertyLienActivityPage(activityRemedyCd, caseId));
@@ -76,9 +81,9 @@ public class ActivityController {
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/ag-followupshortnote", produces = "application/json")
     public ResponseEntity<ActivityFollowUpShortNoteResponse> getFollowUpShortNoteActivityPage
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getFollowUpShortNoteActivityPage(activityTypeCd, activityRemedyCd));
@@ -87,10 +92,10 @@ public class ActivityController {
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/ag-sendresend", produces = "application/json")
     public ResponseEntity<ActivitySendReSendResponse> getSendReSendActivityPage
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
-        Long caseId = activityInputPayload.getCaseId();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getSendReSendActivityPage(caseId, activityRemedyCd, activityTypeCd));
@@ -99,10 +104,10 @@ public class ActivityController {
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/activitypaymentplan", produces = "application/json")
     public ResponseEntity<ActivityPaymentPlanPageResponse> getPaymentPlanActivityPage
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
-        Long caseId = activityInputPayload.getCaseId();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getPaymentPlanActivityPage(caseId, activityRemedyCd, activityTypeCd));
@@ -111,10 +116,10 @@ public class ActivityController {
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/activitywagegarnish", produces = "application/json")
     public ResponseEntity<ActivityWageGarnishmentPageResponse> getWageGarnishmentActivityPage
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
-        Long caseId = activityInputPayload.getCaseId();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getWageGarnishmentActivityPage(caseId, activityRemedyCd, activityTypeCd));
@@ -123,9 +128,9 @@ public class ActivityController {
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/awg-employercontact", produces = "application/json")
     public ResponseEntity<ActivityWageGarnishmentPageResponse> getEmployerContactWageGarnish
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long employerId = activityInputPayload.getEmployerId();
-        Long caseId = activityInputPayload.getCaseId();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long employerId = ccaseInputPayload.getEmployerId();
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getEmployerContactWageGarnish(caseId, employerId));
@@ -133,8 +138,8 @@ public class ActivityController {
 
     @GetMapping(path = "/awg-employer", produces = "application/json")
     public ResponseEntity<ActivityWageGarnishmentPageResponse> getEmployerWageGarnish
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long caseId = activityInputPayload.getCaseId();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getEmployerWageGarnish(caseId));
@@ -143,21 +148,21 @@ public class ActivityController {
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/awg-employerrep", produces = "application/json")
     public ResponseEntity<ActivityWageGarnishmentPageResponse> getEmployerRepWageGarnish
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long employerId = activityInputPayload.getEmployerId();
-        Long caseId = activityInputPayload.getCaseId();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long employerId = ccaseInputPayload.getEmployerId();
+        Long caseId = ccaseInputPayload.getCaseId();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getEmployerRepWageGarnish(caseId, employerId));
     }
 
     @GetMapping(path = "/awg-other", produces = "application/json")
-    public ResponseEntity<ActivityWageGarnishmentPageResponse> getWageGarnishOther(@ModelAttribute ActivityInputPayload
-                                                                                           activityInputPayload) {
-        Long employerId = activityInputPayload.getEmployerId();
-        Long caseId = activityInputPayload.getCaseId();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
+    public ResponseEntity<ActivityWageGarnishmentPageResponse> getWageGarnishOther(@ModelAttribute CcaseInputPayload
+                                                                                           ccaseInputPayload) {
+        Long employerId = ccaseInputPayload.getEmployerId();
+        Long caseId = ccaseInputPayload.getCaseId();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getWageGarnishOther(caseId, employerId, activityTypeCd, activityRemedyCd));
     }
@@ -165,19 +170,19 @@ public class ActivityController {
     @SuppressWarnings("SpellCheckingInspection")
     @GetMapping(path = "/activityupdatecontact", produces = "application/json")
     public ResponseEntity<ActivityUpdateContactPageResponse> getUpdateContactActivityPage
-            (@ModelAttribute ActivityInputPayload activityInputPayload) {
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
-        Long caseId = activityInputPayload.getCaseId();
+            (@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
+        Long caseId = ccaseInputPayload.getCaseId();
         // Bak TODO need to decide and push all the calls here - static drop down list
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getUpdateContactActivityPage(caseId, activityRemedyCd, activityTypeCd));
     }
 
-    @GetMapping(path = "/getActivityInfoForFollowup", produces = "application/json")
-    public ResponseEntity<FollowupActivityDTO> getActivityInfoForFollowup(@ModelAttribute ActivityInputPayload
-                                                                                  activityInputPayload) {
-        Long activityId = activityInputPayload.getActivityId();
+    @GetMapping(path = "/cactivity-followup", produces = "application/json")
+    public ResponseEntity<FollowupActivityDTO> getActivityInfoForFollowup(@ModelAttribute CcaseInputPayload
+                                                                                  ccaseInputPayload) {
+        Long activityId = ccaseInputPayload.getActivityId();
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getActivityInfoForFollowup(activityId));
     }
@@ -195,38 +200,133 @@ public class ActivityController {
     }
 
     @GetMapping(path = "/auc-entity", produces = "application/json")
-    public ResponseEntity<Map<String, String>> getUpdateContactEntity(@ModelAttribute ActivityInputPayload
-                                                                              activityInputPayload) {
-        Long caseId = activityInputPayload.getCaseId();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
+    public ResponseEntity<Map<String, String>> getUpdateContactEntity(@ModelAttribute CcaseInputPayload
+                                                                              ccaseInputPayload) {
+        Long caseId = ccaseInputPayload.getCaseId();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getUpdateContactEntity(caseId, activityTypeCd));
     }
 
     @GetMapping(path = "/auc-contacts", produces = "application/json")
-    public ResponseEntity<List<OrganizationIndividualDTO>> getUpdateContactContacts(@ModelAttribute ActivityInputPayload
-                                                                                            activityInputPayload) {
-        Long caseId = activityInputPayload.getCaseId();
-        Long entityId = activityInputPayload.getEntityId();
+    public ResponseEntity<List<OrganizationIndividualDTO>> getUpdateContactContacts(@ModelAttribute CcaseInputPayload
+                                                                                            ccaseInputPayload) {
+        Long caseId = ccaseInputPayload.getCaseId();
+        Long entityId = ccaseInputPayload.getEntityId();
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getUpdateContactContacts(caseId, entityId));
     }
 
     @GetMapping(path = "/auc-rep", produces = "application/json")
-    public ResponseEntity<List<EmployerListDTO>> getUpdateContactRep(@ModelAttribute ActivityInputPayload
-                                                                             activityInputPayload) {
-        Long caseId = activityInputPayload.getCaseId();
+    public ResponseEntity<List<EmployerListDTO>> getUpdateContactRep(@ModelAttribute CcaseInputPayload
+                                                                             ccaseInputPayload) {
+        Long caseId = ccaseInputPayload.getCaseId();
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
                 .getUpdateContactRep(caseId));
     }
 
     @GetMapping(path = "/get-template", produces = "application/json")
-    public ResponseEntity<Map<String, String>> getGeneralActivityGo(@ModelAttribute ActivityInputPayload
-                                                                            activityInputPayload) {
-        Long activityRemedyCd = activityInputPayload.getActivityRemedyTypeCd();
-        Long activityTypeCd = activityInputPayload.getActivityTypeCd();
+    public ResponseEntity<Map<String, String>> getGeneralActivityGo(@ModelAttribute CcaseInputPayload
+                                                                            ccaseInputPayload) {
+        Long activityRemedyCd = ccaseInputPayload.getActivityRemedyTypeCd();
+        Long activityTypeCd = ccaseInputPayload.getActivityTypeCd();
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
                 .body(activityService.getGeneralActivityGo(activityTypeCd, activityRemedyCd));
     }
+
+    @PostMapping(path = "/orglookup", produces = "application/json")
+    public ResponseEntity caseLookup(
+            @Valid @RequestBody final OrgLookupDTO orgLookupDTO) {
+        //Test Purpose
+        /*orgLookupDTO.setEntityType(CollecticaseConstants.EMPLOYER_ENTITY_TYPE);
+        orgLookupDTO.setCaseId(7142L);
+        orgLookupDTO.setOrgName("RED FISH WHITE FISH");
+        orgLookupDTO.setUiAcctNbr("0000531233");
+        orgLookupDTO.setFein("764747611");*/
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
+                activityService.searchOrgLookup(orgLookupDTO));
+    }
+
+    @PostMapping(path = "/complete-followup", produces = "application/json")
+    public ResponseEntity completeFollowupActivity(
+            @Valid @RequestBody final CompleteFollowupActivityDTO completeFollowupActivityDTO,
+            BindingResult result) {
+        if(!result.hasErrors())
+        {
+            activityService.completeFollowupActivity(completeFollowupActivityDTO);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(completeFollowupActivityDTO);
+        }
+        else {
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
+        }
+    }
+
+    @PostMapping(path = "/appendnotes", produces = "application/json")
+    public ResponseEntity appendNotes(
+            @Valid @RequestBody final AppendNotesDTO appendNotesDTO,
+            BindingResult result) {
+        if(!result.hasErrors())
+        {
+            activityService.appendNotes(appendNotesDTO);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(appendNotesDTO);
+        }
+        else {
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
+        }
+    }
+
+    @PostMapping(path = "/add-general", produces = "application/json")
+    public ResponseEntity<GeneralActivityDTO> addGeneralActivity(
+            @Valid @RequestBody final GeneralActivityDTO generalActivityDTO, BindingResult result) {
+        if(!result.hasErrors())
+        {
+            activityService.createGeneralActivity(generalActivityDTO);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(generalActivityDTO);
+        }
+        else {
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
+        }
+    }
+
+    @PostMapping(path = "/add-paymentplan", produces = "application/json")
+    public ResponseEntity<PaymentPlanActivityDTO> addGeneralActivity(
+            @Valid @RequestBody final PaymentPlanActivityDTO paymentPlanActivityDTO, HttpServletRequest request,
+            BindingResult result) {
+        if(!result.hasErrors())
+        {
+            activityService.createPaymentPlanActivity(paymentPlanActivityDTO);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(paymentPlanActivityDTO);
+        }
+        else {
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
+        }
+    }
+
+    @PostMapping(path = "/add-wagegarnish", produces = "application/json")
+    public ResponseEntity<GeneralActivityDTO> addGeneralActivity(
+            @Valid @RequestBody final WageGarnishmentActivityDTO wageGarnishmentActivityDTO, BindingResult result) {
+        if(!result.hasErrors())
+        {
+            activityService.createWageGarnishmentActivity(wageGarnishmentActivityDTO);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(wageGarnishmentActivityDTO);
+        }
+        else {
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
+        }
+    }
+
+    @PostMapping(path = "/add-updatecontact", produces = "application/json")
+    public ResponseEntity<UpdateContactActivityDTO> addUpdateContactActivity(
+            @Valid @RequestBody final UpdateContactActivityDTO updateContactActivityDTO, BindingResult result) {
+        if(!result.hasErrors())
+        {
+            activityService.createUpdateContactActivity(updateContactActivityDTO);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(updateContactActivityDTO);
+        }
+        else {
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
+        }
+    }
+
 
 }
