@@ -48,26 +48,26 @@ public class ActivityWageGarnishmentPageResponse {
     private Date courtOrderedDate;
 
     //wageAmount - showInd
-    boolean disableWageAmount;
+    Boolean disableWageAmount;
 
     //doNotGarnishInd - showInd
-    boolean disableDoNotGarnishInd;
+    Boolean disableDoNotGarnishInd;
 
     //wageNonCompliance - showInd
-    boolean disableWageNonCompliance;
+    Boolean disableWageNonCompliance;
 
     //wageMotionFiledOn - showInd
-    boolean disableWageMotionFiledOn;
+    Boolean disableWageMotionFiledOn;
 
     //wageEffectiveFrom - showInd
-    boolean disableWageEffectiveFrom;
+    Boolean disableWageEffectiveFrom;
 
     //wageEffectiveUntil - showInd
-    boolean disableWageEffectiveUntil;
+    Boolean disableWageEffectiveUntil;
 
     //courtOrderedInd - showInd
-    boolean disableCourtOrderedInd;
+    Boolean disableCourtOrderedInd;
 
     //courtOrderedDate - showInd
-    boolean disableCourtOrderedDate;
+    Boolean disableCourtOrderedDate;
 }
