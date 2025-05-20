@@ -54,7 +54,6 @@ import java.util.Date;
 				@StoredProcedureParameter(mode = ParameterMode.IN, name = CollecticaseConstants.PIN_CASE_PRIORITY, type = Long.class),
 				@StoredProcedureParameter(mode = ParameterMode.IN, name = CollecticaseConstants.PIN_NEXT_FOLLOW_UP, type = String.class),
 				@StoredProcedureParameter(mode = ParameterMode.IN, name = CollecticaseConstants.PIN_BKT_STATUS, type = Long.class),
-				@StoredProcedureParameter(mode = ParameterMode.IN, name = CollecticaseConstants.PIN_CASE_PRIORITY, type = Long.class),
 				@StoredProcedureParameter(mode = ParameterMode.IN, name = CollecticaseConstants.PIN_ASSIGNED_TO, type = Long.class),
 				@StoredProcedureParameter(mode = ParameterMode.IN, name = CollecticaseConstants.PIN_TELE_NUM, type = String.class),
 				@StoredProcedureParameter(mode = ParameterMode.IN, name = CollecticaseConstants.PIN_CASE_OPEN, type = String.class),

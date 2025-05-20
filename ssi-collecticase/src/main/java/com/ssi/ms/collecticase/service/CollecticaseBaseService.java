@@ -1,8 +1,17 @@
 package com.ssi.ms.collecticase.service;
 
-import com.ssi.ms.collecticase.database.mapper.*;
+import com.ssi.ms.collecticase.database.mapper.AllowValAlvMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseHeaderMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseOpmMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseRemedyMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseHeaderEntityMapper;
+import com.ssi.ms.collecticase.database.mapper.CcaseCraCorrespondenceCrcMapper;
+import com.ssi.ms.collecticase.database.mapper.CcaseCmaNoticesCmnMapper;
+import com.ssi.ms.collecticase.database.mapper.CcaseActivitiesCmaMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseCaseloadMapper;
 import com.ssi.ms.collecticase.database.repository.*;
 import com.ssi.ms.common.database.repository.ParameterParRepository;
+import com.ssi.ms.common.database.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -13,12 +22,19 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Anand
  */
-
-
 public class CollecticaseBaseService {
 
     @Autowired
     AllowValAlvRepository allowValAlvRepository;
+
+    @Autowired
+    ClaimantCmtRepository claimantCmtRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    CustomLookupRepository customLookupRepository;
 
     @Autowired
     CcaseActivitiesCmaRepository ccaseActivitiesCmaRepository;

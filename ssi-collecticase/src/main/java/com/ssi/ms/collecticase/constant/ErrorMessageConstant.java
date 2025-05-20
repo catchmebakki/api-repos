@@ -8,6 +8,10 @@ public interface ErrorMessageConstant {
 
     String CASE_ID_NOT_FOUND = "caseId.notFound";
 
+    String STAFF_ID_NOT_FOUND = "staffId.notFound";
+
+    String USER_ID_NOT_FOUND = "userId.notFound";
+
     String ACTIVITY_ID_NOT_FOUND = "activityId.notFound";
 
     String ALV_ID_NOT_FOUND = "activityId.notFound";
@@ -392,6 +396,35 @@ public interface ErrorMessageConstant {
                 "Entity Contact Fax is invalid.", 0),
         ENTITY_CONTACT_EMAILS_INVALID("entityContactEmails", "entityContactEmails.invalid",
                 "Entity Contact Emails is invalid.", 0);
+        private String frontendField;
+        private String frontendErrorCode;
+        private String description;
+        private Integer params;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    enum CaseLookupErrorDetail implements CollecticaseErrorEnum {
+        CASE_LOOKUP_INPUT_INVALID("caseNumber", "caselookup.input.invalid",
+                "At least one filter condition should be provided.", 0),
+
+        CASE_LOOKUP_REMEDY_FROM_TO_DATE("caseRemedyFromDate", "caselookup.remedy.from.date.to.date.both.mandatory",
+                                          "Remedy From Date and To date is Mandatory ", 0),
+
+        CASE_LOOKUP_CASE_OPEN_FROM_TO_DATE("caseOpenFromDate", "caselookup.case.from.date.to.date.both.mandatory",
+                                                       "Case Open From Date and To date is Mandatory", 0),
+
+        CASE_LOOKUP_RPM_FROM_TO_DATE("repaymentFromDate", "caselookup.rpm.from.date.to.date.both.mandatory",
+                "Case repayment From Date and To date is Mandatory", 0),
+
+        REMEDY_FROM_GREATER_THAN_TO_DATE("caseRemedyFromDate", "caselookup.remedy.from.date.greater.than.to.date",
+                                                "Remedy From Date should less than Remedy To date", 0),
+
+        CASE_OPEN_FROM_GREATER_THAN_TO_DATE("caseOpenFromDate", "caselookup.caseopen.from.date.greater.than.to.date",
+                "Case Opened From Date should less than Case Opened To date", 0),
+
+        RPM_FROM_GREATER_THAN_TO_DATE("repaymentFromDate", "caselookup.rpm.from.date.greater.than.to.date",
+                "Repayment From Date should less than Repayment To date", 0);
         private String frontendField;
         private String frontendErrorCode;
         private String description;
