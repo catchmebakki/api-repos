@@ -1,25 +1,25 @@
 package com.ssi.ms.collecticase.controller;
 
+import com.ssi.ms.collecticase.dto.AppendNotesDTO;
+import com.ssi.ms.collecticase.dto.CompleteFollowupActivityDTO;
+import com.ssi.ms.collecticase.dto.EmployerListDTO;
 import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
 import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
-import com.ssi.ms.collecticase.dto.WageGarnishmentActivityDTO;
+import com.ssi.ms.collecticase.dto.OrgLookupDTO;
+import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
+import com.ssi.ms.collecticase.dto.PaymentPlanActivityDTO;
 import com.ssi.ms.collecticase.dto.StateDTO;
 import com.ssi.ms.collecticase.dto.UpdateContactActivityDTO;
-import com.ssi.ms.collecticase.dto.EmployerListDTO;
-import com.ssi.ms.collecticase.dto.PaymentPlanActivityDTO;
-import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
-import com.ssi.ms.collecticase.dto.OrgLookupDTO;
-import com.ssi.ms.collecticase.dto.CompleteFollowupActivityDTO;
-import com.ssi.ms.collecticase.dto.AppendNotesDTO;
+import com.ssi.ms.collecticase.dto.WageGarnishmentActivityDTO;
 import com.ssi.ms.collecticase.inputpayload.CcaseInputPayload;
-import com.ssi.ms.collecticase.outputpayload.ActivityGeneralPageResponse;
-import com.ssi.ms.collecticase.outputpayload.ActivitySendReSendResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityEntityContactResponse;
-import com.ssi.ms.collecticase.outputpayload.ActivityPropertyLienResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityFollowUpShortNoteResponse;
+import com.ssi.ms.collecticase.outputpayload.ActivityGeneralPageResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityPaymentPlanPageResponse;
-import com.ssi.ms.collecticase.outputpayload.ActivityWageGarnishmentPageResponse;
+import com.ssi.ms.collecticase.outputpayload.ActivityPropertyLienResponse;
+import com.ssi.ms.collecticase.outputpayload.ActivitySendReSendResponse;
 import com.ssi.ms.collecticase.outputpayload.ActivityUpdateContactPageResponse;
+import com.ssi.ms.collecticase.outputpayload.ActivityWageGarnishmentPageResponse;
 import com.ssi.ms.collecticase.service.ActivityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -258,12 +265,10 @@ public class ActivityController {
     public ResponseEntity completeFollowupActivity(
             @Valid @RequestBody final CompleteFollowupActivityDTO completeFollowupActivityDTO,
             BindingResult result) {
-        if(!result.hasErrors())
-        {
+        if (!result.hasErrors()) {
             activityService.completeFollowupActivity(completeFollowupActivityDTO);
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(completeFollowupActivityDTO);
-        }
-        else {
+        } else {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
         }
     }
@@ -272,12 +277,10 @@ public class ActivityController {
     public ResponseEntity appendNotes(
             @Valid @RequestBody final AppendNotesDTO appendNotesDTO,
             BindingResult result) {
-        if(!result.hasErrors())
-        {
+        if (!result.hasErrors()) {
             activityService.appendNotes(appendNotesDTO);
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(appendNotesDTO);
-        }
-        else {
+        } else {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
         }
     }
@@ -285,12 +288,10 @@ public class ActivityController {
     @PostMapping(path = "/add-general", produces = "application/json")
     public ResponseEntity<GeneralActivityDTO> addGeneralActivity(
             @Valid @RequestBody final GeneralActivityDTO generalActivityDTO, BindingResult result) {
-        if(!result.hasErrors())
-        {
+        if (!result.hasErrors()) {
             activityService.createGeneralActivity(generalActivityDTO);
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(generalActivityDTO);
-        }
-        else {
+        } else {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
         }
     }
@@ -299,12 +300,10 @@ public class ActivityController {
     public ResponseEntity<PaymentPlanActivityDTO> addGeneralActivity(
             @Valid @RequestBody final PaymentPlanActivityDTO paymentPlanActivityDTO, HttpServletRequest request,
             BindingResult result) {
-        if(!result.hasErrors())
-        {
+        if (!result.hasErrors()) {
             activityService.createPaymentPlanActivity(paymentPlanActivityDTO);
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(paymentPlanActivityDTO);
-        }
-        else {
+        } else {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
         }
     }
@@ -312,12 +311,10 @@ public class ActivityController {
     @PostMapping(path = "/add-wagegarnish", produces = "application/json")
     public ResponseEntity<GeneralActivityDTO> addGeneralActivity(
             @Valid @RequestBody final WageGarnishmentActivityDTO wageGarnishmentActivityDTO, BindingResult result) {
-        if(!result.hasErrors())
-        {
+        if (!result.hasErrors()) {
             activityService.createWageGarnishmentActivity(wageGarnishmentActivityDTO);
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(wageGarnishmentActivityDTO);
-        }
-        else {
+        } else {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
         }
     }
@@ -325,15 +322,12 @@ public class ActivityController {
     @PostMapping(path = "/add-updatecontact", produces = "application/json")
     public ResponseEntity<UpdateContactActivityDTO> addUpdateContactActivity(
             @Valid @RequestBody final UpdateContactActivityDTO updateContactActivityDTO, BindingResult result) {
-        if(!result.hasErrors())
-        {
+        if (!result.hasErrors()) {
             activityService.createUpdateContactActivity(updateContactActivityDTO);
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(updateContactActivityDTO);
-        }
-        else {
+        } else {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
         }
     }
-
 
 }
