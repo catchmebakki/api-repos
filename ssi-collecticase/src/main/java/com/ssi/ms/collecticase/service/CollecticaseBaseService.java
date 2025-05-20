@@ -1,8 +1,39 @@
 package com.ssi.ms.collecticase.service;
 
-import com.ssi.ms.collecticase.database.mapper.*;
-import com.ssi.ms.collecticase.database.repository.*;
+import com.ssi.ms.collecticase.database.mapper.AllowValAlvMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseHeaderMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseOpmMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseRemedyMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseHeaderEntityMapper;
+import com.ssi.ms.collecticase.database.mapper.CcaseCraCorrespondenceCrcMapper;
+import com.ssi.ms.collecticase.database.mapper.CcaseCmaNoticesCmnMapper;
+import com.ssi.ms.collecticase.database.mapper.CcaseActivitiesCmaMapper;
+import com.ssi.ms.collecticase.database.mapper.VwCcaseCaseloadMapper;
+import com.ssi.ms.collecticase.database.repository.CcaseCraCorrespondenceCrcRepository;
+import com.ssi.ms.collecticase.database.repository.AllowValAlvRepository;
+import com.ssi.ms.collecticase.database.repository.CustomLookupRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseActivitiesCmaRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseCaseRemedyCmrRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseCasesCmcRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseCmaNoticesCmnRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseCmeIndividualCmiRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseEntityCmeRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseOrganizationCmoRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseRemedyActivityCraRepository;
+import com.ssi.ms.collecticase.database.repository.CorrespondenceCorRepository;
+import com.ssi.ms.collecticase.database.repository.EmployerEmpRepository;
+import com.ssi.ms.collecticase.database.repository.CcaseWageGarnishmentCwgRepository;
+import com.ssi.ms.collecticase.database.repository.ClmLofClfRepository;
+import com.ssi.ms.collecticase.database.repository.CmtNotesCnoRepository;
+import com.ssi.ms.collecticase.database.repository.OpmPayPlanOppRepository;
+import com.ssi.ms.collecticase.database.repository.StaffStfRepository;
+import com.ssi.ms.collecticase.database.repository.RepaymentRpmRepository;
+import com.ssi.ms.collecticase.database.repository.VwCcaseCaseloadRepository;
+import com.ssi.ms.collecticase.database.repository.VwCcaseCollectibleDebtsRepository;
+import com.ssi.ms.collecticase.database.repository.VwCcaseEntityRepository;
 import com.ssi.ms.common.database.repository.ParameterParRepository;
+import com.ssi.ms.collecticase.database.repository.ClaimantCmtRepository;
+import com.ssi.ms.common.database.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -13,12 +44,19 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Anand
  */
-
-
 public class CollecticaseBaseService {
 
     @Autowired
     AllowValAlvRepository allowValAlvRepository;
+
+    @Autowired
+    ClaimantCmtRepository claimantCmtRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    CustomLookupRepository customLookupRepository;
 
     @Autowired
     CcaseActivitiesCmaRepository ccaseActivitiesCmaRepository;

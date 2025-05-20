@@ -29,26 +29,26 @@ public class ActivityPaymentPlanPageResponse {
     private Long paymentPlanMonths;
 
     // paymentPlanResponseToCd showInd
-    boolean disablePPResponseToCd;
+    Boolean disablePPResponseToCd;
 
     // paymentPlanResponseToOther showInd
-    boolean disablePPResponseToOther;
+    Boolean disablePPResponseToOther;
 
     // paymentPlanGuideLineAmount showInd
-    boolean disablePPGuideLineAmount;
+    Boolean disablePPGuideLineAmount;
 
     // paymentPlanSignedDate showInd
-    boolean disablePPSignedDate;
+    Boolean disablePPSignedDate;
 
     // paymentPlanFinAffidavitSignedDate showInd
-    boolean disablePPFASignedDate;
+    Boolean disablePPFASignedDate;
 
     // paymentPlanPaymentAmount showInd
-    boolean disablePPPaymentAmount;
+    Boolean disablePPPaymentAmount;
 
     // paymentPlanPaymentCategory showInd
-    boolean disablePPPaymentCategory;
+    Boolean disablePPPaymentCategory;
 
     // paymentPlanEffectiveUntilDate showInd
-    boolean disablePPEffUntilDate;
+    Boolean disablePPEffUntilDate;
 }

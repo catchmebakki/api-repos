@@ -8,9 +8,9 @@ public class ActivityFollowUpShortNoteResponse {
     // Follow-up Date
     Date activityFollowupDate;
     // Follow-up showInd
-    boolean disableFollowupDate;
+    Boolean disableFollowupDate;
     // Short Note
     String activityFollowupShortNote;
     // Short Note showInd
-    boolean disableFollowupShNote;
+    Boolean disableFollowupShNote;
 }

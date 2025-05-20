@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Repository
 public interface VwCcaseCollectibleDebtsRepository extends CrudRepository<VwCcaseCollectibleDebtsDAO, Long> {
@@ -23,4 +24,11 @@ public interface VwCcaseCollectibleDebtsRepository extends CrudRepository<VwCcas
 			GROUP BY vwCcaseCollectibleDebtsDAO.claimantCmtDAO.cmtId
 			""")
     CaseCollectibleDebtsDTO getCollectibleDebtsAmount(Long claimantId, BigDecimal overpaymentBalanceAmount);
+
+	@Query("""          
+       from VwCcaseCollectibleDebtsDAO vwCcaseCollectibleDebtsDAO
+       where vwCcaseCollectibleDebtsDAO.claimantCmtDAO.ssn = :claimantSsn
+       ORDER BY vwCcaseCollectibleDebtsDAO.claimantCmtDAO.ssn
+       """)
+	List<VwCcaseCollectibleDebtsDAO> getCollectionDebts(String claimantSsn);
 }

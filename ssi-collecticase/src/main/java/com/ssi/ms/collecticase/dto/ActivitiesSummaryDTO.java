@@ -14,6 +14,7 @@ import java.util.Date;
 @Validated
 @Getter
 public class ActivitiesSummaryDTO {
+    private Long id;
     private Long activityId;
     private Date activityDate;
     private String activityTypeDesc;
