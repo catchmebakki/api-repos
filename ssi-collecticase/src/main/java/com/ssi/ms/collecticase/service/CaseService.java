@@ -32,7 +32,9 @@ import com.ssi.ms.collecticase.dto.ReassignDTO;
 import com.ssi.ms.collecticase.outputpayload.PaginationResponse;
 import com.ssi.ms.collecticase.util.CollecticaseHelper;
 import com.ssi.ms.collecticase.util.CollecticaseUtilFunction;
+import com.ssi.ms.collecticase.validator.CaseLookupValidator;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
+import com.ssi.ms.platform.exception.custom.CustomValidationException;
 import com.ssi.ms.platform.exception.custom.NotFoundException;
 import com.ssi.ms.platform.util.UtilFunction;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +63,9 @@ public class CaseService extends CollecticaseBaseService {
 
     @Autowired
     private GeneralActivityValidator generalActivityValidator;
+
+    @Autowired
+    private CaseLookupValidator caseLookupValidator;
 
     public List<VwCcaseHeaderDTO> getCaseHeaderInfoByCaseId(Long caseId) {
         return vwCcaseCaseloadRepository.getCaseHeaderInfoByCaseId(caseId).stream().map(dao ->
@@ -740,6 +745,11 @@ public class CaseService extends CollecticaseBaseService {
     public Object searchCaseLookup(CaseLookupDTO caseLookupDTO) {
         String poutSqlString;
         List<VwCcaseCaseloadDAO> vwCcaseCaseloadDAOList;
+        final HashMap<String, List<String>> errorMap = caseLookupValidator.validateCaseLookupDTO(caseLookupDTO);
+        if (!errorMap.isEmpty()) {
+            throw new CustomValidationException("Case Lookup Validation Failed.", errorMap);
+        }
+
         Map<String, Object> caseLookup = CollecticaseHelper.getCaseLookupData(caseLookupDTO, ccaseCasesCmcRepository);
         if (caseLookup != null) {
             poutSqlString = (String) caseLookup.get(POUT_SQL_STRING);

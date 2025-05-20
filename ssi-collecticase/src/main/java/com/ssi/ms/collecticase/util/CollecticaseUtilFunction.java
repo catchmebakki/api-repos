@@ -37,6 +37,8 @@ public interface CollecticaseUtilFunction {
     // Email Pattern for multiple email address validation separated by semi-colon
     static final String EMAILS_PATTERN ="(([_a-zA-Z0-9-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)(\\s*;\\s*|\\s*$))*";
 
+    static final String DATE_PATTERN_MM_DD_YYYY = "^\\d{2}/\\d{2}/\\d{4}$";
+
     BiPredicate<BigDecimal, BigDecimal> compareBigDecimalObject = (l1, l2) -> null != l1 && null != l2 && l1.compareTo(l2) == 0;
 
     BiPredicate<BigDecimal, BigDecimal> lessThanBigDecimalObject = (l1, l2) -> null != l1 && null != l2 && l1.compareTo(l2) < 0;
