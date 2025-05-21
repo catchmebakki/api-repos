@@ -26,7 +26,32 @@ public interface ErrorMessageConstant {
 
     String EMP_ID_NOT_FOUND = "employerdid.notices.notFound";
 
+    String STAFF_ID_MANDATORY = "staffId.mandatory";
+
+    String CASE_LOOKUP_CLAIMANT_SSN_INVALID = "caselookup.claimantSSN.invalid";
+
+    String CASE_LOOKUP_CASE_OPEN_FROM_DATE_FUTURE = "caselookup.caseOpenFromDate.future"; //Case Opened Start Date cannot be in future.
+
+    String CASE_LOOKUP_CASE_OPEN_TO_DATE_FUTURE = "caselookup.caseOpenToDate.future"; //Case Opened End Date cannot be in future.
+
+    String CASE_LOOKUP_REMEDY_FROM_DATE_FUTURE = "caselookup.caseRemedyFromDate.future"; // Remedy Start Date cannot be in future.
+
+    String CASE_LOOKUP_REMEDY_TO_DATE_FUTURE = "caselookup.caseRemedyToDate.future";  //Remedy End Date cannot be in future.
+
+    String CASE_LOOKUP_REPAYMENT_FROM_DATE_FUTURE = "caselookup.repaymentFromDate.future";  //Repayment Start Date cannot be in future.
+
+    String CASE_LOOKUP_REPAYMENT_TO_DATE_FUTURE = "caselookup.repaymentToDate`.future";  //Repayment End Date cannot be in future.
+
     String CASE_REMEDY_ACTIVITY_ID_NOT_FOUND = "remedy.activityId.notFound";
+
+    String COMPELTE_FOLLOWUP_COMPLETED_ON_MANDATORY = "complete.followup.completed.on.mandatory"; //Please enter valid Completed On Date
+
+    String COMPELTE_FOLLOWUP_COMPLETED_ON_FUTURE = "complete.followup.completed.on.future"; //Follow-up completion date cannot be in the future
+
+    String COMPELTE_FOLLOWUP_COMPLETED_DATE_GREATER_THAN_ACTIVITY_DATE = "complete.followup.completed.on.future"; //Completed on date should be greater than activity creation date
+
+    String COMPELTE_FOLLOWUP_COMPLETED_BY_MANDATORY = "complete.followup.completed.by.mandatory"; //Please select valid Staff
+
 
     @Getter
     @AllArgsConstructor
@@ -397,4 +422,48 @@ public interface ErrorMessageConstant {
         private String description;
         private Integer params;
     }
+
+    @Getter
+    @AllArgsConstructor
+    enum CaseLookupErrorDetail implements CollecticaseErrorEnum {
+        CASE_LOOKUP_INPUT_INVALID("caseNumber", "caselookup.caseNumber.atleastoneshouldbeselected",
+                "At least one search option should be selected.", 0),
+
+        CASE_LOOKUP_REMEDY_FROM_TO_DATE("caseRemedyFromDate", "caselookup.remedy.from.date.to.date.both.mandatory",
+                "Remedy From Date and Remedy To date is Mandatory ", 0),
+
+        CASE_LOOKUP_CASE_OPEN_FROM_TO_DATE("caseOpenFromDate", "caselookup.case.from.date.to.date.both.mandatory",
+                "Case Open From Date and Case Open To date is Mandatory", 0),
+
+        CASE_LOOKUP_RPM_FROM_TO_DATE("repaymentFromDate", "caselookup.rpm.from.date.to.date.both.mandatory",
+                "Case Repayment From Date and To date is Mandatory", 0),
+
+        REMEDY_FROM_GREATER_THAN_TO_DATE("caseRemedyFromDate", "caselookup.remedy.from.date.greater.than.to.date",
+                "Remedy From Date should less than Remedy To date", 0),
+
+        CASE_OPEN_FROM_GREATER_THAN_TO_DATE("caseOpenFromDate", "caselookup.caseopen.from.date.greater.than.to.date",
+                "Case Opened From Date should less than Case Opened To date", 0),
+
+        RPM_FROM_GREATER_THAN_TO_DATE("repaymentFromDate", "caselookup.rpm.from.date.greater.than.to.date",
+                "Repayment From Date should less than Repayment To date", 0);
+        private String frontendField;
+        private String frontendErrorCode;
+        private String description;
+        private Integer params;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    enum CompleteFollowupDetail implements CollecticaseErrorEnum {
+        COMPLETE_FOLLOWUP_COMPLETED_ON_LESS_THAN_ACTIVITY_DATE("activityCompletedOn", "completefollowup.completed.on.greater.than.activity.date",
+                "Completed on date should be greater than activity creation date.", 0);
+
+        private String frontendField;
+        private String frontendErrorCode;
+        private String description;
+        private Integer params;
+    }
+
+
+
 }
