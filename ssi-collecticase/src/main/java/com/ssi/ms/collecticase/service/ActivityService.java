@@ -57,6 +57,7 @@ import com.ssi.ms.collecticase.util.CollecticaseUtilFunction;
 import com.ssi.ms.collecticase.util.CollectionUtility;
 import com.ssi.ms.collecticase.util.ValidationHelper;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
+import com.ssi.ms.collecticase.validator.PaymentPlanActivityValidator;
 import com.ssi.ms.common.database.dao.UserDAO;
 import com.ssi.ms.platform.exception.custom.NotFoundException;
 import com.ssi.ms.platform.util.DateUtil;
@@ -108,6 +109,9 @@ public class ActivityService extends CollecticaseBaseService {
 
     @Autowired
     GeneralActivityValidator generalActivityValidator;
+
+    @Autowired
+    PaymentPlanActivityValidator paymentPlanActivityValidator;
 
     public ActivityService(List<ResponseFactory<?>> factories) {
         for (ResponseFactory<?> factory : factories) {
@@ -1200,7 +1204,10 @@ public class ActivityService extends CollecticaseBaseService {
                 generalActivityDTO.getCallingUser(), generalActivityDTO.getUsingProgramName());
     }
 
-    public String createPaymentPlanActivity(PaymentPlanActivityDTO paymentPlanActivityDTO) {
+    public void createPaymentPlanActivity(PaymentPlanActivityDTO paymentPlanActivityDTO) {
+        //Functional Validation
+        ValidationHelper.validateGeneralActivity(generalActivityValidator, paymentPlanActivityDTO);
+        ValidationHelper.validatePaymentPlanActivity(paymentPlanActivityValidator, paymentPlanActivityDTO);
         boolean activityCreated = false;
         Map<String, Object> createCollecticaseActivity = null;
         CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = null;
@@ -1228,8 +1235,8 @@ public class ActivityService extends CollecticaseBaseService {
                             ACTIVITY_ID_NOT_FOUND));
             activityCreated = true;
 
-            ccaseActivitiesCmaDAO.setCmaPpRespToCd(paymentPlanActivityDTO.getPaymentPlanReponseToCd());
-            ccaseActivitiesCmaDAO.setCmaPpRespToOther(paymentPlanActivityDTO.getPaymentPlanReponseToOther());
+            ccaseActivitiesCmaDAO.setCmaPpRespToCd(paymentPlanActivityDTO.getPaymentPlanResponseToCd());
+            ccaseActivitiesCmaDAO.setCmaPpRespToOther(paymentPlanActivityDTO.getPaymentPlanResponseToOther());
             ccaseActivitiesCmaDAO.setCmaPpGuidelineAmt(paymentPlanActivityDTO.getPaymentPlanGuideLineAmount());
             ccaseActivitiesCmaDAO.setCmaPpSignedDt(paymentPlanActivityDTO.getPaymentPlanSignedDate());
             ccaseActivitiesCmaDAO.setCmaPpFaSignedDt(paymentPlanActivityDTO.getPaymentPlanFinAffidavitSignedDate());
@@ -1262,8 +1269,6 @@ public class ActivityService extends CollecticaseBaseService {
             processAutoCompleteAct(ccaseActivitiesCmaDAO);
             processClosedCasePPActivity(ccaseActivitiesCmaDAO);
         }
-        return activityCreated ? CommonErrorDetail.CREATE_ACTIVITY_FAILED.getDescription() :
-                CREATE_ACTIVITY_SUCCESSFUL;
     }
 
     private void updatePPRemedy(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {

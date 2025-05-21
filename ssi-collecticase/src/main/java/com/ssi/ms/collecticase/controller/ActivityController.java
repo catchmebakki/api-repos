@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -298,8 +297,7 @@ public class ActivityController {
 
     @PostMapping(path = "/add-paymentplan", produces = "application/json")
     public ResponseEntity<PaymentPlanActivityDTO> addGeneralActivity(
-            @Valid @RequestBody final PaymentPlanActivityDTO paymentPlanActivityDTO, HttpServletRequest request,
-            BindingResult result) {
+            @Valid @RequestBody final PaymentPlanActivityDTO paymentPlanActivityDTO, BindingResult result) {
         if (!result.hasErrors()) {
             activityService.createPaymentPlanActivity(paymentPlanActivityDTO);
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(paymentPlanActivityDTO);

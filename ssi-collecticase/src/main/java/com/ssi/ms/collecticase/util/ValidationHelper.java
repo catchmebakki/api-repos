@@ -1,7 +1,9 @@
 package com.ssi.ms.collecticase.util;
 
 import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
+import com.ssi.ms.collecticase.dto.PaymentPlanActivityDTO;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
+import com.ssi.ms.collecticase.validator.PaymentPlanActivityValidator;
 import com.ssi.ms.platform.dto.DynamicErrorDTO;
 import com.ssi.ms.platform.exception.custom.DynamicValidationException;
 
@@ -15,7 +17,16 @@ public class ValidationHelper {
         final Map<String, List<DynamicErrorDTO>> errorMap = generalActivityValidator
                 .validateGeneralActivity(generalActivityDTO);
         if (!errorMap.isEmpty()) {
-            throw new DynamicValidationException("GeneralActivity POST call Errors", errorMap);
+            throw new DynamicValidationException("Activity General Page POST call Errors", errorMap);
+        }
+    }
+
+    public static void validatePaymentPlanActivity(PaymentPlanActivityValidator paymentPlanActivityValidator,
+                                                   PaymentPlanActivityDTO paymentPlanActivityDTO) {
+        final Map<String, List<DynamicErrorDTO>> errorMap = paymentPlanActivityValidator
+                .validatePaymentPlanActivity(paymentPlanActivityDTO);
+        if (!errorMap.isEmpty()) {
+            throw new DynamicValidationException("Activity PaymentPlan POST call Errors", errorMap);
         }
     }
 }
