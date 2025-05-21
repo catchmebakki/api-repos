@@ -1,8 +1,6 @@
 package com.ssi.ms.collecticase.database.repository;
 
-import com.ssi.ms.collecticase.database.dao.CcaseActivitiesCmaDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseOrganizationCmoDAO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -11,10 +9,9 @@ import org.springframework.stereotype.Repository;
 public interface CcaseOrganizationCmoRepository extends CrudRepository<CcaseOrganizationCmoDAO, Long> {
 
     @Query("""                
-			from CcaseOrganizationCmoDAO ccaseOrganizationCmoDAO
-			            where ccaseOrganizationCmoDAO.cmoId = :organisationId         
-			""")
+            from CcaseOrganizationCmoDAO ccaseOrganizationCmoDAO
+                        where ccaseOrganizationCmoDAO.cmoId = :organisationId
+            """)
     Long getOrganisationInfoById(Long organisationId);
-
 
 }

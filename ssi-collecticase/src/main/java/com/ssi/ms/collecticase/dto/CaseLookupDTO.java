@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.With;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.Future;
 import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
@@ -24,7 +23,8 @@ import static com.ssi.ms.collecticase.constant.CollecticaseConstants.DATE_FORMAT
 @Getter
 public class CaseLookupDTO {
     private Long caseNumber;
-    @Pattern(regexp = CollecticaseUtilFunction.NUMERIC_PATTERN, message = ErrorMessageConstant.CASE_LOOKUP_CLAIMANT_SSN_INVALID)
+    @Pattern(regexp = CollecticaseUtilFunction.NUMERIC_PATTERN, message = ErrorMessageConstant
+            .CASE_LOOKUP_CLAIMANT_SSN_INVALID)
     private String claimantSSN;
     private String claimantLastName;
     private String claimantFirstName;

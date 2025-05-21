@@ -1,59 +1,127 @@
 package com.ssi.ms.collecticase.service;
 
 import com.ssi.ms.collecticase.constant.CollecticaseConstants;
-import com.ssi.ms.collecticase.database.dao.CcaseCmeIndividualCmiDAO;
-import com.ssi.ms.collecticase.database.dao.CcaseEntityCmeDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseActivitiesCmaDAO;
-import com.ssi.ms.collecticase.database.dao.EmployerEmpDAO;
-import com.ssi.ms.collecticase.database.dao.CcaseCmaNoticesCmnDAO;
-import com.ssi.ms.collecticase.database.dao.CcaseOrganizationCmoDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseCasesCmcDAO;
-import com.ssi.ms.collecticase.database.dao.StaffStfDAO;
+import com.ssi.ms.collecticase.database.dao.CcaseCmaNoticesCmnDAO;
+import com.ssi.ms.collecticase.database.dao.CcaseCmeIndividualCmiDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseCraCorrespondenceCrcDAO;
-import com.ssi.ms.collecticase.database.dao.CorrespondenceCorDAO;
+import com.ssi.ms.collecticase.database.dao.CcaseEntityCmeDAO;
+import com.ssi.ms.collecticase.database.dao.CcaseOrganizationCmoDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseRemedyActivityCraDAO;
+import com.ssi.ms.collecticase.database.dao.CorrespondenceCorDAO;
+import com.ssi.ms.collecticase.database.dao.EmployerEmpDAO;
+import com.ssi.ms.collecticase.database.dao.StaffStfDAO;
 import com.ssi.ms.collecticase.database.dao.VwCcaseCaseloadDAO;
 import com.ssi.ms.collecticase.database.mapper.PageMapper;
-import com.ssi.ms.collecticase.dto.CreateActivityDTO;
-import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
-import com.ssi.ms.collecticase.dto.CcaseActivitiesCmaDTO;
-import com.ssi.ms.collecticase.dto.CaseCollectibleDebtsDTO;
 import com.ssi.ms.collecticase.dto.ActivitiesSummaryDTO;
-import com.ssi.ms.collecticase.dto.VwCcaseHeaderEntityDTO;
-import com.ssi.ms.collecticase.dto.VwCcaseRemedyDTO;
+import com.ssi.ms.collecticase.dto.CaseCollectibleDebtsDTO;
+import com.ssi.ms.collecticase.dto.CaseLookupDTO;
+import com.ssi.ms.collecticase.dto.CaseReassignDTO;
+import com.ssi.ms.collecticase.dto.CcaseActivitiesCmaDTO;
+import com.ssi.ms.collecticase.dto.CreateActivityDTO;
+import com.ssi.ms.collecticase.dto.CreateCaseDTO;
+import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
+import com.ssi.ms.collecticase.dto.ReassignDTO;
+import com.ssi.ms.collecticase.dto.StaffDTO;
 import com.ssi.ms.collecticase.dto.VwCcaseCaseloadDTO;
 import com.ssi.ms.collecticase.dto.VwCcaseHeaderDTO;
+import com.ssi.ms.collecticase.dto.VwCcaseHeaderEntityDTO;
 import com.ssi.ms.collecticase.dto.VwCcaseOpmDTO;
-import com.ssi.ms.collecticase.dto.CreateCaseDTO;
-import com.ssi.ms.collecticase.dto.StaffDTO;
-import com.ssi.ms.collecticase.dto.CaseReassignDTO;
-import com.ssi.ms.collecticase.dto.CaseLookupDTO;
-import com.ssi.ms.collecticase.dto.ReassignDTO;
+import com.ssi.ms.collecticase.dto.VwCcaseRemedyDTO;
 import com.ssi.ms.collecticase.outputpayload.PaginationResponse;
 import com.ssi.ms.collecticase.util.CollecticaseHelper;
 import com.ssi.ms.collecticase.util.CollecticaseUtilFunction;
+import com.ssi.ms.collecticase.validator.CaseLookupValidator;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
+import com.ssi.ms.platform.exception.custom.CustomValidationException;
 import com.ssi.ms.platform.exception.custom.NotFoundException;
 import com.ssi.ms.platform.util.UtilFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.ssi.ms.collecticase.constant.CollecticaseConstants.*;
-import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.*;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_SPECIFICS_TEMP_REDUCTION;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_SPECIFICS_TEMP_SUSPENSION;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_SENT_TEMP_PP_REDUCTION_LTR;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_SENT_TEMP_PP_SUSPENSION_LTR;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.BANKRUPTCY_SPECIALIST;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.CLAIMANT_REPRESENTS_FOR;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.CME_TYPE_IND;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.CME_TYPE_ORG;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COLLECTION_LOF_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COLLECTION_SPECIALIST;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COLLECTION_SUPERVISOR;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COMM_METHOD_NOT_APPLICABLE;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_RECEIPT_CLAIMANT;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_RECEIPT_EMPLOYER;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_SOURCE_IFK_CD_FOR_CMC;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_STATUS_NOT_PROCESSED;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.EMPLOYER_REPRESENTS_FOR;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ENTITY_CONTACT_TYPE_ATTY;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ENTITY_CONTACT_TYPE_EMP;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ENTITY_CONTACT_TYPE_REP_I;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ENTITY_CONTACT_TYPE_REP_O;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.INDICATOR;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NHUIS_RETURN_SUCCESS;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_CHANGED_WG;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_COURT_ORDERED_WG;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_GARNISHMENT;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_SUSPENDED_WG;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ONLINE_COE_TXT;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_CRC_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_EMP_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_CLM_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_CMT_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COE_STRING;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COR_COE_IND;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COR_DEC_ID_IFK;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COR_RECEIP_CD;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COR_RECEIP_IFK;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COR_STATUS_CD;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COR_TS;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_EMP_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_FORCED_IND;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_RPT_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_SQL_STRING;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_COR_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_RETURN_CD;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_RETURN_MSG;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.REMEDY_PAYMENT_PLAN;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.REMEDY_WAGE_GARNISHMENT;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TEMP_REDUCTION_LIEN;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TEMP_SUSPENSION_LIEN;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TILE_SYMBOL;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TIME_FORMAT_INPUT;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.USER_INTERFACE;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.USR_STATUS_CD;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.ACTIVITY_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CASE_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CASE_REMEDY_ACTIVITY_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMI_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMN_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.COR_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CRC_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.EMP_ID_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -61,6 +129,9 @@ public class CaseService extends CollecticaseBaseService {
 
     @Autowired
     private GeneralActivityValidator generalActivityValidator;
+
+    @Autowired
+    private CaseLookupValidator caseLookupValidator;
 
     public List<VwCcaseHeaderDTO> getCaseHeaderInfoByCaseId(Long caseId) {
         return vwCcaseCaseloadRepository.getCaseHeaderInfoByCaseId(caseId).stream().map(dao ->
@@ -88,7 +159,7 @@ public class CaseService extends CollecticaseBaseService {
     }
 
     public PaginationResponse<VwCcaseCaseloadDTO> getCaseLoadByStaffId(Long staffId,
-                                                   int page, int size, String sortBy, boolean ascending) {
+                                                                       int page, int size, String sortBy, boolean ascending) {
         Map<String, Object> pageContentMap = new HashMap<>();
         // Create a Sort object based on the provided sort field and direction (ascending or descending)
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -99,15 +170,12 @@ public class CaseService extends CollecticaseBaseService {
                 .getCaseLoadByStaffId(staffId, pageable);
         List<VwCcaseCaseloadDTO> vwCcaseCaseloadDTOList = pageVwCcaseCaseloadDTO.stream().collect(Collectors.toList());
 
-        List<VwCcaseCaseloadDTO> vwCcaseCaseloadDTOList1 = customLookupRepository.caseLoadByMetrics(staffId,
-                true, true, true,false );
-
         // PageMapper to send Pagination attributes and content in PaginationResponse
         return PageMapper.toPaginationResponse(pageVwCcaseCaseloadDTO, vwCcaseCaseloadDTOList);
     }
 
     public PaginationResponse<ActivitiesSummaryDTO> getActivitiesDataByCaseId(Long caseId,
-                                                    int page, int size, String sortBy, boolean ascending) {
+                                                                              int page, int size, String sortBy, boolean ascending) {
 
         // Create a Sort object based on the provided sort field and direction (ascending or descending)
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -125,7 +193,7 @@ public class CaseService extends CollecticaseBaseService {
     }
 
     public Map<String, Object> createCollecticaseCase(CreateCaseDTO createCaseDTO) {
-        return CollecticaseHelper.createCollecticaseCase(createCaseDTO,ccaseCasesCmcRepository);
+        return CollecticaseHelper.createCollecticaseCase(createCaseDTO, ccaseCasesCmcRepository);
     }
 
     public Map<String, Object> createCollecticaseActivity(CreateActivityDTO createActivityDTO) {
@@ -241,13 +309,13 @@ public class CaseService extends CollecticaseBaseService {
             if (INDICATOR.Y.name().equals(activitiesCma.getCmaUpdContPrimary())) {
                 List<CcaseCmeIndividualCmiDAO> ccaseCmeIndividualCmiList = ccaseCmeIndividualCmiRepository
                         .getCaseEntityIndividualByCaseEntityId
-                        (entityCme.getCmeId(), INDICATOR.Y.name());
+                                (entityCme.getCmeId(), INDICATOR.Y.name());
                 for (CcaseCmeIndividualCmiDAO cmi : ccaseCmeIndividualCmiList) {
                     CcaseCmeIndividualCmiDAO ind = new CcaseCmeIndividualCmiDAO();
                     if (!UtilFunction.compareLongObject.test(cmi.getCmiId(), activitiesCma.getFkCmiIdUc())) {
                         ind = ccaseCmeIndividualCmiRepository.findById(activitiesCma.getFkCmiIdUc())
-                                .orElseThrow(() ->
-                                        new NotFoundException("Invalid CMI ID:" + cmi.getCmiId(), CMI_ID_NOT_FOUND));
+                                .orElseThrow(() -> new NotFoundException("Invalid CMI ID:" + cmi.getCmiId(),
+                                        CMI_ID_NOT_FOUND));
                         ind.setCmiIsPrimary(StringUtils.EMPTY);
                         ind.setCmiCreatedBy(activitiesCma.getCmaCreatedBy());
                         ind.setCmiCreatedUsing(activitiesCma.getCmaCreatedUsing());
@@ -262,13 +330,13 @@ public class CaseService extends CollecticaseBaseService {
             if (INDICATOR.Y.name().equals(activitiesCma.getCmaUpdContMailingRcpt())) {
                 List<CcaseCmeIndividualCmiDAO> ccaseCmeIndividualCmiList = ccaseCmeIndividualCmiRepository
                         .getCaseEntityIndividualByCaseEntityId
-                        (entityCme.getCmeId(), INDICATOR.Y.name());
+                                (entityCme.getCmeId(), INDICATOR.Y.name());
                 for (CcaseCmeIndividualCmiDAO cmi : ccaseCmeIndividualCmiList) {
                     CcaseCmeIndividualCmiDAO ind = new CcaseCmeIndividualCmiDAO();
                     if (!UtilFunction.compareLongObject.test(cmi.getCmiId(), activitiesCma.getFkCmiIdUc())) {
                         ind = ccaseCmeIndividualCmiRepository.findById(activitiesCma.getFkCmiIdUc())
-                                .orElseThrow(() ->
-                                        new NotFoundException("Invalid CMI ID:" + cmi.getCmiId(), CMI_ID_NOT_FOUND));
+                                .orElseThrow(() -> new NotFoundException("Invalid CMI ID:" + cmi.getCmiId(),
+                                        CMI_ID_NOT_FOUND));
                         ind.setCmiIsMailingRcpt(StringUtils.EMPTY);
                         ind.setCmiCreatedBy(activitiesCma.getCmaCreatedBy());
                         ind.setCmiCreatedUsing(activitiesCma.getCmaCreatedUsing());
@@ -745,6 +813,11 @@ public class CaseService extends CollecticaseBaseService {
     public Object searchCaseLookup(CaseLookupDTO caseLookupDTO) {
         String poutSqlString;
         List<VwCcaseCaseloadDAO> vwCcaseCaseloadDAOList;
+        final HashMap<String, List<String>> errorMap = caseLookupValidator.validateCaseLookupDTO(caseLookupDTO);
+        if (!errorMap.isEmpty()) {
+            throw new CustomValidationException("Case Lookup Validation Failed.", errorMap);
+        }
+
         Map<String, Object> caseLookup = CollecticaseHelper.getCaseLookupData(caseLookupDTO, ccaseCasesCmcRepository);
         if (caseLookup != null) {
             poutSqlString = (String) caseLookup.get(POUT_SQL_STRING);
@@ -774,4 +847,5 @@ public class CaseService extends CollecticaseBaseService {
     public Long validateSSN(@Valid String ssn) {
         return claimantCmtRepository.getClaimantByClaimantSSN(ssn);
     }
+
 }
