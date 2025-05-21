@@ -9,8 +9,8 @@ import java.util.List;
 public interface VwEmpInfoRepository extends CrudRepository<VwEmpInfoDAO, Long> {
 
     @Query("""          
-			from VwEmpInfoDAO vwEmpInfoDAO
-			            where vwEmpInfoDAO.empId = :empId
-			""")
+            from VwEmpInfoDAO vwEmpInfoDAO
+                        where vwEmpInfoDAO.empId = :empId
+            """)
     List<VwEmpInfoDAO> getEmployerInfo(Long empId);
 }

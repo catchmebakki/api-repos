@@ -18,13 +18,14 @@ import java.util.List;
 @Slf4j
 public class CompleteFollowupValidator {
 
-    public HashMap<String, List<String>> validateCaseFollowupDTO(CompleteFollowupActivityDTO completeFollowupActivityDTO){
+    public HashMap<String, List<String>> validateCaseFollowupDTO(CompleteFollowupActivityDTO completeFollowupActivityDTO) {
         final HashMap<String, List<String>> errorMap = new HashMap<>();
         final List<CollecticaseErrorEnum> errorEnums = new ArrayList<>();
 
-        if(DateUtil.stringToDate.apply(completeFollowupActivityDTO.getActivityCompletedOn()).before(
-                DateUtil.stringToDate.apply(completeFollowupActivityDTO.getActivityCreatedDate())) ) {
-            errorEnums.add(ErrorMessageConstant.CompleteFollowupDetail.COMPLETE_FOLLOWUP_COMPLETED_ON_LESS_THAN_ACTIVITY_DATE);
+        if (DateUtil.stringToDate.apply(completeFollowupActivityDTO.getActivityCompletedOn()).before(
+                DateUtil.stringToDate.apply(completeFollowupActivityDTO.getActivityCreatedDate()))) {
+            errorEnums.add(ErrorMessageConstant.CompleteFollowupDetail
+                    .COMPLETE_FOLLOWUP_COMPLETED_ON_LESS_THAN_ACTIVITY_DATE);
         }
 
         CollecticaseUtilFunction.updateErrorMap(errorMap, errorEnums);
