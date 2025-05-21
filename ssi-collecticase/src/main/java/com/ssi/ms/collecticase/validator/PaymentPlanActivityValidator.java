@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_INITIATE_FINANCIAL_AFFIDAVIT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_INITIATE_GUIDELINE_BASED_PP;
@@ -53,9 +54,9 @@ public class PaymentPlanActivityValidator {
     @Autowired
     private CcaseCraCorrespondenceCrcRepository ccaseCraCorrespondenceCrcRepository;
 
-    public HashMap<String, List<DynamicErrorDTO>> validatePaymentPlanActivity(PaymentPlanActivityDTO
-                                                                                      paymentPlanActivityDTO) {
-        final HashMap<String, List<DynamicErrorDTO>> errorMap = new HashMap<>();
+    public Map<String, List<DynamicErrorDTO>> validatePaymentPlanActivity(PaymentPlanActivityDTO
+                                                                                  paymentPlanActivityDTO) {
+        final Map<String, List<DynamicErrorDTO>> errorMap = new HashMap<>();
         final List<CollecticaseErrorEnum> errorEnums = new ArrayList<>();
         final List<String> errorParams = new ArrayList<>();
 

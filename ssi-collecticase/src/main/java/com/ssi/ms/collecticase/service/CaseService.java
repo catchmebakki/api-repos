@@ -52,7 +52,6 @@ import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -794,7 +793,7 @@ public class CaseService extends CollecticaseBaseService {
     }
 
     public List<CaseReassignDTO> getCaseReassignInfoByCaseId(@Valid Long caseId) {
-        return vwCcaseCaseloadRepository.getCaseReassignInfoByCaseIds(Collections.singletonList(caseId));
+        return vwCcaseCaseloadRepository.getCaseReassignInfoByCaseId(caseId);
     }
 
     public Map<String, String> getCLOverPaymentType() {

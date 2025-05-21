@@ -17,15 +17,15 @@ import com.ssi.ms.platform.util.UtilFunction;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Objects;
-import java.util.Date;
 import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class CollecticaseHelper {
 
@@ -48,14 +48,44 @@ public class CollecticaseHelper {
 
     public static Map<String, String> getCLOverPaymentValue() {
         Map<String, String> overPaymentList = new LinkedHashMap<>();
-        overPaymentList.put(CollecticaseConstants.ZERO_TO_NINE_NINE_NINE,
-                CollecticaseConstants.ZERO_TO_NINE_NINE_NINE_DOLLAR);
-        overPaymentList.put(CollecticaseConstants.THOUSAND_TO_TWO_FOUR_NINE_NINE,
-                CollecticaseConstants.THOUSAND_TO_TWO_FOUR_NINE_NINE_DOLLAR);
-        overPaymentList.put(CollecticaseConstants.TWO_FIVE_ZERO_ZERO_TO_FOUR_NINE_NINE_NINE,
-                CollecticaseConstants.TWO_FIVE_ZERO_ZERO_TO_FOUR_NINE_NINE_NINE_DOLLAR);
-        overPaymentList.put(CollecticaseConstants.FIVE_THOUSAND_TO_ABOVE,
-                CollecticaseConstants.FIVE_THOUSAND_TO_ABOVE_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.ZERO_TO_HUNDERED,
+                CollecticaseConstants.ZERO_TO_HUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.HUNDERED_TO_TWOHUNDERED,
+                CollecticaseConstants.HUNDERED_TO_TWOHUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.TWOHUNDERED_TO_THREEHUNDERED,
+                CollecticaseConstants.TWOHUNDERED_TO_THREEHUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.THREEHUNDERED_TO_FOURHUNDERED,
+                CollecticaseConstants.THREEHUNDERED_TO_FOURHUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.FOURHUNDERED_TO_FIVEHUNDERED,
+                CollecticaseConstants.FOURHUNDERED_TO_FIVEHUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.FIVEHUNDERED_TO_SIXHUNDERED,
+                CollecticaseConstants.FIVEHUNDERED_TO_SIXHUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.SIXHUNDERED_TO_SEVENHUNDERED,
+                CollecticaseConstants.SIXHUNDERED_TO_SEVENHUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.SEVENHUNDERED_TO_EIGHTHUNDERED,
+                CollecticaseConstants.SEVENHUNDERED_TO_EIGHTHUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.EIGHTHUNDERED_TO_NINEHUNDERED,
+                CollecticaseConstants.EIGHTHUNDERED_TO_NINEHUNDERED_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.NINEHUNDERED_TO_ONETHOUSAND,
+                CollecticaseConstants.NINEHUNDERED_TO_ONETHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.THOUSAND_TO_TWOTHOUSAND,
+                CollecticaseConstants.THOUSAND_TO_TWOTHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.TWOTHOUSAND_TO_THREETHOUSAND,
+                CollecticaseConstants.TWOTHOUSAND_TO_THREETHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.THIRDTHOUSAND_TO_FOURTHOUSAND,
+                CollecticaseConstants.THIRDTHOUSAND_TO_FOURTHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.FOURTHOUSAND_TO_FIVETHOUSAND,
+                CollecticaseConstants.FOURTHOUSAND_TO_FIVETHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.SIXTHOUSAND_TO_SEVENTHOUSAND,
+                CollecticaseConstants.SIXTHOUSAND_TO_SEVENTHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.SEVENTHOUSAND_TO_EIGHTTHOUSAND,
+                CollecticaseConstants.SEVENTHOUSAND_TO_EIGHTTHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.EIGHTTHOUSAND_TO_NINETHOUSAND,
+                CollecticaseConstants.EIGHTTHOUSAND_TO_NINETHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.NINETHOUSAND_TO_TENTHOUSAND,
+                CollecticaseConstants.NINETHOUSAND_TO_TENTHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.ABOVE_TEN_THOUSAND,
+                CollecticaseConstants.ABOVE_TEN_THOUSAND_DOLLAR);
         return overPaymentList;
     }
 
@@ -103,7 +133,7 @@ public class CollecticaseHelper {
     }
 
     public static void populateEnableDisableEffDate(Long activityTypeCd,
-                                            ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse) {
+                                                    ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse) {
 
         List<Long> changeWGSuspendWageList = Arrays.asList(
                 CollecticaseConstants.ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
@@ -155,7 +185,7 @@ public class CollecticaseHelper {
     }
 
     public static void populateEnableDisableCourtOrderDt(Long activityTypeCd,
-                                         ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse) {
+                                                         ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse) {
 
         activityWageGarnishmentPageResponse.setDisableCourtOrderedDate(true);
 
@@ -174,7 +204,7 @@ public class CollecticaseHelper {
     }
 
     public static void populateEnableDisableNonComp(Long activityTypeCd,
-                                          ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse) {
+                                                    ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse) {
 
         if (!UtilFunction.compareLongObject.test(activityTypeCd,
                 CollecticaseConstants.ACTIVITY_TYPE_EMPLOYER_NON_COMPLIANCE)) {
@@ -183,13 +213,14 @@ public class CollecticaseHelper {
     }
 
     public static void populateEnableDisableWGFreq(ActivityWageGarnishmentPageResponse
-                      activityWageGarnishmentPageResponse, CcaseWageGarnishmentCwgDAO wageInfoForCaseEmployerRemedy) {
+                                                           activityWageGarnishmentPageResponse,
+                                                   CcaseWageGarnishmentCwgDAO wageInfoForCaseEmployerRemedy) {
         activityWageGarnishmentPageResponse.setWageFrequency(wageInfoForCaseEmployerRemedy
                 .getCwgFreqCd());
     }
 
     public static void populateEnableDisableDoNotGarnish(Long activityTypeCd,
-                                              ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse,
+                                                         ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse,
                                                          CcaseWageGarnishmentCwgDAO wageInfoForCaseEmployerRemedy) {
 
         activityWageGarnishmentPageResponse.setDoNotGarnishInd(wageInfoForCaseEmployerRemedy.getCwgDoNotGarnish());
@@ -215,7 +246,7 @@ public class CollecticaseHelper {
     }
 
     public static void populateEnableDisableWGAmount(Long activityTypeCd,
-                                              ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse,
+                                                     ActivityWageGarnishmentPageResponse activityWageGarnishmentPageResponse,
                                                      CcaseWageGarnishmentCwgDAO wageInfoForCaseEmployerRemedy) {
 
         activityWageGarnishmentPageResponse.setWageAmount(wageInfoForCaseEmployerRemedy
@@ -323,7 +354,7 @@ public class CollecticaseHelper {
         pageInputs.put(CollecticaseConstants.PAGE_NO_NAME, Objects.requireNonNullElse(pageNo, 0));
         pageInputs.put(CollecticaseConstants.PAGE_SIZE_NAME, Objects.requireNonNullElse(pageSize, 10));
         pageInputs.put(CollecticaseConstants.PAGE_ASC_ENABLE_NAME,
-                                            Objects.requireNonNullElse(pageAscendingEnable, Boolean.TRUE));
+                Objects.requireNonNullElse(pageAscendingEnable, Boolean.TRUE));
 
         return pageInputs;
     }

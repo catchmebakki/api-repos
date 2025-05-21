@@ -58,6 +58,7 @@ import com.ssi.ms.collecticase.util.CollectionUtility;
 import com.ssi.ms.collecticase.util.ValidationHelper;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
 import com.ssi.ms.collecticase.validator.PaymentPlanActivityValidator;
+import com.ssi.ms.collecticase.validator.WageGarnishmentValidator;
 import com.ssi.ms.common.database.dao.UserDAO;
 import com.ssi.ms.platform.exception.custom.NotFoundException;
 import com.ssi.ms.platform.util.DateUtil;
@@ -112,6 +113,9 @@ public class ActivityService extends CollecticaseBaseService {
 
     @Autowired
     PaymentPlanActivityValidator paymentPlanActivityValidator;
+
+    @Autowired
+    WageGarnishmentValidator wageGarnishmentValidator;
 
     public ActivityService(List<ResponseFactory<?>> factories) {
         for (ResponseFactory<?> factory : factories) {
@@ -1208,7 +1212,7 @@ public class ActivityService extends CollecticaseBaseService {
         //Functional Validation
         ValidationHelper.validateGeneralActivity(generalActivityValidator, paymentPlanActivityDTO);
         ValidationHelper.validatePaymentPlanActivity(paymentPlanActivityValidator, paymentPlanActivityDTO);
-        
+
         boolean activityCreated = false;
         Map<String, Object> createCollecticaseActivity = null;
         CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = null;
@@ -1414,7 +1418,11 @@ public class ActivityService extends CollecticaseBaseService {
         createActivity(createActivityDTO);
     }
 
-    public String createWageGarnishmentActivity(WageGarnishmentActivityDTO wageGarnishmentActivityDTO) {
+    public void createWageGarnishmentActivity(WageGarnishmentActivityDTO wageGarnishmentActivityDTO) {
+        //Functional Validation
+        ValidationHelper.validateGeneralActivity(generalActivityValidator, wageGarnishmentActivityDTO);
+        ValidationHelper.validateWageGarnishActivity(wageGarnishmentValidator, wageGarnishmentActivityDTO);
+
         boolean activityCreated = false;
         Map<String, Object> createCollecticaseActivity = null;
         CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = null;
@@ -1481,7 +1489,6 @@ public class ActivityService extends CollecticaseBaseService {
             processCorrespondence(sendNoticeList, resendNoticeList, manualNoticeList, ccaseActivitiesCmaDAO, cwgId);
             processAutoCompleteAct(ccaseActivitiesCmaDAO);
         }
-        return activityCreated ? CommonErrorDetail.CREATE_ACTIVITY_FAILED.getDescription() : CREATE_ACTIVITY_SUCCESSFUL;
     }
 
     private void updateWGRemedy(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO,
