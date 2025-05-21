@@ -63,7 +63,8 @@ public interface CcaseActivitiesCmaRepository extends CrudRepository<CcaseActivi
 
     @Transactional
     @Procedure(name = "createActivity")
-    Map<String, Object> createCollecticaseActivity(@Param(CollecticaseConstants.PIN_CMC_ID) Long caseId,
+    Map<String, Object> createCollecticaseActivity
+                          (@Param(CollecticaseConstants.PIN_CMC_ID) Long caseId,
                            @Param(CollecticaseConstants.PIN_EMP_ID) Long employerId,
                            @Param(CollecticaseConstants.PIN_ACTIVITY_TYPE_CD) Long activityTypeCd,
                            @Param(CollecticaseConstants.PIN_REMEDY_TYPE_CD) Long remedyTypeCd,
@@ -91,4 +92,13 @@ public interface CcaseActivitiesCmaRepository extends CrudRepository<CcaseActivi
             where ccaseActivitiesCma.cmaId = :activityId
             """)
     FollowupActivityDTO getActivityInfoForFollowup(Long activityId);
+
+    @Query(""" 
+            SELECT new com.ssi.ms.collecticase.dto.FollowupActivityDTO(
+            fnInvGetAlvDescription(ccaseActivitiesCma.cmaActivityTypeCd) as activityName,
+            TO_CHAR(cmaActivityDt, 'MM/DD/YYYY') as activityCreatedDate)
+            from CcaseActivitiesCmaDAO ccaseActivitiesCma
+            where ccaseActivitiesCma.cmaId = :activityId
+            """)
+    FollowupActivityDTO getAppendsNotesInfo(Long activityId);
 }
