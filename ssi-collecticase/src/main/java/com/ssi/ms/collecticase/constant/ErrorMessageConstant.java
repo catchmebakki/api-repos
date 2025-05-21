@@ -139,7 +139,7 @@ public interface ErrorMessageConstant {
                 "Payment Plan Guide Line Amount should be 4 digit with 2 decimal.", 0),
 
         RESPONSE_TO_REQUIRED("paymentPlanReponseToCd",
-                "paymentPlanReponseToCd.required",
+                "paymentPlanResponseToCd.required",
                 "Payment Plan Response To is mandatory.", 0),
 
         RESPONSE_TO_OTHER_REQUIRED("paymentPlanReponseToOther",
@@ -189,7 +189,7 @@ public interface ErrorMessageConstant {
                 "Payment Plan Payment category when payment plan amount is entered.", 0),
 
         PAYMENT_PLAN_PAYMENT_AMOUNT_NOT_APPLICABLE("paymentPlanPaymentAmount",
-                "paymentPlanPaymentAmount.notapplicable",
+                "paymentPlanPaymentCategory.invalid",
                 "Payment Plan Payment category is not applicable when payment plan amount is not entered.",
                 0),
 
@@ -219,19 +219,19 @@ public interface ErrorMessageConstant {
                 "Payment Plan payment amount not same as nhuis payment plan amount .", 0),
 
         PAYMENT_PLAN_COR_PAYMENT_CATEGORY_NA("activityCorrespondence",
-                "activityCorrespondence.notapplicable",
+                "activityCorrespondence.pmtcategory.notapplicable",
                 "'{0}' Notices cannot be sent when the Payment Category is '{1}'", 2),
 
         PAYMENT_PLAN_COR_PAYMENT_CATEGORY_NONE("activityCorrespondence",
-                "activityCorrespondence.notapplicable",
+                "activityCorrespondence.pmtcategory.none",
                 "'{0}' Notices cannot be sent when the Payment Category is none", 1),
 
         PAYMENT_PLAN_COR_CURRENT_FILING_NONE("activityCorrespondence",
-                "activityCorrespondence.notapplicable",
+                "activityCorrespondence.current.filing.none",
                 "'{0}' Notices cannot be sent when the Claimant is not currently Filing", 1),
 
         PAYMENT_PLAN_COR_CURRENT_FILING_NA("activityCorrespondence",
-                "activityCorrespondence.notapplicable",
+                "activityCorrespondence.current.filing.notapplicable",
                 "'{0}' Notices cannot be sent when the Claimant is currently Filing", 1);
 
         private final String frontendField;

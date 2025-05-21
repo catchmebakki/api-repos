@@ -228,7 +228,7 @@ public class PaymentPlanActivityValidator {
                 if (paymentPlanActivityDTO.getPaymentPlanPaymentAmount().compareTo(BigDecimal.ZERO) == 0) {
                     errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.PAYMENT_AMOUNT_ZERO);
                 }
-                if (CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.FOUR_DIGIT_TWO_DEICMAL_PATTERN,
+                if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.FOUR_DIGIT_TWO_DEICMAL_PATTERN,
                         String.valueOf(paymentPlanActivityDTO.getPaymentPlanPaymentAmount()))) {
                     errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.PAYMENT_AMOUNT_INVALID);
                 }
@@ -297,7 +297,7 @@ public class PaymentPlanActivityValidator {
                 if (paymentPlanActivityDTO.getPaymentPlanGuideLineAmount().compareTo(BigDecimal.ZERO) == 0) {
                     errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.GUIDE_LINE_AMOUNT_ZERO);
                 }
-                if (CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.FOUR_DIGIT_TWO_DEICMAL_PATTERN,
+                if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.FOUR_DIGIT_TWO_DEICMAL_PATTERN,
                         String.valueOf(paymentPlanActivityDTO.getPaymentPlanGuideLineAmount()))) {
                     errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.GUIDE_LINE_AMOUNT_INVALID);
                 }

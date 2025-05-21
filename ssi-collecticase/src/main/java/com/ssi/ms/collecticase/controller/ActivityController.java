@@ -296,7 +296,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/add-paymentplan", produces = "application/json")
-    public ResponseEntity<PaymentPlanActivityDTO> addGeneralActivity(
+    public ResponseEntity<PaymentPlanActivityDTO> addPaymentPlanActivity(
             @Valid @RequestBody final PaymentPlanActivityDTO paymentPlanActivityDTO, BindingResult result) {
         if (!result.hasErrors()) {
             activityService.createPaymentPlanActivity(paymentPlanActivityDTO);
@@ -307,7 +307,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/add-wagegarnish", produces = "application/json")
-    public ResponseEntity<GeneralActivityDTO> addGeneralActivity(
+    public ResponseEntity<GeneralActivityDTO> addWageGarnishActivity(
             @Valid @RequestBody final WageGarnishmentActivityDTO wageGarnishmentActivityDTO, BindingResult result) {
         if (!result.hasErrors()) {
             activityService.createWageGarnishmentActivity(wageGarnishmentActivityDTO);

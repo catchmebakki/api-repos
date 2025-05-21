@@ -1208,6 +1208,7 @@ public class ActivityService extends CollecticaseBaseService {
         //Functional Validation
         ValidationHelper.validateGeneralActivity(generalActivityValidator, paymentPlanActivityDTO);
         ValidationHelper.validatePaymentPlanActivity(paymentPlanActivityValidator, paymentPlanActivityDTO);
+        
         boolean activityCreated = false;
         Map<String, Object> createCollecticaseActivity = null;
         CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = null;
