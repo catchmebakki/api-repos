@@ -1,13 +1,14 @@
 package com.ssi.ms.collecticase.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.With;
 import org.springframework.validation.annotation.Validated;
+
 import javax.validation.constraints.NotNull;
 
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.STAFF_ID_MANDATORY;
-
-import java.math.BigDecimal;
-import java.util.Date;
 
 @With
 @Builder
