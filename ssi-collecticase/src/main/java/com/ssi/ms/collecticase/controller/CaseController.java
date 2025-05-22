@@ -102,6 +102,18 @@ public class CaseController {
                         (Boolean) pageInputs.get("pageAscendingEnable")));
     }
 
+    @PostMapping(path = "/caseload-metric", produces = "application/json")
+    public ResponseEntity<PaginationResponse<VwCcaseCaseloadDTO>> getCaseLoadByMetric(@ModelAttribute CcaseInputPayload
+                                                                                              ccaseInputPayload) {
+        Long staffId = ccaseInputPayload.getStaffId();
+        String metricValue = ccaseInputPayload.getMetricValue();
+        Map<String, Object> pageInputs = CollecticaseHelper.getPageInputs(ccaseInputPayload);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
+                caseService.getCaseLoadByMetric(staffId, (Integer) pageInputs.get("pageNo"),
+                        (Integer) pageInputs.get("pageSize"), "caseNo",
+                        (Boolean) pageInputs.get("pageAscendingEnable"), metricValue));
+    }
+
     @PostMapping(path = "/case-activities", produces = "application/json")
     public ResponseEntity<PaginationResponse<ActivitiesSummaryDTO>>
     getActivitiesDataByCaseId(@ModelAttribute CcaseInputPayload ccaseInputPayload) {

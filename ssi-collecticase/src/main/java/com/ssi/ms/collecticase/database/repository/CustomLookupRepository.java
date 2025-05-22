@@ -22,5 +22,5 @@ public interface CustomLookupRepository {
     List<GTTForOrgLookupDAO> searchOrgLookup(String organisationName, String uiAcctNbr, String fein);
 
     List<VwCcaseCaseloadDTO> caseLoadByMetrics(Long staffId, Boolean newCase, Boolean highMediumPriority,
-                                                                                Boolean overdue, Boolean bankruptcy);
+                                               Boolean overdue, Boolean bankruptcy);
 }

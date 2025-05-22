@@ -148,11 +148,10 @@ public class CustomLookupRepositoryImpl implements CustomLookupRepository {
             sb.append(" and vwCcaseCaseload.newCase = 'Y' ");
         if (highMediumPriority)
             sb.append(" and vwCcaseCaseload.casePriority in (3926, 3929) ");
-        if (overdue) sb.append(" and vwCcaseCaseload.overdue = 'Y' ");
+        if (overdue) sb.append(" and vwCcaseCaseload.overDue = 'Y' ");
         if (bankruptcy)
             sb.append(" and vwCcaseCaseload.bankrupt = 'Y' ");
 
-        List<VwCcaseCaseloadDTO> vwCcaseCaseloadDTOList = entityManager.createQuery(sb.toString()).getResultList();
-        return vwCcaseCaseloadDTOList;
+        return (List<VwCcaseCaseloadDTO>) entityManager.createQuery(sb.toString()).getResultList();
     }
 }

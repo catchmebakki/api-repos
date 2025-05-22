@@ -32,6 +32,7 @@ import com.ssi.ms.collecticase.dto.VwCcaseRemedyDTO;
 import com.ssi.ms.collecticase.outputpayload.PaginationResponse;
 import com.ssi.ms.collecticase.util.CollecticaseHelper;
 import com.ssi.ms.collecticase.util.CollecticaseUtilFunction;
+import com.ssi.ms.collecticase.util.PaginationUtil;
 import com.ssi.ms.collecticase.validator.CaseLookupValidator;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
 import com.ssi.ms.platform.exception.custom.CustomValidationException;
@@ -847,4 +848,32 @@ public class CaseService extends CollecticaseBaseService {
         return claimantCmtRepository.getClaimantByClaimantSSN(ssn);
     }
 
+    public PaginationResponse<VwCcaseCaseloadDTO> getCaseLoadByMetric(Long staffId, Integer page,
+                                                                      Integer size, String sortBy, Boolean ascending,
+                                                                      String metricValue) {
+
+        boolean newCase = false;
+        boolean highMediumPriority = false;
+        boolean overdue = false;
+        boolean bankruptcy = false;
+        // Create a Sort object based on the provided sort field and direction (ascending or descending)
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        // Create the Pageable object with pagination and sorting
+        Pageable pageable = PageRequest.of(page, size, sort);
+        if (metricValue != null) {
+            switch (metricValue) {
+                case "pout_not_started" -> newCase = true;
+                case "pout_bankruptcy_cases" -> bankruptcy = true;
+                case "pout_overdue" -> overdue = true;
+                case "pout_high_priority" -> highMediumPriority = true;
+            }
+        }
+
+        List<VwCcaseCaseloadDTO> vwCcaseCaseloadDTOList = customLookupRepository.caseLoadByMetrics(staffId, newCase,
+                highMediumPriority, overdue, bankruptcy);
+        Page<VwCcaseCaseloadDTO> pageVwCcaseCaseloadDTO = PaginationUtil.listToPage(vwCcaseCaseloadDTOList, pageable);
+        // PageMapper to send Pagination attributes and content in PaginationResponse
+        return PageMapper.toPaginationResponse(pageVwCcaseCaseloadDTO, vwCcaseCaseloadDTOList);
+
+    }
 }
