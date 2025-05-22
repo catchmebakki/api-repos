@@ -48,7 +48,7 @@ public class CaseCorrespondenceController {
         }
     }
 
-    @GetMapping(path = "/getcasecorrespondencebycaseid/{caseId}", produces = "application/json")
+    @GetMapping(path = "/case-correspondence/{caseId}", produces = "application/json")
     public ResponseEntity<List<CorrespondenceDTO>> getCaseCorrespondenceByCaseId(@Valid @PathVariable("caseId")
                                                                                  Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
