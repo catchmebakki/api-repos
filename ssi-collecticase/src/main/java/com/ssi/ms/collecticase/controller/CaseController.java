@@ -136,8 +136,8 @@ public class CaseController {
     }
 
     @GetMapping(path = "/get-activity/{caseId}/{remedyTypeCd}", produces = "application/json")
-    public ResponseEntity<List<AllowValAlvResDTO>> getCaseActivityByRemedyType(@Valid @PathVariable("caseId")
-                                                                               Long caseId, @Valid @PathVariable("remedyTypeCd") Long remedyTypeCd) {
+    public ResponseEntity<List<AllowValAlvResDTO>> getCaseActivityByRemedyType
+            (@Valid @PathVariable("caseId") Long caseId, @Valid @PathVariable("remedyTypeCd") Long remedyTypeCd) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 alvService.getAlvsByAlvIds(caseService.getCaseActivityByRemedyType
                         (caseService.getCaseRemedyActivityByCaseId(caseId, CollecticaseConstants.INDICATOR.Y.name()),
