@@ -11,17 +11,19 @@ import com.ssi.ms.collecticase.database.dao.CcaseOrganizationCmoDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseRemedyActivityCraDAO;
 import com.ssi.ms.collecticase.database.dao.CorrespondenceCorDAO;
 import com.ssi.ms.collecticase.database.dao.EmployerEmpDAO;
+import com.ssi.ms.collecticase.database.dao.GttForCaselookupDAO;
 import com.ssi.ms.collecticase.database.dao.StaffStfDAO;
-import com.ssi.ms.collecticase.database.dao.VwCcaseCaseloadDAO;
 import com.ssi.ms.collecticase.database.mapper.PageMapper;
 import com.ssi.ms.collecticase.dto.ActivitiesSummaryDTO;
 import com.ssi.ms.collecticase.dto.CaseCollectibleDebtsDTO;
 import com.ssi.ms.collecticase.dto.CaseLookupDTO;
+import com.ssi.ms.collecticase.dto.CaseNotesDTO;
 import com.ssi.ms.collecticase.dto.CaseReassignDTO;
 import com.ssi.ms.collecticase.dto.CcaseActivitiesCmaDTO;
 import com.ssi.ms.collecticase.dto.CreateActivityDTO;
 import com.ssi.ms.collecticase.dto.CreateCaseDTO;
 import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
+import com.ssi.ms.collecticase.dto.GttForCaselookupDTO;
 import com.ssi.ms.collecticase.dto.ReassignDTO;
 import com.ssi.ms.collecticase.dto.StaffDTO;
 import com.ssi.ms.collecticase.dto.VwCcaseCaseloadDTO;
@@ -32,6 +34,7 @@ import com.ssi.ms.collecticase.dto.VwCcaseRemedyDTO;
 import com.ssi.ms.collecticase.outputpayload.PaginationResponse;
 import com.ssi.ms.collecticase.util.CollecticaseHelper;
 import com.ssi.ms.collecticase.util.CollecticaseUtilFunction;
+import com.ssi.ms.collecticase.util.PaginationUtil;
 import com.ssi.ms.collecticase.validator.CaseLookupValidator;
 import com.ssi.ms.collecticase.validator.GeneralActivityValidator;
 import com.ssi.ms.platform.exception.custom.CustomValidationException;
@@ -52,7 +55,6 @@ import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -158,8 +160,9 @@ public class CaseService extends CollecticaseBaseService {
                 ccaseActivitiesCmaMapper.daoToDto(dao)).toList();
     }
 
-    public PaginationResponse<VwCcaseCaseloadDTO> getCaseLoadByStaffId(Long staffId,
-                                                                       int page, int size, String sortBy, boolean ascending) {
+    public PaginationResponse<VwCcaseCaseloadDTO> getCaseLoadByStaffId
+            (Long staffId, int page, int size, String sortBy, boolean ascending) {
+        
         Map<String, Object> pageContentMap = new HashMap<>();
         // Create a Sort object based on the provided sort field and direction (ascending or descending)
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -174,8 +177,8 @@ public class CaseService extends CollecticaseBaseService {
         return PageMapper.toPaginationResponse(pageVwCcaseCaseloadDTO, vwCcaseCaseloadDTOList);
     }
 
-    public PaginationResponse<ActivitiesSummaryDTO> getActivitiesDataByCaseId(Long caseId,
-                                                                              int page, int size, String sortBy, boolean ascending) {
+    public PaginationResponse<ActivitiesSummaryDTO> getActivitiesDataByCaseId
+            (Long caseId, int page, int size, String sortBy, boolean ascending) {
 
         // Create a Sort object based on the provided sort field and direction (ascending or descending)
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -794,7 +797,7 @@ public class CaseService extends CollecticaseBaseService {
     }
 
     public List<CaseReassignDTO> getCaseReassignInfoByCaseId(@Valid Long caseId) {
-        return vwCcaseCaseloadRepository.getCaseReassignInfoByCaseIds(Collections.singletonList(caseId));
+        return vwCcaseCaseloadRepository.getCaseReassignInfoByCaseId(caseId);
     }
 
     public Map<String, String> getCLOverPaymentType() {
@@ -810,9 +813,10 @@ public class CaseService extends CollecticaseBaseService {
         return CollecticaseHelper.getCLFollowUpValue();
     }
 
-    public Object searchCaseLookup(CaseLookupDTO caseLookupDTO) {
+    public List<GttForCaselookupDTO> searchCaseLookup(CaseLookupDTO caseLookupDTO) {
         String poutSqlString;
-        List<VwCcaseCaseloadDAO> vwCcaseCaseloadDAOList;
+        List<GttForCaselookupDAO> gttForCaselookupDAOList = null;
+        List<GttForCaselookupDTO> gttForCaselookupDTOList = null;
         final HashMap<String, List<String>> errorMap = caseLookupValidator.validateCaseLookupDTO(caseLookupDTO);
         if (!errorMap.isEmpty()) {
             throw new CustomValidationException("Case Lookup Validation Failed.", errorMap);
@@ -821,11 +825,13 @@ public class CaseService extends CollecticaseBaseService {
         Map<String, Object> caseLookup = CollecticaseHelper.getCaseLookupData(caseLookupDTO, ccaseCasesCmcRepository);
         if (caseLookup != null) {
             poutSqlString = (String) caseLookup.get(POUT_SQL_STRING);
-            vwCcaseCaseloadDAOList = customLookupRepository.processCaseLookupQuery(poutSqlString);
-            //Bak TODO convert DAO to DTO and send the DTO object
+            gttForCaselookupDAOList = customLookupRepository.processCaseLookupQuery(poutSqlString);
+            gttForCaselookupDTOList = gttForCaselookupDAOList.stream().map(dao ->
+                    gttForCaselookupMapper.daoToDto(dao)).toList();
         }
-        return null;
+        return gttForCaselookupDTOList;
     }
+
 
     public void reassignCase(ReassignDTO reassignDTO) {
         CcaseCasesCmcDAO ccaseCasesCmcDAO = ccaseCasesCmcRepository.findById(reassignDTO.getCaseId())
@@ -848,4 +854,35 @@ public class CaseService extends CollecticaseBaseService {
         return claimantCmtRepository.getClaimantByClaimantSSN(ssn);
     }
 
+    public PaginationResponse<VwCcaseCaseloadDTO> getCaseLoadByMetric(Long staffId, Integer page,
+                                                                      Integer size, String sortBy, Boolean ascending,
+                                                                      String metricValue) {
+        boolean newCase = false;
+        boolean highMediumPriority = false;
+        boolean overdue = false;
+        boolean bankruptcy = false;
+        // Create a Sort object based on the provided sort field and direction (ascending or descending)
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        // Create the Pageable object with pagination and sorting
+        Pageable pageable = PageRequest.of(page, size, sort);
+        if (metricValue != null) {
+            switch (metricValue) {
+                case "pout_not_started" -> newCase = true;
+                case "pout_bankruptcy_cases" -> bankruptcy = true;
+                case "pout_overdue" -> overdue = true;
+                case "pout_high_priority" -> highMediumPriority = true;
+            }
+        }
+
+        List<VwCcaseCaseloadDTO> vwCcaseCaseloadDTOList = customLookupRepository.caseLoadByMetrics(staffId, newCase,
+                highMediumPriority, overdue, bankruptcy);
+        Page<VwCcaseCaseloadDTO> pageVwCcaseCaseloadDTO = PaginationUtil.listToPage(vwCcaseCaseloadDTOList, pageable);
+        // PageMapper to send Pagination attributes and content in PaginationResponse
+        return PageMapper.toPaginationResponse(pageVwCcaseCaseloadDTO, vwCcaseCaseloadDTOList);
+
+    }
+
+    public List<CaseNotesDTO> getCaseNotesInfoByCaseId(Long caseId) {
+        return ccaseActivitiesCmaRepository.getCaseNotesInfoByCaseId(caseId);
+    }
 }

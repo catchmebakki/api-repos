@@ -16,5 +16,6 @@ public class CcaseInputPayload {
     private Integer pageSize;
     private Boolean pageAscendingEnable;
     private String caseLoadMetricsValue;
+    private String metricValue;
 
 }

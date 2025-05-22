@@ -42,37 +42,28 @@ public class GeneralActivityValidator {
         final List<CollecticaseErrorEnum> errorEnums = new ArrayList<>();
         final List<String> errorParams = new ArrayList<>();
 
-        if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
-                CollecticaseConstants.ACTIVITY_TYPE_RECORD_NEW_FOLLOW_UP)) {
-            if (generalActivityDTO.getActivityFollowupDate() == null) {
-                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.FOLLOWUP_DT_REQUIRED);
-            }
-        }
-        if (StringUtils.isNotBlank(generalActivityDTO.getActivityFollowupShortNote())) {
-            if (generalActivityDTO.getActivityFollowupDate() == null) {
-                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.FOLLOWUP_SHORT_NOTE_NA);
-            }
-        }
-        if (generalActivityDTO.getActivityFollowupDate() != null) {
-            if (StringUtils.isBlank(generalActivityDTO.getActivityFollowupShortNote())) {
-                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.FOLLOWUP_SHORT_NOTE_REQUIRED);
-            }
-        }
+        validateFollowupAndNote(generalActivityDTO, errorEnums);
+        validateResearchNHProperty(generalActivityDTO, errorEnums);
+        validateEnityContact(generalActivityDTO, errorEnums);
+        validateNotices(generalActivityDTO, errorEnums, errorParams);
+        validateRepenActivity(generalActivityDTO, errorEnums);
 
-        if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
-                CollecticaseConstants.ACTIVITY_TYPE_RESEARCH_NH_PROPERTY)) {
-            if (generalActivityDTO.getPropertyLien() == null) {
-                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.PROPERTY_LIEN_REQUIRED);
-            }
-        }
+        CollecticaseUtilFunction.updateErrorMap(errorMap, errorEnums, errorParams);
+        return errorMap;
+    }
 
+    private static void validateEnityContact(GeneralActivityDTO generalActivityDTO,
+                                             List<CollecticaseErrorEnum> errorEnums) {
         if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
                 CollecticaseConstants.ACTIVITY_TYPE_OTHER_ENTITY_CONTACT)) {
             if (StringUtils.isBlank(generalActivityDTO.getActivityEntityContact())) {
                 errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.ENTITY_CONTACT_REQUIRED);
             }
         }
+    }
 
+    private void validateNotices(GeneralActivityDTO generalActivityDTO, List<CollecticaseErrorEnum> errorEnums,
+                                 List<String> errorParams) {
         if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
                 CollecticaseConstants.ACTIVITY_TYPE_RESEARCH_NH_PROPERTY)) {
             if (generalActivityDTO.getActivitySendCorrespondence() != null) {
@@ -103,7 +94,9 @@ public class GeneralActivityValidator {
                 }
             }
         }
+    }
 
+    private void validateRepenActivity(GeneralActivityDTO generalActivityDTO, List<CollecticaseErrorEnum> errorEnums) {
         if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
                 CollecticaseConstants.ACTIVITY_TYPE_REOPEN_CASE)) {
             List<VwCcaseOpmDAO> vwCcaseOpmDAOList = vwCcaseCaseloadRepository
@@ -131,8 +124,36 @@ public class GeneralActivityValidator {
                 errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.REOPEN_OPM_BAL_ZERO);
             }
         }
-
-        CollecticaseUtilFunction.updateErrorMap(errorMap, errorEnums, errorParams);
-        return errorMap;
     }
+
+    private static void validateResearchNHProperty(GeneralActivityDTO generalActivityDTO,
+                                                   List<CollecticaseErrorEnum> errorEnums) {
+        if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
+                CollecticaseConstants.ACTIVITY_TYPE_RESEARCH_NH_PROPERTY)) {
+            if (generalActivityDTO.getPropertyLien() == null) {
+                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.PROPERTY_LIEN_REQUIRED);
+            }
+        }
+    }
+
+    private static void validateFollowupAndNote(GeneralActivityDTO generalActivityDTO,
+                                                List<CollecticaseErrorEnum> errorEnums) {
+        if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
+                CollecticaseConstants.ACTIVITY_TYPE_RECORD_NEW_FOLLOW_UP)) {
+            if (generalActivityDTO.getActivityFollowupDate() == null) {
+                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.FOLLOWUP_DT_REQUIRED);
+            }
+        }
+        if (StringUtils.isNotBlank(generalActivityDTO.getActivityFollowupShortNote())) {
+            if (generalActivityDTO.getActivityFollowupDate() == null) {
+                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.FOLLOWUP_SHORT_NOTE_NA);
+            }
+        }
+        if (generalActivityDTO.getActivityFollowupDate() != null) {
+            if (StringUtils.isBlank(generalActivityDTO.getActivityFollowupShortNote())) {
+                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.FOLLOWUP_SHORT_NOTE_REQUIRED);
+            }
+        }
+    }
+    
 }

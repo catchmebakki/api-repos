@@ -1,8 +1,20 @@
 package com.ssi.ms.collecticase.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ssi.ms.collecticase.constant.CollecticaseConstants;
-import com.ssi.ms.collecticase.dto.*;
+import com.ssi.ms.collecticase.dto.ActivitiesSummaryDTO;
+import com.ssi.ms.collecticase.dto.AllowValAlvResDTO;
+import com.ssi.ms.collecticase.dto.CaseLookupDTO;
+import com.ssi.ms.collecticase.dto.CaseNotesDTO;
+import com.ssi.ms.collecticase.dto.CaseReassignDTO;
+import com.ssi.ms.collecticase.dto.CreateCaseDTO;
+import com.ssi.ms.collecticase.dto.GttForCaselookupDTO;
+import com.ssi.ms.collecticase.dto.ReassignDTO;
+import com.ssi.ms.collecticase.dto.StaffDTO;
+import com.ssi.ms.collecticase.dto.VwCcaseCaseloadDTO;
+import com.ssi.ms.collecticase.dto.VwCcaseHeaderDTO;
+import com.ssi.ms.collecticase.dto.VwCcaseHeaderEntityDTO;
+import com.ssi.ms.collecticase.dto.VwCcaseOpmDTO;
+import com.ssi.ms.collecticase.dto.VwCcaseRemedyDTO;
 import com.ssi.ms.collecticase.inputpayload.CcaseInputPayload;
 import com.ssi.ms.collecticase.outputpayload.PaginationResponse;
 import com.ssi.ms.collecticase.service.AlvService;
@@ -15,18 +27,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import java.util.List;
 import java.util.Map;
 
@@ -47,39 +58,42 @@ public class CaseController {
     private GeneralActivityValidator generalActivityValidator;
 
     @GetMapping(path = "/caseheader/{caseId}", produces = "application/json")
-    public ResponseEntity<List<VwCcaseHeaderDTO>> getCaseHeaderInfoByCaseId(@Valid @PathVariable("caseId") Long caseId)
-            throws JsonProcessingException {
+    public ResponseEntity<List<VwCcaseHeaderDTO>> getCaseHeaderInfoByCaseId(@Valid @PathVariable("caseId")
+                                                                            Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.getCaseHeaderInfoByCaseId(caseId));
     }
 
     @GetMapping(path = "/claimantoverpayment/{caseId}", produces = "application/json")
-    public ResponseEntity<List<VwCcaseOpmDTO>> getClaimantOpmInfoByCaseId(@Valid @PathVariable("caseId") Long caseId) {
+    public ResponseEntity<List<VwCcaseOpmDTO>> getClaimantOpmInfoByCaseId(@Valid @PathVariable("caseId")
+                                                                          Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.getClaimantOpmInfoByCaseId(caseId));
     }
 
     @GetMapping(path = "/caseremedy/{caseId}", produces = "application/json")
-    public ResponseEntity<List<VwCcaseRemedyDTO>> getCaseRemedyInfoByCaseId(@Valid @PathVariable("caseId") Long caseId) {
+    public ResponseEntity<List<VwCcaseRemedyDTO>> getCaseRemedyInfoByCaseId(@Valid @PathVariable("caseId")
+                                                                            Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.getCaseRemedyInfoByCaseId(caseId));
     }
 
     @GetMapping(path = "/caseentity/{caseId}", produces = "application/json")
-    public ResponseEntity<List<VwCcaseHeaderEntityDTO>> getCaseEntityInfoByCaseId(@Valid @PathVariable("caseId") Long caseId) {
+    public ResponseEntity<List<VwCcaseHeaderEntityDTO>> getCaseEntityInfoByCaseId(@Valid @PathVariable("caseId")
+                                                                                  Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.getCaseEntityInfoByCaseId(caseId));
     }
 
     @GetMapping(path = "/casenotes/{caseId}", produces = "application/json")
-    public ResponseEntity<List<CcaseActivitiesCmaDTO>> getCaseNotesByCaseId(@Valid @PathVariable("caseId") Long caseId) {
+    public ResponseEntity<List<CaseNotesDTO>> getCaseNotesByCaseId(@Valid @PathVariable("caseId") Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
-                caseService.getCaseNotesByCaseId(caseId));
+                caseService.getCaseNotesInfoByCaseId(caseId));
     }
 
-    @GetMapping(path = "/caseload", produces = "application/json")
+    @PostMapping(path = "/caseload", produces = "application/json")
     public ResponseEntity<PaginationResponse<VwCcaseCaseloadDTO>> getCaseLoadByStaffId(@ModelAttribute CcaseInputPayload
-                                                                                     ccaseInputPayload) {
+                                                                                               ccaseInputPayload) {
         Long staffId = ccaseInputPayload.getStaffId();
         Map<String, Object> pageInputs = CollecticaseHelper.getPageInputs(ccaseInputPayload);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
@@ -88,9 +102,21 @@ public class CaseController {
                         (Boolean) pageInputs.get("pageAscendingEnable")));
     }
 
-    @GetMapping(path = "/case-activities", produces = "application/json")
+    @PostMapping(path = "/caseload-metric", produces = "application/json")
+    public ResponseEntity<PaginationResponse<VwCcaseCaseloadDTO>> getCaseLoadByMetric(@ModelAttribute CcaseInputPayload
+                                                                                              ccaseInputPayload) {
+        Long staffId = ccaseInputPayload.getStaffId();
+        String metricValue = ccaseInputPayload.getMetricValue();
+        Map<String, Object> pageInputs = CollecticaseHelper.getPageInputs(ccaseInputPayload);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
+                caseService.getCaseLoadByMetric(staffId, (Integer) pageInputs.get("pageNo"),
+                        (Integer) pageInputs.get("pageSize"), "caseNo",
+                        (Boolean) pageInputs.get("pageAscendingEnable"), metricValue));
+    }
+
+    @PostMapping(path = "/case-activities", produces = "application/json")
     public ResponseEntity<PaginationResponse<ActivitiesSummaryDTO>>
-                                        getActivitiesDataByCaseId(@ModelAttribute CcaseInputPayload ccaseInputPayload) {
+    getActivitiesDataByCaseId(@ModelAttribute CcaseInputPayload ccaseInputPayload) {
         Long caseId = ccaseInputPayload.getCaseId();
         Map<String, Object> pageInputs = CollecticaseHelper.getPageInputs(ccaseInputPayload);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
@@ -103,7 +129,7 @@ public class CaseController {
     public ResponseEntity<Map<String, Object>> createCollecticaseCase(
             @Valid @RequestBody final CreateCaseDTO createCaseDTO, HttpServletRequest request) {
         final Map<String, Object> createCollecticaseActivity = caseService
-                                                                .createCollecticaseCase(createCaseDTO);
+                .createCollecticaseCase(createCaseDTO);
         if (createCollecticaseActivity != null
                 && createCollecticaseActivity.get(CollecticaseConstants.POUT_SUCCESS) != null
                 && createCollecticaseActivity.get(CollecticaseConstants.POUT_CMC_ID) != null) {
@@ -122,8 +148,8 @@ public class CaseController {
     }
 
     @GetMapping(path = "/get-activity/{caseId}/{remedyTypeCd}", produces = "application/json")
-    public ResponseEntity<List<AllowValAlvResDTO>> getCaseActivityByRemedyType(@Valid @PathVariable("caseId") Long caseId,
-                                                      @Valid @PathVariable("remedyTypeCd") Long remedyTypeCd) {
+    public ResponseEntity<List<AllowValAlvResDTO>> getCaseActivityByRemedyType
+            (@Valid @PathVariable("caseId") Long caseId, @Valid @PathVariable("remedyTypeCd") Long remedyTypeCd) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 alvService.getAlvsByAlvIds(caseService.getCaseActivityByRemedyType
                         (caseService.getCaseRemedyActivityByCaseId(caseId, CollecticaseConstants.INDICATOR.Y.name()),
@@ -131,7 +157,8 @@ public class CaseController {
     }
 
     @GetMapping(path = "/reassign-case/{caseId}", produces = "application/json")
-    public ResponseEntity<List<CaseReassignDTO>> getCaseReassignInfoByCaseId(@Valid @PathVariable("caseId") Long caseId) {
+    public ResponseEntity<List<CaseReassignDTO>> getCaseReassignInfoByCaseId(@Valid @PathVariable("caseId")
+                                                                             Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.getCaseReassignInfoByCaseId(caseId));
     }
@@ -143,7 +170,8 @@ public class CaseController {
     }
 
     @GetMapping(path = "/reassign-caseto/{staffId}", produces = "application/json")
-    public ResponseEntity<List<StaffDTO>> getReassignStaffListByLofAndRole(@Valid @PathVariable("staffId") Long staffId) {
+    public ResponseEntity<List<StaffDTO>> getReassignStaffListByLofAndRole(@Valid @PathVariable("staffId")
+                                                                           Long staffId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.getReassignStaffListByLofAndRole(staffId));
     }
@@ -175,7 +203,7 @@ public class CaseController {
     }
 
     @PostMapping(path = "/caselookup", produces = "application/json")
-    public ResponseEntity caseLookup(
+    public ResponseEntity<List<GttForCaselookupDTO>> caseLookup(
             @Valid @RequestBody final CaseLookupDTO caseLookupDTO) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.searchCaseLookup(caseLookupDTO));
