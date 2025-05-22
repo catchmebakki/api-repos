@@ -3,6 +3,7 @@ package com.ssi.ms.collecticase.database.repository;
 import com.ssi.ms.collecticase.constant.CollecticaseConstants;
 import com.ssi.ms.collecticase.database.dao.CcaseActivitiesCmaDAO;
 import com.ssi.ms.collecticase.dto.ActivitiesSummaryDTO;
+import com.ssi.ms.collecticase.dto.CaseNotesDTO;
 import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,25 +65,25 @@ public interface CcaseActivitiesCmaRepository extends CrudRepository<CcaseActivi
     @Transactional
     @Procedure(name = "createActivity")
     Map<String, Object> createCollecticaseActivity
-                          (@Param(CollecticaseConstants.PIN_CMC_ID) Long caseId,
-                           @Param(CollecticaseConstants.PIN_EMP_ID) Long employerId,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_TYPE_CD) Long activityTypeCd,
-                           @Param(CollecticaseConstants.PIN_REMEDY_TYPE_CD) Long remedyTypeCd,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_DT) Date activityDt,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_TIME) String activityTime,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_SPECIFICS) String activitySpecifics,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_NOTES) String activityNotes,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_NOTES_ADDL) String activityNotesAdditional,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_NOTES_NHUIS) String activityNotesNHUIS,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_COMM_METHOD) Long communicationMethod,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_CASE_CHARACTERISTICS) String caseCharacteristics,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_CMT_REP_CD) Long activityCmtRepCd,
-                           @Param(CollecticaseConstants.PIN_ACTIVITY_CASE_PRIORITY) Long activityCasePriority,
-                           @Param(CollecticaseConstants.PIN_FOLLOWUP_DT) Date followupDt,
-                           @Param(CollecticaseConstants.PIN_FOLLOWUP_SH_NOTE) String followupShortNote,
-                           @Param(CollecticaseConstants.PIN_FOLLOWUP_COMP_SH_NOTE) String followupCompleteShortNote,
-                           @Param(CollecticaseConstants.PIN_USER) String callingUser,
-                           @Param(CollecticaseConstants.PIN_USING) String usingProgramName);
+            (@Param(CollecticaseConstants.PIN_CMC_ID) Long caseId,
+             @Param(CollecticaseConstants.PIN_EMP_ID) Long employerId,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_TYPE_CD) Long activityTypeCd,
+             @Param(CollecticaseConstants.PIN_REMEDY_TYPE_CD) Long remedyTypeCd,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_DT) Date activityDt,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_TIME) String activityTime,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_SPECIFICS) String activitySpecifics,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_NOTES) String activityNotes,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_NOTES_ADDL) String activityNotesAdditional,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_NOTES_NHUIS) String activityNotesNHUIS,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_COMM_METHOD) Long communicationMethod,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_CASE_CHARACTERISTICS) String caseCharacteristics,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_CMT_REP_CD) Long activityCmtRepCd,
+             @Param(CollecticaseConstants.PIN_ACTIVITY_CASE_PRIORITY) Long activityCasePriority,
+             @Param(CollecticaseConstants.PIN_FOLLOWUP_DT) Date followupDt,
+             @Param(CollecticaseConstants.PIN_FOLLOWUP_SH_NOTE) String followupShortNote,
+             @Param(CollecticaseConstants.PIN_FOLLOWUP_COMP_SH_NOTE) String followupCompleteShortNote,
+             @Param(CollecticaseConstants.PIN_USER) String callingUser,
+             @Param(CollecticaseConstants.PIN_USING) String usingProgramName);
 
     @Query(""" 
             SELECT new com.ssi.ms.collecticase.dto.FollowupActivityDTO(
@@ -101,4 +102,33 @@ public interface CcaseActivitiesCmaRepository extends CrudRepository<CcaseActivi
             where ccaseActivitiesCma.cmaId = :activityId
             """)
     FollowupActivityDTO getAppendsNotesInfo(Long activityId);
+
+    @Query(""" 
+            SELECT new com.ssi.ms.collecticase.dto.CaseNotesDTO(
+            cmaId,
+            TO_CHAR(cmaActivityDt, 'MM/DD/YYYY') as activityCreatedDate,
+            fnInvGetAlvDescription(ccaseActivitiesCma.cmaActivityTypeCd),  
+            fnInvGetAlvLongDesc(ccaseActivitiesCma.cmaRemedyType),       
+            fnInvGetAlvDescription(ccaseActivitiesCma.cmaRemedyType),
+            cmaActivityNotes || cmaActivityNotesAddl
+            )
+            from CcaseActivitiesCmaDAO ccaseActivitiesCma
+            where ccaseActivitiesCma.ccaseCasesCmcDAO.cmcId = :caseId
+            """)
+    List<CaseNotesDTO> getCaseNotesInfoByCaseId(Long caseId);
+
+    @Query(""" 
+            SELECT new com.ssi.ms.collecticase.dto.CaseNotesDTO(
+            cmaId,
+            TO_CHAR(cmaActivityDt, 'MM/DD/YYYY') as activityCreatedDate,
+            fnInvGetAlvDescription(ccaseActivitiesCma.cmaActivityTypeCd),  
+            fnInvGetAlvLongDesc(ccaseActivitiesCma.cmaRemedyType),       
+            fnInvGetAlvDescription(ccaseActivitiesCma.cmaRemedyType),
+            cmaActivityNotes || cmaActivityNotesAddl
+            )
+            from CcaseActivitiesCmaDAO ccaseActivitiesCma
+            where ccaseActivitiesCma.cmaId = :activityId
+            """)
+    CaseNotesDTO getAppendNotesInfoByActivityId(Long activityId);
+
 }

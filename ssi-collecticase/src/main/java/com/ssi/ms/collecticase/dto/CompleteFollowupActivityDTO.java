@@ -9,7 +9,6 @@ import lombok.With;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Pattern;
 
 @With
@@ -30,8 +29,8 @@ public class CompleteFollowupActivityDTO {
     private String activityId;
 
     @NotNull(message = ErrorMessageConstant.COMPELTE_FOLLOWUP_COMPLETED_ON_MANDATORY)
-    @PastOrPresent(message = ErrorMessageConstant.COMPELTE_FOLLOWUP_COMPLETED_ON_FUTURE)
-    @Pattern(regexp = CollecticaseUtilFunction.DATE_PATTERN_MM_DD_YYYY, message = ErrorMessageConstant.COMPELTE_FOLLOWUP_COMPLETED_ON_MANDATORY)
+    @Pattern(regexp = CollecticaseUtilFunction.DATE_PATTERN_MM_DD_YYYY, message =
+            ErrorMessageConstant.COMPELTE_FOLLOWUP_COMPLETED_ON_MANDATORY)
     private String activityCompletedOn;
 
     @NotNull(message = ErrorMessageConstant.COMPELTE_FOLLOWUP_COMPLETED_BY_MANDATORY)

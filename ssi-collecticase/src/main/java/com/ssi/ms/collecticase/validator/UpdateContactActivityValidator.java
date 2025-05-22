@@ -15,30 +15,32 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_DISASSOCIATE_ORG_FROM_CASE;
-import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_DISASSOCIATE_ORG_CONTACT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_ADD_UPD_ATTY_CONTACT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_ADD_UPD_OTHER_REP_CONTACT;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_DISASSOCIATE_ORG_CONTACT;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_DISASSOCIATE_ORG_FROM_CASE;
 
 @Component
 @AllArgsConstructor
 @Slf4j
 public class UpdateContactActivityValidator {
 
-    public HashMap<String, List<DynamicErrorDTO>> validateUpdateContactActivity(UpdateContactActivityDTO updateContactActivityDTO) {
+    public Map<String, List<DynamicErrorDTO>> validateUpdateContactActivity(UpdateContactActivityDTO
+                                                                                    updateContactActivityDTO) {
         final HashMap<String, List<DynamicErrorDTO>> errorMap = new HashMap<>();
         final List<CollecticaseErrorEnum> errorEnums = new ArrayList<>();
         final List<String> errorParams = new ArrayList<>();
         String[] entityContact = null;
 
-        if(StringUtils.isBlank(updateContactActivityDTO.getActivityEntityContact()))
-        {
+        if (StringUtils.isBlank(updateContactActivityDTO.getActivityEntityContact())) {
             errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.ENTITY_CONTACT_REQUIRED);
         }
 
-        if(StringUtils.isNotBlank(updateContactActivityDTO.getActivityEntityContact())) {
-            entityContact = StringUtils.split(updateContactActivityDTO.getActivityEntityContact(), CollecticaseConstants.SEPARATOR);
+        if (StringUtils.isNotBlank(updateContactActivityDTO.getActivityEntityContact())) {
+            entityContact = StringUtils.split(updateContactActivityDTO.getActivityEntityContact(),
+                    CollecticaseConstants.SEPARATOR);
 
             if (!List.of(ACTIVITY_TYPE_DISASSOCIATE_ORG_FROM_CASE, ACTIVITY_TYPE_DISASSOCIATE_ORG_CONTACT)
                     .contains(updateContactActivityDTO.getActivityTypeCd())
@@ -72,10 +74,8 @@ public class UpdateContactActivityValidator {
 
                 if (UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
                         CollecticaseConstants.ENTITY_PREFERENCE_FAX)) {
-                    {
-                        if (StringUtils.isBlank(updateContactActivityDTO.getEntityFax())) {
-                            errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_FAX_REQUIRED);
-                        }
+                    if (StringUtils.isBlank(updateContactActivityDTO.getEntityFax())) {
+                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_FAX_REQUIRED);
                     }
 
                     if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.UI_ACCT_NBR_PATTERN,
@@ -100,7 +100,8 @@ public class UpdateContactActivityValidator {
                             updateContactActivityDTO.getEntityCity())) {
                         errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CITY_INVALID);
                     }
-                    if (!CollecticaseUtilFunction.isValidZip(updateContactActivityDTO.getEntityCountry(), updateContactActivityDTO.getEntityState())) {
+                    if (!CollecticaseUtilFunction.isValidZip(updateContactActivityDTO.getEntityCountry(),
+                            updateContactActivityDTO.getEntityState())) {
                         errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_ZIP_INVALID);
                     }
                     if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.PHONE_PATTERN,
@@ -115,123 +116,114 @@ public class UpdateContactActivityValidator {
             }
         }
 
-        if(List.of(ACTIVITY_TYPE_ADD_UPD_ATTY_CONTACT,ACTIVITY_TYPE_ADD_UPD_OTHER_REP_CONTACT).contains(updateContactActivityDTO.getActivityTypeCd()))
-        {
-            if(StringUtils.isBlank(updateContactActivityDTO.getEntityRepresentedFor()))
-            {
+        if (List.of(ACTIVITY_TYPE_ADD_UPD_ATTY_CONTACT, ACTIVITY_TYPE_ADD_UPD_OTHER_REP_CONTACT)
+                .contains(updateContactActivityDTO.getActivityTypeCd())) {
+            if (StringUtils.isBlank(updateContactActivityDTO.getEntityRepresentedFor())) {
                 errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_REPRESENTED_FOR_REQUIRED);
             }
         }
 
-        if(UtilFunction.compareLongObject.test(updateContactActivityDTO.getActivityTypeCd(),
-                CollecticaseConstants.ACTIVITY_TYPE_DISASSOCIATE_ORG_CONTACT))
-        {
-            if(updateContactActivityDTO.getEntityContactId() == null ||
+        if (UtilFunction.compareLongObject.test(updateContactActivityDTO.getActivityTypeCd(),
+                CollecticaseConstants.ACTIVITY_TYPE_DISASSOCIATE_ORG_CONTACT)) {
+            if (updateContactActivityDTO.getEntityContactId() == null ||
                     UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactId(),
-                            -1L) )
-            {
+                            -1L)) {
                 errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_REQUIRED);
             }
         }
 
-        if(!List.of(ACTIVITY_TYPE_DISASSOCIATE_ORG_FROM_CASE,ACTIVITY_TYPE_DISASSOCIATE_ORG_CONTACT)
+        if (!List.of(ACTIVITY_TYPE_DISASSOCIATE_ORG_FROM_CASE, ACTIVITY_TYPE_DISASSOCIATE_ORG_CONTACT)
                 .contains(updateContactActivityDTO.getActivityTypeCd())
-                    &&  updateContactActivityDTO.getEntityContactId() != null)
-        {
-            if(CollecticaseConstants.REPRESENTATIVE_IND_STRING.equalsIgnoreCase(entityContact[0])
-                    || CollecticaseConstants.NEW_REPRESENTATIVE_IND_STRING.equalsIgnoreCase(entityContact[0]))
-            {
-                if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactFirstName()))
-                {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_FIRST_NAME_REQUIRED);
+                && updateContactActivityDTO.getEntityContactId() != null) {
+            if (CollecticaseConstants.REPRESENTATIVE_IND_STRING.equalsIgnoreCase(entityContact[0])
+                    || CollecticaseConstants.NEW_REPRESENTATIVE_IND_STRING.equalsIgnoreCase(entityContact[0])) {
+                if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactFirstName())) {
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_FIRST_NAME_REQUIRED);
                 }
-                if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactLastName()))
-                {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_LAST_NAME_REQUIRED);
+                if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactLastName())) {
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_LAST_NAME_REQUIRED);
                 }
-                if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactAddressLine1()))
-                {
+                if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactAddressLine1())) {
                     errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_ADDRESS_REQUIRED);
                 }
-                if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactCity()))
-                {
+                if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactCity())) {
                     errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_CITY_REQUIRED);
                 }
-                if(updateContactActivityDTO.getEntityContactCountry() == null)
-                {
+                if (updateContactActivityDTO.getEntityContactCountry() == null) {
                     errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_CITY_REQUIRED);
                 }
-                if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactState()))
-                {
+                if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactState())) {
                     errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_STATE_REQUIRED);
                 }
-                if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactZip()))
-                {
+                if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactZip())) {
                     errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_ZIP_REQUIRED);
                 }
-                if(updateContactActivityDTO.getEntityContactPreference() == null)
-                {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_PREFERENCE_REQUIRED);
+                if (updateContactActivityDTO.getEntityContactPreference() == null) {
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_PREFERENCE_REQUIRED);
                 }
-                if(UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
-                        CollecticaseConstants.ENTITY_CONTACT_PREFERENCE_WORK_PHONE))
-                {
-                    if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactPhoneWork()))
-                    {
-                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_WORK_PHONE_REQUIRED);
+                if (UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
+                        CollecticaseConstants.ENTITY_CONTACT_PREFERENCE_WORK_PHONE)) {
+                    if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactPhoneWork())) {
+                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                                .ENTITY_CONTACT_WORK_PHONE_REQUIRED);
                     }
                 }
 
-                if(StringUtils.isNotBlank(updateContactActivityDTO.getEntityContactPhoneWorkExt())
-                        && StringUtils.isBlank(updateContactActivityDTO.getEntityContactPhoneWork()))
-                {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_EXT_PROVIDED_WORK_PHONE_REQUIRED);
+                if (StringUtils.isNotBlank(updateContactActivityDTO.getEntityContactPhoneWorkExt())
+                        && StringUtils.isBlank(updateContactActivityDTO.getEntityContactPhoneWork())) {
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_EXT_PROVIDED_WORK_PHONE_REQUIRED);
                 }
 
-                if(UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
-                        CollecticaseConstants.ENTITY_CONTACT_PREFERENCE_HOME_PHONE))
-                {
-                    if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactPhoneHome()))
-                    {
-                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_HOME_PHONE_REQUIRED);
+                if (UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
+                        CollecticaseConstants.ENTITY_CONTACT_PREFERENCE_HOME_PHONE)) {
+                    if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactPhoneHome())) {
+                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                                .ENTITY_CONTACT_HOME_PHONE_REQUIRED);
                     }
                 }
 
-                if(UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
-                        CollecticaseConstants.ENTITY_CONTACT_PREFERENCE_CELL_PHONE))
-                {
-                    if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactPhoneCell()))
-                    {
-                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_CELL_PHONE_REQUIRED);
+                if (UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
+                        CollecticaseConstants.ENTITY_CONTACT_PREFERENCE_CELL_PHONE)) {
+                    if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactPhoneCell())) {
+                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                                .ENTITY_CONTACT_CELL_PHONE_REQUIRED);
                     }
                 }
-                if(UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
-                        CollecticaseConstants.ENTITY_CONTACT_PREFERENCE_FAX))
-                {
-                    if(StringUtils.isBlank(updateContactActivityDTO.getEntityContactFax()))
-                    {
-                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_FAX_REQUIRED);
+                
+                if (UtilFunction.compareLongObject.test(updateContactActivityDTO.getEntityContactPreference(),
+                        CollecticaseConstants.ENTITY_CONTACT_PREFERENCE_FAX)) {
+                    if (StringUtils.isBlank(updateContactActivityDTO.getEntityContactFax())) {
+                        errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                                .ENTITY_CONTACT_FAX_REQUIRED);
                     }
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.ALPHANUMERIC_PATTERN,
                         updateContactActivityDTO.getEntityContactFirstName())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_FIRST_NAME_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_FIRST_NAME_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.ALPHANUMERIC_PATTERN,
                         updateContactActivityDTO.getEntityContactLastName())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_LAST_NAME_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_LAST_NAME_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.ALPHANUMERIC_PATTERN,
                         updateContactActivityDTO.getEntityContactAddressLine1())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_ADDRESS_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_ADDRESS_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.ALPHANUMERIC_PATTERN,
                         updateContactActivityDTO.getEntityContactAddressLine2())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_ADDRESS_LINE_2_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_ADDRESS_LINE_2_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.ALPHANUMERIC_PATTERN,
@@ -246,27 +238,32 @@ public class UpdateContactActivityValidator {
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.PHONE_PATTERN,
                         updateContactActivityDTO.getEntityContactPhoneWork())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_WORK_PHONE_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_WORK_PHONE_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.NUMERIC_PATTERN,
                         updateContactActivityDTO.getEntityContactPhoneWorkExt())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_WORK_PHONE_EXT_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_WORK_PHONE_EXT_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.PHONE_PATTERN,
                         updateContactActivityDTO.getEntityContactPhoneHome())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_HOME_PHONE_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_HOME_PHONE_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.PHONE_PATTERN,
                         updateContactActivityDTO.getEntityContactPhoneCell())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_CELL_PHONE_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_CELL_PHONE_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.PHONE_PATTERN,
                         updateContactActivityDTO.getEntityContactFax())) {
-                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail.ENTITY_CONTACT_FAX_INVALID);
+                    errorEnums.add(ErrorMessageConstant.UpdateContactActivityDTODetail
+                            .ENTITY_CONTACT_FAX_INVALID);
                 }
 
                 if (!CollecticaseUtilFunction.validateRegExPattern(CollecticaseUtilFunction.EMAILS_PATTERN,
@@ -275,6 +272,8 @@ public class UpdateContactActivityValidator {
                 }
             }
         }
+
+        CollecticaseUtilFunction.updateErrorMap(errorMap, errorEnums, errorParams);
 
         return errorMap;
     }

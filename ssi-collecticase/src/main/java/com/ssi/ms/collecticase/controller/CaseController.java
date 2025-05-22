@@ -4,9 +4,10 @@ import com.ssi.ms.collecticase.constant.CollecticaseConstants;
 import com.ssi.ms.collecticase.dto.ActivitiesSummaryDTO;
 import com.ssi.ms.collecticase.dto.AllowValAlvResDTO;
 import com.ssi.ms.collecticase.dto.CaseLookupDTO;
+import com.ssi.ms.collecticase.dto.CaseNotesDTO;
 import com.ssi.ms.collecticase.dto.CaseReassignDTO;
-import com.ssi.ms.collecticase.dto.CcaseActivitiesCmaDTO;
 import com.ssi.ms.collecticase.dto.CreateCaseDTO;
+import com.ssi.ms.collecticase.dto.GttForCaselookupDTO;
 import com.ssi.ms.collecticase.dto.ReassignDTO;
 import com.ssi.ms.collecticase.dto.StaffDTO;
 import com.ssi.ms.collecticase.dto.VwCcaseCaseloadDTO;
@@ -85,10 +86,9 @@ public class CaseController {
     }
 
     @GetMapping(path = "/casenotes/{caseId}", produces = "application/json")
-    public ResponseEntity<List<CcaseActivitiesCmaDTO>> getCaseNotesByCaseId(@Valid @PathVariable("caseId")
-                                                                            Long caseId) {
+    public ResponseEntity<List<CaseNotesDTO>> getCaseNotesByCaseId(@Valid @PathVariable("caseId") Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
-                caseService.getCaseNotesByCaseId(caseId));
+                caseService.getCaseNotesInfoByCaseId(caseId));
     }
 
     @PostMapping(path = "/caseload", produces = "application/json")
@@ -203,7 +203,7 @@ public class CaseController {
     }
 
     @PostMapping(path = "/caselookup", produces = "application/json")
-    public ResponseEntity caseLookup(
+    public ResponseEntity<List<GttForCaselookupDTO>> caseLookup(
             @Valid @RequestBody final CaseLookupDTO caseLookupDTO) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.searchCaseLookup(caseLookupDTO));

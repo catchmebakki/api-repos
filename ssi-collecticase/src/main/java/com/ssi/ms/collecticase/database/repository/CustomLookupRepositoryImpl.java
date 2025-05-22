@@ -1,10 +1,8 @@
 package com.ssi.ms.collecticase.database.repository;
 
-
 import com.ssi.ms.collecticase.constant.CollecticaseConstants;
 import com.ssi.ms.collecticase.database.dao.GTTForOrgLookupDAO;
 import com.ssi.ms.collecticase.database.dao.GttForCaselookupDAO;
-import com.ssi.ms.collecticase.database.dao.VwCcaseCaseloadDAO;
 import com.ssi.ms.collecticase.dto.OrgLookupDTO;
 import com.ssi.ms.collecticase.dto.VwCcaseCaseloadDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -39,13 +37,12 @@ public class CustomLookupRepositoryImpl implements CustomLookupRepository {
 
     @Transactional
     @Override
-    public List<VwCcaseCaseloadDAO> processCaseLookupQuery(String searchString) {
-        List<VwCcaseCaseloadDAO> vwCcaseCaseloadDAOList;
+    public List<GttForCaselookupDAO> processCaseLookupQuery(String searchString) {
         List<GttForCaselookupDAO> gttForCaselookupDAOList;
         Query query = entityManager.createNativeQuery(searchString.substring(0, searchString.length() - 1).trim());
         query.executeUpdate();
-        vwCcaseCaseloadDAOList = vwCcaseCaseloadRepository.getCaseLookupData();
-        return vwCcaseCaseloadDAOList;
+        gttForCaselookupDAOList = vwCcaseCaseloadRepository.getCaseLookupData();
+        return gttForCaselookupDAOList;
     }
 
     @Transactional
@@ -154,4 +151,5 @@ public class CustomLookupRepositoryImpl implements CustomLookupRepository {
 
         return (List<VwCcaseCaseloadDTO>) entityManager.createQuery(sb.toString()).getResultList();
     }
+
 }

@@ -1,6 +1,7 @@
 package com.ssi.ms.collecticase.controller;
 
 import com.ssi.ms.collecticase.dto.AppendNotesDTO;
+import com.ssi.ms.collecticase.dto.CaseNotesDTO;
 import com.ssi.ms.collecticase.dto.CompleteFollowupActivityDTO;
 import com.ssi.ms.collecticase.dto.EmployerListDTO;
 import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
@@ -243,12 +244,6 @@ public class ActivityController {
     @PostMapping(path = "/orglookup", produces = "application/json")
     public ResponseEntity orgLookup(
             @Valid @RequestBody final OrgLookupDTO orgLookupDTO) {
-        //Test Purpose
-        /*orgLookupDTO.setEntityType(CollecticaseConstants.EMPLOYER_ENTITY_TYPE);
-        orgLookupDTO.setCaseId(7142L);
-        orgLookupDTO.setOrgName("RED FISH WHITE FISH");
-        orgLookupDTO.setUiAcctNbr("0000531233");
-        orgLookupDTO.setFein("764747611");*/
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 activityService.searchOrgLookup(orgLookupDTO));
     }
@@ -282,6 +277,14 @@ public class ActivityController {
         } else {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
         }
+    }
+
+    @GetMapping(path = "/appendnotes", produces = "application/json")
+    public ResponseEntity<CaseNotesDTO> getAppendNotesInfo(@ModelAttribute CcaseInputPayload
+                                                                   ccaseInputPayload) {
+        Long activityId = ccaseInputPayload.getActivityId();
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(activityService
+                .getAppendNotesInfoByActivityId(activityId));
     }
 
     @PostMapping(path = "/add-general", produces = "application/json")

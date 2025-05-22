@@ -12,13 +12,14 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Getter
 public class VwCcaseCaseloadDTO {
-// we should Not change the order of attributes/elements between Query in Repository and this VwCcaseCaseloadDTO - IMPORTANT
+    // we should Not change the order of attributes/elements between Query in Repository and this VwCcaseCaseloadDTO - IMPORTANT
     private String claimantBankrupt;
     private String claimantBankruptDesc;
     private String claimantFraud;
     private String claimantFraudDesc;
     private String caseStatus;
     private Long caseNo;
+    private Long id;
     private String claimantName;
     private String casePriorityDesc;
     private Long caseAge;
@@ -28,5 +29,4 @@ public class VwCcaseCaseloadDTO {
     private String claimantFraudStatus;
     private String nextFollowupDate;
     private String nextFollowupRemedy;
-
 }

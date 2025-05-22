@@ -70,10 +70,6 @@ public interface ErrorMessageConstant {
 
     String COMPELTE_FOLLOWUP_COMPLETED_ON_MANDATORY = "complete.followup.completed.on.mandatory";
 
-    String COMPELTE_FOLLOWUP_COMPLETED_ON_FUTURE = "complete.followup.completed.on.future";
-
-    String COMPELTE_FOLLOWUP_COMPLETED_DATE_GREATER_THAN_ACTIVITY_DATE = "complete.followup.completed.on.future";
-
     String COMPELTE_FOLLOWUP_COMPLETED_BY_MANDATORY = "complete.followup.completed.by.mandatory";
 
     @Getter
@@ -549,7 +545,12 @@ public interface ErrorMessageConstant {
     enum CompleteFollowupDetail implements CollecticaseErrorEnum {
         COMPLETE_FOLLOWUP_COMPLETED_ON_LESS_THAN_ACTIVITY_DATE("activityCompletedOn",
                 "completefollowup.completed.on.greater.than.activity.date",
-                "Completed on date should be greater than activity creation date.", 0);
+                "Completed on date should be greater than activity creation date.", 0),
+
+        COMPELTE_FOLLOWUP_COMPLETED_ON_FUTURE("activityCompletedOn",
+                "complete.followup.completed.on.future",
+                "Follow-up completion date cannot be in the future.",
+                0);
 
         private final String frontendField;
         private final String frontendErrorCode;
