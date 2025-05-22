@@ -76,6 +76,8 @@ public class CollecticaseHelper {
                 CollecticaseConstants.THIRDTHOUSAND_TO_FOURTHOUSAND_DOLLAR);
         overPaymentList.put(CollecticaseConstants.FOURTHOUSAND_TO_FIVETHOUSAND,
                 CollecticaseConstants.FOURTHOUSAND_TO_FIVETHOUSAND_DOLLAR);
+        overPaymentList.put(CollecticaseConstants.FIVETHOUSAND_TO_SIXTHOUSAND,
+                CollecticaseConstants.FIVETHOUSAND_TO_SIXTHOUSAND_DOLLAR);
         overPaymentList.put(CollecticaseConstants.SIXTHOUSAND_TO_SEVENTHOUSAND,
                 CollecticaseConstants.SIXTHOUSAND_TO_SEVENTHOUSAND_DOLLAR);
         overPaymentList.put(CollecticaseConstants.SEVENTHOUSAND_TO_EIGHTTHOUSAND,
