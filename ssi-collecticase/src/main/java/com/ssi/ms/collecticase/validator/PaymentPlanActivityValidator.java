@@ -5,6 +5,7 @@ import com.ssi.ms.collecticase.constant.ErrorMessageConstant;
 import com.ssi.ms.collecticase.database.dao.CcaseCraCorrespondenceCrcDAO;
 import com.ssi.ms.collecticase.database.dao.OpmPayPlanOppDAO;
 import com.ssi.ms.collecticase.database.dao.VwCcaseHeaderDAO;
+import com.ssi.ms.collecticase.database.repository.AllowValAlvRepository;
 import com.ssi.ms.collecticase.database.repository.CcaseCraCorrespondenceCrcRepository;
 import com.ssi.ms.collecticase.database.repository.OpmPayPlanOppRepository;
 import com.ssi.ms.collecticase.database.repository.VwCcaseCaseloadRepository;
@@ -28,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_INITIATE_FINANCIAL_AFFIDAVIT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ACTIVITY_TYPE_INITIATE_GUIDELINE_BASED_PP;
@@ -53,6 +55,9 @@ public class PaymentPlanActivityValidator {
 
     @Autowired
     private CcaseCraCorrespondenceCrcRepository ccaseCraCorrespondenceCrcRepository;
+
+    @Autowired
+    private AllowValAlvRepository allowValAlvRepository;
 
     public Map<String, List<DynamicErrorDTO>> validatePaymentPlanActivity(PaymentPlanActivityDTO
                                                                                   paymentPlanActivityDTO) {
@@ -104,12 +109,15 @@ public class PaymentPlanActivityValidator {
                             if (paymentPlanActivityDTO.getPaymentPlanPaymentCategory() == null) {
                                 errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail
                                         .PAYMENT_PLAN_COR_PAYMENT_CATEGORY_NONE);
+                                errorParams.add(ccaseCraCorrespondenceCrcDAO.getCrcRptName());
                             } else if (!UtilFunction.compareLongObject
                                     .test(ccaseCraCorrespondenceCrcDAO.getCrcPmtCategory(),
                                             paymentPlanActivityDTO.getPaymentPlanPaymentCategory())) {
                                 errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail
                                         .PAYMENT_PLAN_COR_PAYMENT_CATEGORY_NA);
-
+                                errorParams.add(ccaseCraCorrespondenceCrcDAO.getCrcRptName());
+                                errorParams.add(allowValAlvRepository.getShortDescByAlv(ccaseCraCorrespondenceCrcDAO
+                                        .getCrcPmtCategory()).getDesc());
                             }
                         }
                         if (ccaseCraCorrespondenceCrcDAO.getCrcCurrFiling() != null) {
@@ -117,9 +125,11 @@ public class PaymentPlanActivityValidator {
                                 if (CollecticaseConstants.INDICATOR.N.name().equals(currFiling)) {
                                     errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail
                                             .PAYMENT_PLAN_COR_CURRENT_FILING_NONE);
+                                    errorParams.add(ccaseCraCorrespondenceCrcDAO.getCrcRptName());
                                 } else {
                                     errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail
                                             .PAYMENT_PLAN_COR_CURRENT_FILING_NA);
+                                    errorParams.add(ccaseCraCorrespondenceCrcDAO.getCrcRptName());
                                 }
                             }
                         }
@@ -149,7 +159,8 @@ public class PaymentPlanActivityValidator {
                 List<OpmPayPlanOppDAO> opmPayPlanOppList = null;
                 opmPayPlanOppList = opmPayPlanOppRepository.getOverpaymentPlanInfo(vwCcaseHeaderDAO.getCmtId());
                 OpmPayPlanOppDAO opmPayPlanOppDAO = null;
-                if (CollectionUtils.isEmpty(opmPayPlanOppList)) {
+                if (CollecticaseConstants.YES.equals(vwCcaseHeaderDAO.getCurrFiling())
+                        && CollectionUtils.isEmpty(opmPayPlanOppList)) {
                     errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.PAYMENT_PLAN_NO_ACTIVE_PAYMENT_PLAN);
                 } else if (CollectionUtils.isNotEmpty(opmPayPlanOppList)) {
                     opmPayPlanOppDAO = opmPayPlanOppList.get(0);
@@ -193,14 +204,20 @@ public class PaymentPlanActivityValidator {
                 errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail
                         .PAYMENT_PLAN_EFF_UNITL_MORE_THAN_6_MONTHS);
             }
+            if (!paymentPlanActivityDTO.getPaymentPlanEffectiveUntilDate().after(currentDate)) {
+                errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail
+                        .PAYMENT_PLAN_EFF_UNITL_SHOULD_BE_IN_FUTURE);
+            }
         }
     }
 
     private static void validatePaymentCategory(PaymentPlanActivityDTO paymentPlanActivityDTO,
                                                 List<CollecticaseErrorEnum> errorEnums) {
-        if (CollecticaseUtilFunction.greaterThanBigDecimalObject.test(paymentPlanActivityDTO.getPaymentPlanPaymentAmount(),
+        if (!CollecticaseUtilFunction.compareBigDecimalObject.test(paymentPlanActivityDTO.getPaymentPlanPaymentAmount(),
                 BigDecimal.ZERO)) {
-            errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.PAYMENT_PLAN_PAYMENT_CATEGORY_REQUIRED);
+            if (paymentPlanActivityDTO.getPaymentPlanPaymentCategory() == null) {
+                errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.PAYMENT_PLAN_PAYMENT_CATEGORY_REQUIRED);
+            }
         }
 
         if (paymentPlanActivityDTO.getPaymentPlanPaymentAmount() == null
@@ -242,17 +259,39 @@ public class PaymentPlanActivityValidator {
                     paymentPlanActivityDTO.getPaymentPlanPaymentAmount())) {
                 errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.GUIDE_LINE_PAYMENT_AMOUNT_NOT_SAME);
             }
-        } else if (List.of(CollecticaseConstants.PAYMENT_CATEGORY_SUSPENDED,
-                        CollecticaseConstants.PAYMENT_CATEGORY_REDUCED, CollecticaseConstants.PAYMENT_CATEGORY_VARIABLE)
+        } else if (Objects.equals(CollecticaseConstants.PAYMENT_CATEGORY_SUSPENDED,
+                paymentPlanActivityDTO.getPaymentPlanPaymentCategory())) {
+            if (paymentPlanActivityDTO.getPaymentPlanPaymentAmount() != null) {
+                if (CollecticaseUtilFunction.greaterThanBigDecimalObject.test(
+                        paymentPlanActivityDTO.getPaymentPlanPaymentAmount(), BigDecimal.ZERO)) {
+                    errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.
+                            PAYMENT_AMOUNT_ZERO_WHEN_PAYMENT_CATEGORY_SUSPENDED);
+                }
+            }
+        } else if (List.of(CollecticaseConstants.PAYMENT_CATEGORY_REDUCED, CollecticaseConstants.PAYMENT_CATEGORY_VARIABLE)
                 .contains(paymentPlanActivityDTO.getPaymentPlanPaymentCategory())) {
-            if (!CollecticaseUtilFunction.compareBigDecimalObject.test(paymentPlanActivityDTO.getPaymentPlanPaymentAmount(),
-                    BigDecimal.ZERO.stripTrailingZeros())) {
-                errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.PAYMENT_AMOUNT_SHOULD_BE_ZERO);
+            if (paymentPlanActivityDTO.getPaymentPlanPaymentAmount() != null &&
+                    paymentPlanActivityDTO.getPaymentPlanGuideLineAmount() != null) {
+                if (CollecticaseUtilFunction.greaterThanBigDecimalObject.test(paymentPlanActivityDTO
+                                .getPaymentPlanPaymentAmount(),
+                        paymentPlanActivityDTO.getPaymentPlanGuideLineAmount()) ||
+                        CollecticaseUtilFunction.compareBigDecimalObject.test(paymentPlanActivityDTO
+                                        .getPaymentPlanPaymentAmount(),
+                                paymentPlanActivityDTO.getPaymentPlanGuideLineAmount())) {
+                    errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail
+                            .PAYMENT_AMOUNT_LESS_THAN_GUIDELINE_AMOUNT);
+                }
             }
         }
-        if (!CollecticaseUtilFunction.lessThanBigDecimalObject.test(paymentPlanActivityDTO.getPaymentPlanPaymentAmount(),
-                paymentPlanActivityDTO.getPaymentPlanGuideLineAmount())) {
-            errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail.PAYMENT_AMOUNT_LESS_THAN_GUIDELINE_AMOUNT);
+        if (CollecticaseUtilFunction.compareBigDecimalObject.test(paymentPlanActivityDTO.getPaymentPlanPaymentAmount(),
+                BigDecimal.ZERO)) {
+            if (List.of(CollecticaseConstants.PAYMENT_CATEGORY_REDUCED)
+                    .contains(paymentPlanActivityDTO.getPaymentPlanPaymentCategory())) {
+                {
+                    errorEnums.add(ErrorMessageConstant.PaymentPlanActivityDTODetail
+                            .PAYMENT_AMOUNT_NON_ZERO_PAYMENT_CATEGORY_REDUCED);
+                }
+            }
         }
     }
 

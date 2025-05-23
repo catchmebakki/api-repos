@@ -12,6 +12,7 @@ import com.ssi.ms.collecticase.database.dao.CcaseEntityCmeDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseOrganizationCmoDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseRemedyActivityCraDAO;
 import com.ssi.ms.collecticase.database.dao.CcaseWageGarnishmentCwgDAO;
+import com.ssi.ms.collecticase.database.dao.ClmLofClfDAO;
 import com.ssi.ms.collecticase.database.dao.CmtNotesCnoDAO;
 import com.ssi.ms.collecticase.database.dao.CorrespondenceCorDAO;
 import com.ssi.ms.collecticase.database.dao.EmployerEmpDAO;
@@ -26,6 +27,7 @@ import com.ssi.ms.collecticase.database.repository.VwCcaseCountyCtyRepository;
 import com.ssi.ms.collecticase.dto.AllowValAlvResDTO;
 import com.ssi.ms.collecticase.dto.AlvDescResDTO;
 import com.ssi.ms.collecticase.dto.AppendNotesDTO;
+import com.ssi.ms.collecticase.dto.CaseCollectibleDebtsDTO;
 import com.ssi.ms.collecticase.dto.CaseNotesDTO;
 import com.ssi.ms.collecticase.dto.CcaseCasesCmcDTO;
 import com.ssi.ms.collecticase.dto.CcaseCountyCtyDTO;
@@ -72,16 +74,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -154,6 +160,7 @@ import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COMM_METHOD
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_RECEIPT_CLAIMANT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_RECEIPT_EMPLOYER;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_SOURCE_IFK_CD_FOR_CMC;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_STATUS_NOT_PROCESSED;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COUNTY_NONE;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.EMPLOYER_REPRESENTS_FOR;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.EMP_DIS_ASSOCIATE_SHORT_NOTE;
@@ -170,8 +177,10 @@ import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_C
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_GARNISHMENT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_SUSPENDED_WG;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NO_KNOWN_NH_EMPLOYER;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ONLINE_COE_TXT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.OUT_OF_STATE_EMPLOYER;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_CRC_ID;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_EMP_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_CLM_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_CMT_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COE_STRING;
@@ -188,6 +197,7 @@ import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_CMA_ID
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_SUCCESS;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_COR_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_RETURN_CD;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_RETURN_MSG;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.REMEDY_BANKRUPTCY;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.REMEDY_GENERAL;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.REMEDY_LIEN;
@@ -197,18 +207,21 @@ import static com.ssi.ms.collecticase.constant.CollecticaseConstants.REMEDY_WAGE
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.SYSTEM_USER_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TEMP_REDUCTION_LIEN;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TEMP_SUSPENSION_LIEN;
+import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TILE_SYMBOL;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TIME_FORMAT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TIME_FORMAT_INPUT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.USER_INTERFACE;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.WAGE_GARNISH_SOURCE;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.ACTIVITY_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.ALV_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CASE_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CASE_REMEDY_ACTIVITY_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CME_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMI_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMN_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMO_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.COR_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CRC_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.EMP_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.util.CollecticaseHelper.fornattedActivityNotes;
 import static com.ssi.ms.collecticase.util.CollecticaseHelper.splitNotesAndAddlNotes;
@@ -237,6 +250,9 @@ public class ActivityService extends CollecticaseBaseService {
     @Autowired
     UpdateContactActivityValidator updateContactActivityValidator;
 
+    @Autowired
+    EntityManager entityManager;
+
     public ActivityService(List<ResponseFactory<?>> factories) {
         for (ResponseFactory<?> factory : factories) {
             factoryMap.put(factory.getType(), factory);
@@ -262,9 +278,9 @@ public class ActivityService extends CollecticaseBaseService {
         // Characteristics Details
         CcaseCasesCmcDTO ccaseCasesCmcDTO = ccaseCasesCmcRepository.getCaseCmcByCaseId(caseId);
         // Activity short desc
-        AlvDescResDTO shortDescByActivityCd = allowValAlvRepository.getShortDescByAlc(activityTypeCd);
+        AlvDescResDTO shortDescByActivityCd = allowValAlvRepository.getShortDescByAlv(activityTypeCd);
         // Remedy short desc
-        AlvDescResDTO shortDescByRemedyCd = allowValAlvRepository.getShortDescByAlc(activityRemedyCd);
+        AlvDescResDTO shortDescByRemedyCd = allowValAlvRepository.getShortDescByAlv(activityRemedyCd);
 
         if (shortDescByActivityCd != null && shortDescByRemedyCd != null) {
             activityHeaderName = shortDescByRemedyCd.getDesc() + " - " + shortDescByActivityCd.getDesc();
@@ -527,7 +543,6 @@ public class ActivityService extends CollecticaseBaseService {
             empRepList.add(new OrganizationIndividualDTO
                     (allowValAlvResDTO.getConstId().toString(), allowValAlvResDTO.getConstShortDesc()));
         }
-
         activityWageGarnishmentPageResponse.setEmployerRepList(empRepList);
 
         return activityWageGarnishmentPageResponse;
@@ -901,6 +916,7 @@ public class ActivityService extends CollecticaseBaseService {
         }
     }
 
+    @Transactional
     public void createGeneralActivity(GeneralActivityDTO generalActivityDTO) {
         //Functional Validation
         ValidationHelper.validateGeneralActivity(generalActivityValidator, generalActivityDTO);
@@ -915,6 +931,11 @@ public class ActivityService extends CollecticaseBaseService {
         List<Map<String, Object>> sendNoticeList = new ArrayList<>();
         List<String> resendNoticeList = new ArrayList<>();
         List<String> manualNoticeList = new ArrayList<>();
+        CcaseCasesCmcDAO ccaseCasesCmcDAO = ccaseCasesCmcRepository.findById(generalActivityDTO.getCaseId())
+                .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + generalActivityDTO.getCaseId(),
+                        ACTIVITY_ID_NOT_FOUND));
+        generalActivityDTO.setCasePriorityCd(ccaseCasesCmcDAO.getCmcCasePriority());
+        generalActivityDTO.setClaimantId(ccaseCasesCmcDAO.getClaimantCmtDAO().getCmtId());
         createCollecticaseActivity = createActivity(generalActivityDTO);
         if (createCollecticaseActivity != null &&
                 createCollecticaseActivity.get(POUT_SUCCESS) != null &&
@@ -982,6 +1003,7 @@ public class ActivityService extends CollecticaseBaseService {
             processReopenActivity(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO(),
                     generalActivityDTO, currentDate, currentTimeStamp);
             createNHUISNotes(ccaseActivitiesCmaDAO, currentTimeStamp);
+            sendNoticeList = prepareCorrespondenceMapFromDTO(generalActivityDTO);
             processCorrespondence(sendNoticeList, resendNoticeList, manualNoticeList,
                     ccaseActivitiesCmaDAO, null);
             processResearchNHProperty(ccaseActivitiesCmaDAO);
@@ -1342,6 +1364,7 @@ public class ActivityService extends CollecticaseBaseService {
                 generalActivityDTO.getCallingUser(), generalActivityDTO.getUsingProgramName());
     }
 
+    @Transactional
     public void createPaymentPlanActivity(PaymentPlanActivityDTO paymentPlanActivityDTO) {
         //Functional Validation
         ValidationHelper.validateGeneralActivity(generalActivityValidator, paymentPlanActivityDTO);
@@ -1357,6 +1380,10 @@ public class ActivityService extends CollecticaseBaseService {
         List<Map<String, Object>> sendNoticeList = new ArrayList<>();
         List<String> resendNoticeList = new ArrayList<>();
         List<String> manualNoticeList = new ArrayList<>();
+        CcaseCasesCmcDAO ccaseCasesCmcDAO = ccaseCasesCmcRepository.findById(paymentPlanActivityDTO.getCaseId())
+                .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + paymentPlanActivityDTO.getCaseId(),
+                        CASE_ID_NOT_FOUND));
+        paymentPlanActivityDTO.setClaimantId(ccaseCasesCmcDAO.getClaimantCmtDAO().getCmtId());
         createCollecticaseActivity = createActivity(paymentPlanActivityDTO);
         if (createCollecticaseActivity != null &&
                 createCollecticaseActivity.get(POUT_SUCCESS) != null &&
@@ -1401,13 +1428,138 @@ public class ActivityService extends CollecticaseBaseService {
                 }
             }
             updatePPRemedy(ccaseActivitiesCmaDAO);
-            ccaseCaseRemedyCmrRepository.updateCaseRemedy(activityId, null);
+            entityManager.flush();
+            Map<String, Object> mapObject = ccaseCaseRemedyCmrRepository.updateCaseRemedy(activityId, null);
+            System.out.println(" mapObject " + mapObject);
             createNHUISNotes(ccaseActivitiesCmaDAO, currentTimeStamp);
+            prepareCorrespondenceMapFromDTO(paymentPlanActivityDTO);
+            resendNoticeList = prepareResendNoticesList(paymentPlanActivityDTO, resendNoticeList);
+            manualNoticeList = prepareManualNoticesList(paymentPlanActivityDTO, manualNoticeList);
             processCorrespondence(sendNoticeList, resendNoticeList, manualNoticeList,
                     ccaseActivitiesCmaDAO, null);
             processAutoCompleteAct(ccaseActivitiesCmaDAO);
             processClosedCasePPActivity(ccaseActivitiesCmaDAO);
         }
+    }
+
+    private List<String> prepareResendNoticesList(PaymentPlanActivityDTO paymentPlanActivityDTO,
+                                                  List<String> resendNoticeList) {
+        if (paymentPlanActivityDTO.getActivityReSendCorrespondence() != null) {
+            resendNoticeList = Arrays.asList(paymentPlanActivityDTO.getActivityReSendCorrespondence());
+        }
+        return resendNoticeList;
+    }
+
+    private List<String> prepareManualNoticesList(PaymentPlanActivityDTO paymentPlanActivityDTO,
+                                                  List<String> manualNoticeList) {
+        if (paymentPlanActivityDTO.getActivityManualCorrespondence() != null) {
+            manualNoticeList = Arrays.asList(paymentPlanActivityDTO.getActivityManualCorrespondence());
+        }
+        return manualNoticeList;
+    }
+
+    public List<Map<String, Object>> prepareCorrespondenceMapFromDTO(
+            GeneralActivityDTO generalActivityDTO) {
+        List<Map<String, Object>> correspMapList = new ArrayList<Map<String, Object>>();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO = null;
+        if (generalActivityDTO.getActivitySendCorrespondence() != null) {
+            for (String sendNotice : generalActivityDTO.getActivitySendCorrespondence()) {
+                paramMap = new HashMap<String, Object>();
+                ccaseCraCorrespondenceCrcDAO = ccaseCraCorrespondenceCrcRepository.findById(UtilFunction.stringToLong
+                        .apply(sendNotice)).orElseThrow(() -> new NotFoundException("Invalid CRC ID:" +
+                        UtilFunction.stringToLong.apply(sendNotice), CRC_ID_NOT_FOUND));
+                paramMap.put(PIN_CRC_ID, ccaseCraCorrespondenceCrcDAO.getCrcId());
+                paramMap.put(PIN_WLP_I720_RPT_ID,
+                        ccaseCraCorrespondenceCrcDAO.getReportsRptDAO().getRptId().intValue());
+                List<ClmLofClfDAO> clmLofClfDAOList = clmLofClfRepository
+                        .getClaimLocalOfficeByClaimantId(generalActivityDTO.getClaimantId(),
+                                INDICATOR.Y.name());
+                ClmLofClfDAO clmLofClfDAO = null;
+                if (CollectionUtils.isNotEmpty(clmLofClfDAOList)) {
+                    clmLofClfDAO = clmLofClfDAOList.get(0);
+                }
+                paramMap.put(PIN_WLP_I720_CLM_ID,
+                        clmLofClfDAO != null ? clmLofClfDAO.getFkClmId() : null);
+                if (generalActivityDTO.getActivityEntityContact() != null
+                        && CollecticaseUtilFunction.greaterThanLongObject.test(
+                        UtilFunction.stringToLong.apply(generalActivityDTO.getActivityEntityContact()), 0L))//SAT25570
+                {
+                    paramMap.put(PIN_EMP_ID,
+                            UtilFunction.stringToLong.apply(generalActivityDTO.getActivityEntityContact()).intValue());
+                } else {
+                    paramMap.put(PIN_EMP_ID, null);
+                }
+                paramMap.put(PIN_WLP_I720_CMT_ID,
+                        generalActivityDTO.getClaimantId().intValue());
+                paramMap.put(PIN_WLP_I720_COR_COE_IND,
+                        INDICATOR.Y.name());
+                paramMap.put(PIN_WLP_I720_FORCED_IND,
+                        INDICATOR.N.name());
+                paramMap.put(PIN_WLP_I720_COR_STATUS_CD,
+                        COR_STATUS_NOT_PROCESSED);
+                paramMap.put(
+                        PIN_WLP_I720_COR_DEC_ID_IFK,
+                        null);
+                paramMap.put(
+                        PIN_WLP_I720_COR_RECEIP_IFK,
+                        generalActivityDTO.getClaimantId().intValue());
+                if (UtilFunction.compareLongObject.test(REMEDY_WAGE_GARNISHMENT,
+                        generalActivityDTO.getActivityRemedyTypeCd())) {
+                    if (generalActivityDTO.getActivityEntityContact() != null
+                            && CollecticaseUtilFunction.greaterThanLongObject.test(
+                            UtilFunction.stringToLong.apply(generalActivityDTO.getActivityEntityContact()), 0L)) {
+                        paramMap.put(
+                                PIN_WLP_I720_COR_RECEIP_IFK,
+                                UtilFunction.stringToLong.apply(generalActivityDTO.getActivityEntityContact()).intValue());
+                    }
+                }
+                paramMap.put(PIN_WLP_I720_COR_RECEIP_CD,
+                        COR_RECEIPT_CLAIMANT);
+                paramMap.put(PIN_WLP_I720_COR_TS,
+                        commonRepository.getCurrentTimestamp());
+                paramMap.put(PIN_WLP_I720_COE_STRING,
+                        processCOEString(generalActivityDTO));
+                paramMap.put(POUT_WLP_O720_COR_ID, 0L);
+                paramMap
+                        .put(POUT_WLP_O720_RETURN_CD, 0L);
+                paramMap.put(POUT_WLP_O720_RETURN_MSG,
+                        null);
+                correspMapList.add(paramMap);
+            }
+        }
+        return correspMapList;
+    }
+
+    public String processCOEString(
+            GeneralActivityDTO generalActivityDTO) {
+        String coeString = StringUtils.EMPTY;
+        CaseCollectibleDebtsDTO caseCollectibleDebtsDTO = null;
+        Map<String, Object> paramValueMap = new HashMap<String, Object>();
+        BigDecimal opBalAmt = new BigDecimal("0.0");
+        BigDecimal opFrdBalAmt = new BigDecimal("0.0");
+        BigDecimal opNFBalAmt = new BigDecimal("0.0");
+        BigDecimal opIntAmt = new BigDecimal("0.0");
+        caseCollectibleDebtsDTO = vwCcaseCollectibleDebtsRepository
+                .getCollectibleDebtsAmount(generalActivityDTO.getClaimantId(), BigDecimal.ZERO);
+        coeString = coeString + ONLINE_COE_TXT;
+        if (caseCollectibleDebtsDTO != null) {
+            opBalAmt = caseCollectibleDebtsDTO.getOverpaymentBalanceAmount();
+            opFrdBalAmt = caseCollectibleDebtsDTO.getOverpaymentFraudBalanceAmount();
+            opNFBalAmt = caseCollectibleDebtsDTO.getOverpaymentNonFraudBalanceAmount();
+            opIntAmt = caseCollectibleDebtsDTO.getOverpaymentInterestBalanceAmount();
+
+        }
+        coeString = coeString
+                + TILE_SYMBOL
+                + NumberFormat.getCurrencyInstance(Locale.US).format(opBalAmt)
+                + TILE_SYMBOL
+                + NumberFormat.getCurrencyInstance(Locale.US).format(opFrdBalAmt)
+                + TILE_SYMBOL
+                + NumberFormat.getCurrencyInstance(Locale.US).format(opNFBalAmt)
+                + TILE_SYMBOL
+                + NumberFormat.getCurrencyInstance(Locale.US).format(opIntAmt);
+        return coeString;
     }
 
     private void updatePPRemedy(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
@@ -1589,6 +1741,9 @@ public class ActivityService extends CollecticaseBaseService {
                             ACTIVITY_ID_NOT_FOUND));
             activityCreated = true;
 
+            ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository.getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO
+                    .getCcaseCasesCmcDAO().getCmcId(), List.of(ccaseActivitiesCmaDAO.getCmaRemedyType()));
+
             if (!(UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(), REMEDY_GENERAL)
                     || UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO
                     .getCmaRemedyType(), REMEDY_BANKRUPTCY))) {
@@ -1601,7 +1756,7 @@ public class ActivityService extends CollecticaseBaseService {
                 }
             }
 
-            if (CollecticaseUtilFunction.lesserThanLongObject.test(wageGarnishmentActivityDTO.getEmployerId(), 0L)) {
+            if (CollecticaseUtilFunction.greaterThanLongObject.test(wageGarnishmentActivityDTO.getEmployerId(), 0L)) {
                 ccaseActivitiesCmaDAO.setFkEmpIdWg(wageGarnishmentActivityDTO.getEmployerId());
             } else if (CollecticaseUtilFunction.lesserThanLongObject.test(wageGarnishmentActivityDTO.getEmployerId(),
                     0L)) {
@@ -1616,8 +1771,9 @@ public class ActivityService extends CollecticaseBaseService {
                 }
                 ccaseActivitiesCmaDAO.setFkEmpIdWg(null);
             }
+            ccaseActivitiesCmaDAO.setCmaEmpRepTypeCd(wageGarnishmentActivityDTO.getEmployerRepresentativeCd());
             updateWGRemedy(ccaseActivitiesCmaDAO, wageGarnishmentActivityDTO.getEmployerId());
-            ccaseCaseRemedyCmrRepository.updateCaseRemedy(activityId, null);
+            ccaseCaseRemedyCmrRepository.updateCaseRemedy(activityId, wageGarnishmentActivityDTO.getEmployerId());
             createNHUISNotes(ccaseActivitiesCmaDAO, currentTimeStamp);
             ccaseWageGarnishmentCwgDAO = processWageGarnish(ccaseActivitiesCmaDAO);
             if (ccaseWageGarnishmentCwgDAO != null) {
