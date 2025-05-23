@@ -35,6 +35,7 @@ import com.ssi.ms.collecticase.dto.CreateActivityDTO;
 import com.ssi.ms.collecticase.dto.EmployerContactListDTO;
 import com.ssi.ms.collecticase.dto.EmployerListDTO;
 import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
+import com.ssi.ms.collecticase.dto.GTTForOrgLookupDTO;
 import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
 import com.ssi.ms.collecticase.dto.OrgLookupDTO;
 import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
@@ -776,7 +777,7 @@ public class ActivityService extends CollecticaseBaseService {
         }
     }
 
-    public List<GTTForOrgLookupDAO> searchOrgLookup(@Valid OrgLookupDTO orgLookupDTO) {
+    public List<GTTForOrgLookupDTO> searchOrgLookup(@Valid OrgLookupDTO orgLookupDTO) {
         List<GTTForOrgLookupDAO> gttForOrgLookupDAO = null;
         if (CollecticaseConstants.EMPLOYER_ENTITY_TYPE.equals(orgLookupDTO.getEntityType())) {
             gttForOrgLookupDAO = customLookupRepository.processOrgLookupEmpQuery(orgLookupDTO);
@@ -784,7 +785,8 @@ public class ActivityService extends CollecticaseBaseService {
                 CollecticaseConstants.REPRESENTATIVE_ENTITY_TYPE.equals(orgLookupDTO.getEntityType())) {
             gttForOrgLookupDAO = customLookupRepository.processOrgLookupOrgEmpQuery(orgLookupDTO);
         }
-        return gttForOrgLookupDAO;
+        return Objects.requireNonNull(gttForOrgLookupDAO).stream().map(dao ->
+                gttForOrgLookupMapper.daoToDto(dao)).toList();
     }
 
     public void completeFollowupActivity(CompleteFollowupActivityDTO completeFollowupActivityDTO) {

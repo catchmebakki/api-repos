@@ -5,6 +5,7 @@ import com.ssi.ms.collecticase.database.mapper.CcaseActivitiesCmaMapper;
 import com.ssi.ms.collecticase.database.mapper.CcaseCmaNoticesCmnMapper;
 import com.ssi.ms.collecticase.database.mapper.CcaseCraCorrespondenceCrcMapper;
 import com.ssi.ms.collecticase.database.mapper.GttForCaselookupMapper;
+import com.ssi.ms.collecticase.database.mapper.GttForOrgLookupMapper;
 import com.ssi.ms.collecticase.database.mapper.VwCcaseCaseloadMapper;
 import com.ssi.ms.collecticase.database.mapper.VwCcaseHeaderEntityMapper;
 import com.ssi.ms.collecticase.database.mapper.VwCcaseHeaderMapper;
@@ -151,4 +152,7 @@ public class CollecticaseBaseService {
 
     @Autowired
     GttForCaselookupMapper gttForCaselookupMapper;
+
+    @Autowired
+    GttForOrgLookupMapper gttForOrgLookupMapper;
 }

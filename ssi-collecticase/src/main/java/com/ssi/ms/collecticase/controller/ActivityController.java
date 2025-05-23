@@ -5,6 +5,7 @@ import com.ssi.ms.collecticase.dto.CaseNotesDTO;
 import com.ssi.ms.collecticase.dto.CompleteFollowupActivityDTO;
 import com.ssi.ms.collecticase.dto.EmployerListDTO;
 import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
+import com.ssi.ms.collecticase.dto.GTTForOrgLookupDTO;
 import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
 import com.ssi.ms.collecticase.dto.OrgLookupDTO;
 import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
@@ -242,7 +243,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/orglookup", produces = "application/json")
-    public ResponseEntity orgLookup(
+    public ResponseEntity<List<GTTForOrgLookupDTO>> orgLookup(
             @Valid @RequestBody final OrgLookupDTO orgLookupDTO) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 activityService.searchOrgLookup(orgLookupDTO));
