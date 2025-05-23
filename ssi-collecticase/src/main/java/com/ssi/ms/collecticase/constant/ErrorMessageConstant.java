@@ -274,7 +274,7 @@ public interface ErrorMessageConstant {
                 "Wage amount should be Four digit with two decimal.", 0),
 
         WG_EMPLOYER_MANDATORY_DO_NOT_GARNISH("doNotGarnishInd",
-                "doNotGarnishInd.employer.manadatory",
+                "doNotGarnishInd.employer.mandatory",
                 "Employer mandatory when Do Not garnish is checked.", 0),
 
         WG_FREQUENCY_DO_NOT_GRANISH("doNotGarnishInd",
@@ -285,7 +285,7 @@ public interface ErrorMessageConstant {
                 "Wage Frequency is not applicable when employer doesnot exists", 0),
 
         WG_FREQUENCY_WG_AMOUNT_POSITIVE_NUMBER("wageFrequency",
-                "wage.frequency.wage.amount.non.postive.number",
+                "wage.frequency.wage.amount.non.positive.number",
                 "Wage Frequency is not applicable when wage amount is not positive number", 0),
 
         WG_NON_COMPLIANCE_REQUIRED("wageNonCompliance", "wageNonCompliance.required",
@@ -342,11 +342,11 @@ public interface ErrorMessageConstant {
                 "'{0}' Notices cannot be sent when do not garnish is checked", 1),
 
         WG_CORR_NA_COURT_ORDERED_CHECKED("activityCorrespondence",
-                "activityCorrespondence.na.court.ordered",
+                "activityCorrespondence.na.court.ordered.checked",
                 "'{0}' Notices can be sent when the Court Ordered is Checked", 1),
 
         WG_CORR_NA_COURT_ORDERED_NOT_CHECKED("activityCorrespondence",
-                "activityCorrespondence.na.court.ordered",
+                "activityCorrespondence.na.court.ordered.notchecked",
                 "'{0}' Notices can be sent when the Court Ordered is not Checked", 1);
 
         private final String frontendField;

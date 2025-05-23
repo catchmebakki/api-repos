@@ -256,7 +256,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/complete-followup", produces = "application/json")
-    public ResponseEntity completeFollowupActivity(
+    public ResponseEntity<CompleteFollowupActivityDTO> completeFollowupActivity(
             @Valid @RequestBody final CompleteFollowupActivityDTO completeFollowupActivityDTO,
             BindingResult result) {
         if (!result.hasErrors()) {
@@ -268,7 +268,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/appendnotes", produces = "application/json")
-    public ResponseEntity appendNotes(
+    public ResponseEntity<AppendNotesDTO> appendNotes(
             @Valid @RequestBody final AppendNotesDTO appendNotesDTO,
             BindingResult result) {
         if (!result.hasErrors()) {
@@ -310,7 +310,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/add-wagegarnish", produces = "application/json")
-    public ResponseEntity<GeneralActivityDTO> addWageGarnishActivity(
+    public ResponseEntity<WageGarnishmentActivityDTO> addWageGarnishActivity(
             @Valid @RequestBody final WageGarnishmentActivityDTO wageGarnishmentActivityDTO, BindingResult result) {
         if (!result.hasErrors()) {
             activityService.createWageGarnishmentActivity(wageGarnishmentActivityDTO);

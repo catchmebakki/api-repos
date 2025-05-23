@@ -585,8 +585,16 @@ public class ActivityService extends CollecticaseBaseService {
 
     public ActivityUpdateContactPageResponse getUpdateContactActivityPage(Long caseId, Long activityRemedyCd,
                                                                           Long activityTypeCd) {
-        // Bak TODO need to decide and push all the calls here - static drop down list
-        return null;
+        // Bak TODO for now just setting activityGeneralPageResponse object only, will check and add few more attributes
+        // getGeneralActivityPage call
+        ActivityGeneralPageResponse activityGeneralPageResponse = getGeneralActivityPage(caseId, activityRemedyCd,
+                activityTypeCd);
+        // ActivityUpdateContactPageResponse get bean object
+        ActivityUpdateContactPageResponse activityUpdateContactPageResponse = getResponse(ResponseTypes
+                .ActivityUpdateContactPageResponse);
+
+        activityUpdateContactPageResponse.setActivityGeneralPageResponse(activityGeneralPageResponse);
+        return activityUpdateContactPageResponse;
     }
 
     public FollowupActivityDTO getActivityInfoForFollowup(Long activityId) {
