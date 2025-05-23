@@ -77,7 +77,6 @@ import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COMM_METHOD
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_RECEIPT_CLAIMANT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_RECEIPT_EMPLOYER;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_SOURCE_IFK_CD_FOR_CMC;
-import static com.ssi.ms.collecticase.constant.CollecticaseConstants.COR_STATUS_NOT_PROCESSED;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.EMPLOYER_REPRESENTS_FOR;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ENTITY_CONTACT_TYPE_ATTY;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ENTITY_CONTACT_TYPE_EMP;
@@ -91,7 +90,6 @@ import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_G
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.NOTICE_OF_SUSPENDED_WG;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.ONLINE_COE_TXT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_CRC_ID;
-import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_EMP_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_CLM_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_CMT_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I720_COE_STRING;
@@ -107,7 +105,6 @@ import static com.ssi.ms.collecticase.constant.CollecticaseConstants.PIN_WLP_I72
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_SQL_STRING;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_COR_ID;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_RETURN_CD;
-import static com.ssi.ms.collecticase.constant.CollecticaseConstants.POUT_WLP_O720_RETURN_MSG;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.REMEDY_PAYMENT_PLAN;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.REMEDY_WAGE_GARNISHMENT;
 import static com.ssi.ms.collecticase.constant.CollecticaseConstants.TEMP_REDUCTION_LIEN;
@@ -122,7 +119,6 @@ import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CASE_REMEDY_
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMI_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMN_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.COR_ID_NOT_FOUND;
-import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CRC_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.EMP_ID_NOT_FOUND;
 
 @Slf4j
@@ -162,7 +158,7 @@ public class CaseService extends CollecticaseBaseService {
 
     public PaginationResponse<VwCcaseCaseloadDTO> getCaseLoadByStaffId
             (Long staffId, int page, int size, String sortBy, boolean ascending) {
-        
+
         Map<String, Object> pageContentMap = new HashMap<>();
         // Create a Sort object based on the provided sort field and direction (ascending or descending)
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -666,73 +662,6 @@ public class CaseService extends CollecticaseBaseService {
                 }
             }
         }
-    }
-
-    public List<Map<String, Object>> prepareCorrespondenceMapFromDTO(
-            GeneralActivityDTO generalActivityDTO) {
-        List<Map<String, Object>> correspMapList = new ArrayList<Map<String, Object>>();
-        Map<String, Object> paramMap = new HashMap<String, Object>();
-        CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO = null;
-        if (generalActivityDTO.getActivitySendCorrespondence() != null) {
-            for (String sendNotice : generalActivityDTO.getActivitySendCorrespondence()) {
-                paramMap = new HashMap<String, Object>();
-                ccaseCraCorrespondenceCrcDAO = ccaseCraCorrespondenceCrcRepository.findById(UtilFunction.stringToLong
-                        .apply(sendNotice)).orElseThrow(() -> new NotFoundException("Invalid CRC ID:" +
-                        UtilFunction.stringToLong.apply(sendNotice), CRC_ID_NOT_FOUND));
-                paramMap.put(PIN_CRC_ID, ccaseCraCorrespondenceCrcDAO.getCrcId());
-                paramMap.put(PIN_WLP_I720_RPT_ID,
-                        ccaseCraCorrespondenceCrcDAO.getReportsRptDAO().getRptId().intValue());
-                paramMap.put(PIN_WLP_I720_CLM_ID,
-                        clmLofClfRepository.getClaimLocalOfficeByClaimantId(generalActivityDTO.getClaimantId(),
-                                INDICATOR.Y.name()));
-                if (generalActivityDTO.getActivityEntityContact() != null
-                        && CollecticaseUtilFunction.greaterThanLongObject.test(
-                        UtilFunction.stringToLong.apply(generalActivityDTO.getActivityEntityContact()), 0L))//SAT25570
-                {
-                    paramMap.put(PIN_EMP_ID,
-                            UtilFunction.stringToLong.apply(generalActivityDTO.getActivityEntityContact()));
-                } else {
-                    paramMap.put(PIN_EMP_ID, null);
-                }
-                paramMap.put(PIN_WLP_I720_CMT_ID,
-                        generalActivityDTO.getCaseId());
-                paramMap.put(PIN_WLP_I720_COR_COE_IND,
-                        INDICATOR.Y.name());
-                paramMap.put(PIN_WLP_I720_FORCED_IND,
-                        INDICATOR.N.name());
-                paramMap.put(PIN_WLP_I720_COR_STATUS_CD,
-                        COR_STATUS_NOT_PROCESSED);
-                paramMap.put(
-                        PIN_WLP_I720_COR_DEC_ID_IFK,
-                        null);
-                paramMap.put(
-                        PIN_WLP_I720_COR_RECEIP_IFK,
-                        generalActivityDTO.getClaimantId());
-                if (UtilFunction.compareLongObject.test(REMEDY_WAGE_GARNISHMENT,
-                        generalActivityDTO.getActivityRemedyTypeCd())) {
-                    if (generalActivityDTO.getActivityEntityContact() != null
-                            && CollecticaseUtilFunction.greaterThanLongObject.test(
-                            UtilFunction.stringToLong.apply(generalActivityDTO.getActivityEntityContact()), 0L)) {
-                        paramMap.put(
-                                PIN_WLP_I720_COR_RECEIP_IFK,
-                                UtilFunction.stringToLong.apply(generalActivityDTO.getActivityEntityContact()));
-                    }
-                }
-                paramMap.put(PIN_WLP_I720_COR_RECEIP_CD,
-                        COR_RECEIPT_CLAIMANT);
-                paramMap.put(PIN_WLP_I720_COR_TS,
-                        commonRepository.getCurrentTimestamp());
-                paramMap.put(PIN_WLP_I720_COE_STRING,
-                        processCOEString(generalActivityDTO));
-                paramMap.put(POUT_WLP_O720_COR_ID, 0L);
-                paramMap
-                        .put(POUT_WLP_O720_RETURN_CD, 0L);
-                paramMap.put(POUT_WLP_O720_RETURN_MSG,
-                        null);
-                correspMapList.add(paramMap);
-            }
-        }
-        return correspMapList;
     }
 
     public String processCOEString(
