@@ -5,6 +5,7 @@ import com.ssi.ms.collecticase.dto.CaseNotesDTO;
 import com.ssi.ms.collecticase.dto.CompleteFollowupActivityDTO;
 import com.ssi.ms.collecticase.dto.EmployerListDTO;
 import com.ssi.ms.collecticase.dto.FollowupActivityDTO;
+import com.ssi.ms.collecticase.dto.GTTForOrgLookupDTO;
 import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
 import com.ssi.ms.collecticase.dto.OrgLookupDTO;
 import com.ssi.ms.collecticase.dto.OrganizationIndividualDTO;
@@ -242,7 +243,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/orglookup", produces = "application/json")
-    public ResponseEntity orgLookup(
+    public ResponseEntity<List<GTTForOrgLookupDTO>> orgLookup(
             @Valid @RequestBody final OrgLookupDTO orgLookupDTO) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 activityService.searchOrgLookup(orgLookupDTO));
@@ -256,7 +257,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/complete-followup", produces = "application/json")
-    public ResponseEntity completeFollowupActivity(
+    public ResponseEntity<CompleteFollowupActivityDTO> completeFollowupActivity(
             @Valid @RequestBody final CompleteFollowupActivityDTO completeFollowupActivityDTO,
             BindingResult result) {
         if (!result.hasErrors()) {
@@ -268,7 +269,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/appendnotes", produces = "application/json")
-    public ResponseEntity appendNotes(
+    public ResponseEntity<AppendNotesDTO> appendNotes(
             @Valid @RequestBody final AppendNotesDTO appendNotesDTO,
             BindingResult result) {
         if (!result.hasErrors()) {
@@ -310,7 +311,7 @@ public class ActivityController {
     }
 
     @PostMapping(path = "/add-wagegarnish", produces = "application/json")
-    public ResponseEntity<GeneralActivityDTO> addWageGarnishActivity(
+    public ResponseEntity<WageGarnishmentActivityDTO> addWageGarnishActivity(
             @Valid @RequestBody final WageGarnishmentActivityDTO wageGarnishmentActivityDTO, BindingResult result) {
         if (!result.hasErrors()) {
             activityService.createWageGarnishmentActivity(wageGarnishmentActivityDTO);

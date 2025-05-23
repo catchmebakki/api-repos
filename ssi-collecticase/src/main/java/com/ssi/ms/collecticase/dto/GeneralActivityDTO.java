@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.With;
 import lombok.experimental.SuperBuilder;
 import org.springframework.validation.annotation.Validated;
@@ -37,6 +38,7 @@ import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.NOTES_LENGTH
 @NoArgsConstructor
 @Validated
 @Getter
+@Setter
 public class GeneralActivityDTO {
 
     @NotNull(message = ACTIVITY_DATE_MANDATORY)

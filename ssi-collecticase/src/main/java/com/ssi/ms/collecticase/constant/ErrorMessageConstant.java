@@ -68,9 +68,17 @@ public interface ErrorMessageConstant {
 
     String NHUIS_NOTES_LENGTH_EXCEED = "nhuis.notes.length.exceed";
 
+    String ACTIVITY_NOTES_MANDATORY = "activity.notes.required";
+
     String COMPELTE_FOLLOWUP_COMPLETED_ON_MANDATORY = "complete.followup.completed.on.mandatory";
 
     String COMPELTE_FOLLOWUP_COMPLETED_BY_MANDATORY = "complete.followup.completed.by.mandatory";
+
+    String ORG_LOOKUP_ORG_NAME_INVALID = "orgLookup.orgName.invalid";
+
+    String ORG_LOOKUP_UI_ACCT_NBR_INVALID = "orgLookup.uiAcctNbr.invalid";
+
+    String ORG_LOOKUP_FEIN_INVALID = "orgLookup.fein.invalid";
 
     @Getter
     @AllArgsConstructor
@@ -226,6 +234,18 @@ public interface ErrorMessageConstant {
                 "activityCorrespondence.current.filing.none",
                 "'{0}' Notices cannot be sent when the Claimant is not currently Filing", 1),
 
+        PAYMENT_AMOUNT_ZERO_WHEN_PAYMENT_CATEGORY_SUSPENDED("paymentPlanPaymentAmount",
+                "paymentAmount.should.be.zero.when.payment.category.suspended",
+                "Payment amount should be $0 when the Payment Category is Suspended.", 0),
+
+        PAYMENT_AMOUNT_NON_ZERO_PAYMENT_CATEGORY_REDUCED("paymentPlanPaymentAmount",
+                "paymentAmount.zero.when.payment.category.reduced",
+                "Please provide a valid positive number for Payment Amount.", 0),
+
+        PAYMENT_PLAN_EFF_UNITL_SHOULD_BE_IN_FUTURE("paymentPlanEffectiveUntilDate",
+                "paymentPlanEffectiveUntilDate.should.be.in.future",
+                "Payment Plan Effective Until must be in the future.", 0),
+
         PAYMENT_PLAN_COR_CURRENT_FILING_NA("activityCorrespondence",
                 "activityCorrespondence.current.filing.notapplicable",
                 "'{0}' Notices cannot be sent when the Claimant is currently Filing", 1);
@@ -274,7 +294,7 @@ public interface ErrorMessageConstant {
                 "Wage amount should be Four digit with two decimal.", 0),
 
         WG_EMPLOYER_MANDATORY_DO_NOT_GARNISH("doNotGarnishInd",
-                "doNotGarnishInd.employer.manadatory",
+                "doNotGarnishInd.employer.mandatory",
                 "Employer mandatory when Do Not garnish is checked.", 0),
 
         WG_FREQUENCY_DO_NOT_GRANISH("doNotGarnishInd",
@@ -285,7 +305,7 @@ public interface ErrorMessageConstant {
                 "Wage Frequency is not applicable when employer doesnot exists", 0),
 
         WG_FREQUENCY_WG_AMOUNT_POSITIVE_NUMBER("wageFrequency",
-                "wage.frequency.wage.amount.non.postive.number",
+                "wage.frequency.wage.amount.non.positive.number",
                 "Wage Frequency is not applicable when wage amount is not positive number", 0),
 
         WG_NON_COMPLIANCE_REQUIRED("wageNonCompliance", "wageNonCompliance.required",
@@ -342,11 +362,11 @@ public interface ErrorMessageConstant {
                 "'{0}' Notices cannot be sent when do not garnish is checked", 1),
 
         WG_CORR_NA_COURT_ORDERED_CHECKED("activityCorrespondence",
-                "activityCorrespondence.na.court.ordered",
+                "activityCorrespondence.na.court.ordered.checked",
                 "'{0}' Notices can be sent when the Court Ordered is Checked", 1),
 
         WG_CORR_NA_COURT_ORDERED_NOT_CHECKED("activityCorrespondence",
-                "activityCorrespondence.na.court.ordered",
+                "activityCorrespondence.na.court.ordered.notchecked",
                 "'{0}' Notices can be sent when the Court Ordered is not Checked", 1);
 
         private final String frontendField;
@@ -551,6 +571,19 @@ public interface ErrorMessageConstant {
                 "complete.followup.completed.on.future",
                 "Follow-up completion date cannot be in the future.",
                 0);
+
+        private final String frontendField;
+        private final String frontendErrorCode;
+        private final String description;
+        private final Integer params;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    enum OrgLookupDetail implements CollecticaseErrorEnum {
+        ORG_LOOKUP_ATLEAST_ONE_SHOULD_BE_SELECTED("orgName",
+                "orgName.atleastoneshouldbeselected",
+                "At least one filter condition should be provided.", 0);
 
         private final String frontendField;
         private final String frontendErrorCode;

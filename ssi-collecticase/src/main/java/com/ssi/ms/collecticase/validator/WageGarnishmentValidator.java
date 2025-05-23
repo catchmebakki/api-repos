@@ -242,7 +242,9 @@ public class WageGarnishmentValidator {
                     .contains(wageGarnishmentActivityDTO.getActivityTypeCd())) {
                 errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_EMPLOYER_CONTACT_REQUIRED);
             }
-            errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_EMPLOYER_REPRESENTATIVE_REQUIRED);
+            if (wageGarnishmentActivityDTO.getEmployerRepresentativeCd() == null) {
+                errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_EMPLOYER_REPRESENTATIVE_REQUIRED);
+            }
         }
     }
 
