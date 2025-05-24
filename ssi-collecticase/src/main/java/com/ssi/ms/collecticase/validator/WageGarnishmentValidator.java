@@ -93,7 +93,9 @@ public class WageGarnishmentValidator {
         if (UtilFunction.compareLongObject.test(wageGarnishmentActivityDTO.getActivityTypeCd(),
                 ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT)) {
             if (CollecticaseConstants.INDICATOR.Y.name().equals(wageGarnishmentActivityDTO.getCourtOrderedInd())) {
-                errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_AMOUNT_REQUIRED);
+                if (wageGarnishmentActivityDTO.getWageAmount() == null) {
+                    errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_AMOUNT_REQUIRED);
+                }
             }
             if (wageGarnishmentActivityDTO.getWageFrequency() == null) {
                 errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_FREQUENCY_REQUIRED);
@@ -140,7 +142,9 @@ public class WageGarnishmentValidator {
                                         .getCrcCourtOrdered())) {
                                     errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail
                                             .WG_CORR_NA_COURT_ORDERED_CHECKED);
-                                } else {
+                                }
+                                if (CollecticaseConstants.INDICATOR.N.name().equals(ccaseCraCorrespondenceCrcDAO
+                                        .getCrcCourtOrdered())) {
                                     errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail
                                             .WG_CORR_NA_COURT_ORDERED_NOT_CHECKED);
                                 }
@@ -210,7 +214,8 @@ public class WageGarnishmentValidator {
                                           List<CollecticaseErrorEnum> errorEnums) {
         if (UtilFunction.compareLongObject.test(wageGarnishmentActivityDTO.getActivityTypeCd(),
                 ACTIVITY_TYPE_EMPLOYER_NON_COMPLIANCE)) {
-            errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_NON_COMPLIANCE_REQUIRED);
+            if (wageGarnishmentActivityDTO.getWageNonCompliance() == null)
+                errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_NON_COMPLIANCE_REQUIRED);
         }
         if (UtilFunction.compareLongObject.test(wageGarnishmentActivityDTO.getWageNonCompliance(),
                 EMP_NON_COMP_FAIL_IMP_GARNISH)) {
@@ -234,13 +239,15 @@ public class WageGarnishmentValidator {
     private static void validateContactAndRep(WageGarnishmentActivityDTO wageGarnishmentActivityDTO,
                                               List<CollecticaseErrorEnum> errorEnums) {
         if (wageGarnishmentActivityDTO.getEmployerId() != null &&
-                !UtilFunction.compareLongObject.test(wageGarnishmentActivityDTO.getEmployerId(),
+                CollecticaseUtilFunction.greaterThanLongObject.test(wageGarnishmentActivityDTO.getEmployerId(),
                         0L)) {
             if (List.of(ACTIVITY_TYPE_CMT_NO_LONGER_EMPLOYED, ACTIVITY_TYPE_CHANGE_WG_GARNISH_AMT,
                             ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT, ACTIVITY_TYPE_FILED_MOTION_PERIODIC_PYMTS,
                             ACTIVITY_TYPE_CMT_REQ_WG_AMT_CHANGE, ACTIVITY_TYPE_EMPLOYER_NON_COMPLIANCE)
                     .contains(wageGarnishmentActivityDTO.getActivityTypeCd())) {
-                errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_EMPLOYER_CONTACT_REQUIRED);
+                if (wageGarnishmentActivityDTO.getEmployerContactId() == null) {
+                    errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_EMPLOYER_CONTACT_REQUIRED);
+                }
             }
             if (wageGarnishmentActivityDTO.getEmployerRepresentativeCd() == null) {
                 errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_EMPLOYER_REPRESENTATIVE_REQUIRED);
@@ -270,16 +277,16 @@ public class WageGarnishmentValidator {
         if (UtilFunction.compareLongObject.test(ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT,
                 wageGarnishmentActivityDTO.getActivityTypeCd())) {
             if (wageGarnishmentActivityDTO.getWageMotionFiledOn() == null) {
-                errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_MOTION_FILED_ON_REQUIRED);
+                errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_CHANGE_REQ_DATE_REQUIRED);
             }
             if (wageGarnishmentActivityDTO.getWageMotionFiledOn() != null &&
                     wageGarnishmentActivityDTO.getWageMotionFiledOn().after(currentDate)) {
-                errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_MOTION_FILED_ON_DATE_FUTURE);
+                errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail.WG_CHANGE_REQ_DATE_FUTURE);
             }
             if (wageGarnishmentActivityDTO.getWageMotionFiledOn() != null) {
                 if (wageGarnishmentActivityDTO.getEmployerId() == null) {
                     errorEnums.add(ErrorMessageConstant.WageGarnishmentActivityDTODetail
-                            .WG_MOTION_FILED_ON_EMPLOYER_NONE);
+                            .WG_CHANGE_REQ_DATE_EMPLOYER_NONE);
                 }
             }
         }
@@ -317,13 +324,12 @@ public class WageGarnishmentValidator {
                                     List<CollecticaseErrorEnum> errorEnums) {
         if (UtilFunction.compareLongObject.test(ACTIVITY_TYPE_SENT_NOTICE_OF_WG,
                 wageGarnishmentActivityDTO.getActivityTypeCd())) {
-            CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAOList =
+            CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO =
                     ccaseWageGarnishmentCwgDAORepo.getWageInfoForCaseEmployerRemedy(wageGarnishmentActivityDTO
                                     .getCaseId(),
                             wageGarnishmentActivityDTO.getEmployerId(), wageGarnishmentActivityDTO
                                     .getActivityRemedyTypeCd());
-            CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO = null;
-            if (ccaseWageGarnishmentCwgDAOList != null) {
+            if (ccaseWageGarnishmentCwgDAO != null) {
                 if (CollecticaseConstants.INDICATOR.Y.name().equals(ccaseWageGarnishmentCwgDAO.getCwgSuspended())) {
                     if (CollecticaseConstants.INDICATOR.N.name().equals(wageGarnishmentActivityDTO
                             .getCourtOrderedInd())) {
@@ -385,7 +391,7 @@ public class WageGarnishmentValidator {
         if (UtilFunction.compareLongObject.test(ACTIVITY_TYPE_SUSPEND_WAGE_GARNISHMENT,
                 wageGarnishmentActivityDTO.getActivityTypeCd())) {
             if (wageGarnishmentActivityDTO.getEmployerId() != null &&
-                    !UtilFunction.compareLongObject.test(wageGarnishmentActivityDTO.getEmployerId(),
+                    CollecticaseUtilFunction.greaterThanLongObject.test(wageGarnishmentActivityDTO.getEmployerId(),
                             0L)) {
                 List<CcaseWageGarnishmentCwgDAO> ccaseWageGarnishmentCwgDAOList =
                         ccaseWageGarnishmentCwgDAORepo

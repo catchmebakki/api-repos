@@ -58,8 +58,8 @@ public class CaseController {
     private GeneralActivityValidator generalActivityValidator;
 
     @GetMapping(path = "/caseheader/{caseId}", produces = "application/json")
-    public ResponseEntity<List<VwCcaseHeaderDTO>> getCaseHeaderInfoByCaseId(@Valid @PathVariable("caseId")
-                                                                            Long caseId) {
+    public ResponseEntity<VwCcaseHeaderDTO> getCaseHeaderInfoByCaseId(@Valid @PathVariable("caseId")
+                                                                      Long caseId) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(
                 caseService.getCaseHeaderInfoByCaseId(caseId));
     }

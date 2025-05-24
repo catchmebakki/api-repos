@@ -221,6 +221,7 @@ import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMI_ID_NOT_F
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMN_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CMO_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.COR_ID_NOT_FOUND;
+import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CRA_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.CRC_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.constant.ErrorMessageConstant.EMP_ID_NOT_FOUND;
 import static com.ssi.ms.collecticase.util.CollecticaseHelper.fornattedActivityNotes;
@@ -921,412 +922,127 @@ public class ActivityService extends CollecticaseBaseService {
         //Functional Validation
         ValidationHelper.validateGeneralActivity(generalActivityValidator, generalActivityDTO);
 
-        boolean activityCreated = false;
-        Map<String, Object> createCollecticaseActivity = null;
-        CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = null;
-        CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = null;
-        Long activityId;
-        Date currentDate = null;
-        Timestamp currentTimeStamp = null;
-        List<Map<String, Object>> sendNoticeList = new ArrayList<>();
-        List<String> resendNoticeList = new ArrayList<>();
-        List<String> manualNoticeList = new ArrayList<>();
         CcaseCasesCmcDAO ccaseCasesCmcDAO = ccaseCasesCmcRepository.findById(generalActivityDTO.getCaseId())
-                .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + generalActivityDTO.getCaseId(),
-                        ACTIVITY_ID_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Invalid Case ID:" + generalActivityDTO.getCaseId(),
+                        CASE_ID_NOT_FOUND));
         generalActivityDTO.setCasePriorityCd(ccaseCasesCmcDAO.getCmcCasePriority());
         generalActivityDTO.setClaimantId(ccaseCasesCmcDAO.getClaimantCmtDAO().getCmtId());
-        createCollecticaseActivity = createActivity(generalActivityDTO);
+
+        Map<String, Object> createCollecticaseActivity = createActivity(generalActivityDTO);
         if (createCollecticaseActivity != null &&
                 createCollecticaseActivity.get(POUT_SUCCESS) != null &&
                 UtilFunction.compareLongObject.test((Long) createCollecticaseActivity
                         .get(POUT_SUCCESS), 1L)) {
-            activityId = (Long) createCollecticaseActivity.get(POUT_CMA_ID);
-        } else {
-            activityId = null;
-        }
-        if (activityId != null) {
-            currentDate = commonRepository.getCurrentDate();
-            currentTimeStamp = commonRepository.getCurrentTimestamp();
-            ccaseActivitiesCmaDAO = ccaseActivitiesCmaRepository.findById(activityId)
-                    .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + activityId, ACTIVITY_ID_NOT_FOUND));
-            activityCreated = true;
+            generalActivityDTO.setActivityId((Long) createCollecticaseActivity.get(POUT_CMA_ID));
 
-            ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository.getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO
+            Date currentDate = commonRepository.getCurrentDate();
+            Timestamp currentTimeStamp = commonRepository.getCurrentTimestamp();
+
+            CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = ccaseActivitiesCmaRepository.findById(generalActivityDTO.getActivityId())
+                    .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + generalActivityDTO.getActivityId(), ACTIVITY_ID_NOT_FOUND));
+
+            CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository.getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO
                     .getCcaseCasesCmcDAO().getCmcId(), List.of(ccaseActivitiesCmaDAO.getCmaRemedyType()));
-            if (!(UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(), REMEDY_GENERAL)
-                    || UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(), REMEDY_BANKRUPTCY))) {
-                if (!GENERAL_ACTIVITY_TEMPLATE.equals(ccaseActivitiesCmaDAO
-                        .getCcaseRemedyActivityCraDAO().getCraTemplatePage())) {
-                    ccaseActivitiesCmaDAO.setCmaNHFkCtyCd(generalActivityDTO.getPropertyLien() != null ?
-                            generalActivityDTO.getPropertyLien() : ccaseCaseRemedyCmrDAO.getCmrGnFkCtyCd());
-                } else {
-                    ccaseCaseRemedyCmrDAO.setCmrGnFkCtyCd(generalActivityDTO.getPropertyLien());
-                }
-            }
-
-            if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
-                    ACTIVITY_TYPE_RESEARCH_NH_PROPERTY)) {
-                if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityRemedyTypeCd(),
-                        REMEDY_SECOND_DEMAND_LETTER)) {
-                    ccaseActivitiesCmaDAO.setCmaRemedyStageCd(CMR_STAGE_INPROCESS);
-                    ccaseActivitiesCmaDAO.setCmaRemedyStatusCd(CMR_STATUS_NO_COUNTY);
-                    ccaseActivitiesCmaDAO
-                            .setCmaRemedyNextStepCd(CMR_NEXT_STEP_SECOND_DEMAND_LETTER);
-                }
-            }
-            if (!UtilFunction.compareLongObject.test(generalActivityDTO.getPropertyLien(),
-                    COUNTY_NONE)) {
-                if (ccaseCaseRemedyCmrDAO.getCmrStatusCd().compareTo(CMR_STATUS_UNKNOWN) == 0
-                        || ccaseCaseRemedyCmrDAO.getCmrStatusCd()
-                        .compareTo(CMR_STATUS_USER_ALERT_LIEN) == 0
-                        || ccaseCaseRemedyCmrDAO.getCmrStatusCd()
-                        .compareTo(CMR_STATUS_NO_COUNTY) == 0) {
-                    ccaseActivitiesCmaDAO.setCmaRemedyStatusCd(CMR_STATUS_COUNTY_SELECTED);
-                }
-            }
-            //splitEntityValueIdType(ccaseActivitiesCmaDAO, updateContactActivityDTO.getEntityContactId());
-            List<VwCcaseEntityDAO> vwCcaseEntityDAOList =
-                    vwCcaseEntityRepository.getCaseEntityInfo(UtilFunction.stringToLong
-                                    .apply(generalActivityDTO.getActivityEntityContact()),
-                            generalActivityDTO.getCaseId(),
-                            INDICATOR.Y.name());
-            VwCcaseEntityDAO vwCcaseEntityDAO = null;
-            if (CollectionUtils.isNotEmpty(vwCcaseEntityDAOList)) {
-                vwCcaseEntityDAO = vwCcaseEntityDAOList.get(0);
-                ccaseActivitiesCmaDAO.setCmaEntityContTypeCd(vwCcaseEntityDAO.getCmeRole());
-                ccaseActivitiesCmaDAO.setCmaEntityConttypeIfk(vwCcaseEntityDAO.getEntityId());
-                ccaseActivitiesCmaDAO.setCmaEntityContact(vwCcaseEntityDAO.getEntityName());
-            }
+            updateCountyForRemedyAndActivity(generalActivityDTO, ccaseActivitiesCmaDAO, ccaseCaseRemedyCmrDAO);
+            updateGeneralRemedyInActivity(generalActivityDTO, ccaseActivitiesCmaDAO, ccaseCaseRemedyCmrDAO);
+            setEntityValueIdType(generalActivityDTO, ccaseActivitiesCmaDAO);
             ccaseActivitiesCmaRepository.save(ccaseActivitiesCmaDAO);
-            ccaseCaseRemedyCmrRepository.updateCaseRemedy(activityId, null);
+            ccaseCaseRemedyCmrRepository.updateCaseRemedy(generalActivityDTO.getActivityId(), null);
             processReopenActivity(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO(),
                     generalActivityDTO, currentDate, currentTimeStamp);
             createNHUISNotes(ccaseActivitiesCmaDAO, currentTimeStamp);
-            sendNoticeList = prepareCorrespondenceMapFromDTO(generalActivityDTO);
-            processCorrespondence(sendNoticeList, resendNoticeList, manualNoticeList,
+            processCorrespondence(prepareCorrespondenceMapFromDTO(generalActivityDTO),
+                    prepareNoticesList(generalActivityDTO.getActivityReSendCorrespondence()),
+                    prepareNoticesList(generalActivityDTO.getActivityManualCorrespondence()),
                     ccaseActivitiesCmaDAO, null);
             processResearchNHProperty(ccaseActivitiesCmaDAO);
             processResearchIB(ccaseActivitiesCmaDAO);
             processReassignCaseToSelf(ccaseActivitiesCmaDAO);
             processAutoCompleteAct(ccaseActivitiesCmaDAO);
         }
-
     }
 
-    public void processAutoCompleteAct(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
-        CcaseRemedyActivityCraDAO ccaseRemedyActivityCraDAO = null;
-        CcaseActivitiesCmaDAO activitiesCmaDAO = null;
-        List<CcaseActivitiesCmaDAO> ccaseActivitiesCmaDAOList = null;
-        ccaseRemedyActivityCraDAO = ccaseRemedyActivityCraRepository
-                .getCaseRemedyActivityInfo(ccaseActivitiesCmaDAO.getCmaActivityTypeCd(),
-                        ccaseActivitiesCmaDAO.getCmaRemedyType());
-        if (ccaseRemedyActivityCraDAO.getCraAutoComplete() != null) {
-            CcaseRemedyActivityCraDAO finalCcaseRemedyActivityCraDAO = ccaseRemedyActivityCraDAO;
-            ccaseRemedyActivityCraDAO = ccaseRemedyActivityCraRepository
-                    .findById(ccaseRemedyActivityCraDAO.getCraAutoComplete()).orElseThrow(() ->
-                            new NotFoundException("Invalid Activity ID:" +
-                                    finalCcaseRemedyActivityCraDAO.getCraAutoComplete(), ACTIVITY_ID_NOT_FOUND));
-            ccaseActivitiesCmaDAOList = ccaseActivitiesCmaRepository
-                    .getActivityByActivityCdAndRemedyCd(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
-                            ccaseRemedyActivityCraDAO.getCraActivityCd(), ccaseRemedyActivityCraDAO.getCraRemedyCd());
-            for (CcaseActivitiesCmaDAO autoActivity : ccaseActivitiesCmaDAOList) {
-                if (autoActivity.getFkEmpIdWg() == null || (UtilFunction.compareLongObject
-                        .test(ccaseActivitiesCmaDAO.getFkEmpIdWg(), autoActivity.getFkEmpIdWg()))) {
-                    activitiesCmaDAO = ccaseActivitiesCmaRepository.findById(autoActivity.getCmaId()).orElseThrow(() ->
-                            new NotFoundException("Invalid Activity ID:" + autoActivity.getCmaId(),
-                                    CASE_REMEDY_ACTIVITY_ID_NOT_FOUND));
-                    activitiesCmaDAO.setCmaFollowupComplBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-                    activitiesCmaDAO.setCmaFollowupComplDt(commonRepository.getCurrentDate());
-                    activitiesCmaDAO.setCmaFollowupComplete(INDICATOR.Y.name());
-                    activitiesCmaDAO.setCmaFollowCompShNote(ccaseActivitiesCmaDAO.getCcaseRemedyActivityCraDAO()
-                            .getCraAutoCompleteShNote());
-                    activitiesCmaDAO.setCmaLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-                    activitiesCmaDAO.setCmaLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
-                    ccaseActivitiesCmaRepository.save(activitiesCmaDAO);
-                    break;
-                }
+    private void createActivity(CreateActivityDTO createActivityDTO) {
+
+        createCollecticaseActivity(createActivityDTO.getCaseId(),
+                null, createActivityDTO.getActivityTypeCd(),
+                createActivityDTO.getRemedyTypeCd(), createActivityDTO.getActivityDt(),
+                createActivityDTO.getActivityTime(), createActivityDTO.getActivitySpecifics(),
+                createActivityDTO.getActivityNotes(), createActivityDTO.getActivityNotesAdditional(),
+                createActivityDTO.getActivityNotesNHUIS(), createActivityDTO.getCommunicationMethod(),
+                createActivityDTO.getCaseCharacteristics(), createActivityDTO.getActivityCmtRepCd(),
+                createActivityDTO.getActivityCasePriority(), createActivityDTO.getFollowupDt(),
+                createActivityDTO.getFollowupShortNote(), null,
+                createActivityDTO.getCallingUser(), createActivityDTO.getUsingProgramName());
+    }
+
+    public Map<String, Object> createCollecticaseActivity
+            (Long caseId, Long employerId, Long activityTypeCd,
+             Long remedyTypeCd, Date activityDt, String activityTime, String activitySpecifics,
+             String activityNotes, String activityNotesAdditional, String activityNotesNHUIS,
+             Long communicationMethod, String caseCharacteristics, Long activityCmtRepCd,
+             Long activityCasePriority, Date followupDt, String followupShortNote,
+             String followupCompleteShortNote, String callingUser, String usingProgramName) {
+
+        Map<String, Object> createCollecticaseActivity;
+
+        createCollecticaseActivity = ccaseActivitiesCmaRepository.createCollecticaseActivity(caseId, employerId,
+                activityTypeCd, remedyTypeCd, activityDt, activityTime, activitySpecifics, activityNotes,
+                activityNotesAdditional, activityNotesNHUIS, communicationMethod, caseCharacteristics, activityCmtRepCd,
+                activityCasePriority, followupDt, followupShortNote, followupCompleteShortNote, callingUser,
+                usingProgramName);
+
+        return createCollecticaseActivity;
+    }
+
+    private void updateCountyForRemedyAndActivity(GeneralActivityDTO generalActivityDTO, CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO, CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO) {
+        if (!(UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(), REMEDY_GENERAL)
+                || UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(), REMEDY_BANKRUPTCY))) {
+            if (!GENERAL_ACTIVITY_TEMPLATE.equals(ccaseActivitiesCmaDAO
+                    .getCcaseRemedyActivityCraDAO().getCraTemplatePage())) {
+                ccaseActivitiesCmaDAO.setCmaNHFkCtyCd(generalActivityDTO.getPropertyLien() != null ?
+                        generalActivityDTO.getPropertyLien() : ccaseCaseRemedyCmrDAO.getCmrGnFkCtyCd());
+            } else {
+                ccaseCaseRemedyCmrDAO.setCmrGnFkCtyCd(generalActivityDTO.getPropertyLien());
             }
         }
     }
 
-    private void processReassignCaseToSelf(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
-        List<StaffStfDAO> staffList = null;
-        StaffStfDAO staffDAO = null;
-        CcaseCasesCmcDAO ccaseCasesCmcDAO = null;
-        if (UtilFunction.compareLongObject.test(ACTIVITY_TYPE_ASSIGN_TO_SELF,
-                ccaseActivitiesCmaDAO.getCmaActivityTypeCd())) {
-            staffList = staffStfRepository.getStaffInfoByUserId(UtilFunction.stringToLong
-                    .apply(ccaseActivitiesCmaDAO.getCmaCreatedBy()));
-
-            if (CollectionUtils.isNotEmpty(staffList)) {
-                staffDAO = staffList.get(0);
-            }
-            ccaseCasesCmcDAO = ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO();
-            if (!UtilFunction.compareLongObject.test(staffDAO.getStfId(), ccaseCasesCmcDAO.getStaffStfDAO()
-                    .getStfId())) {
-                ccaseCasesCmcDAO.setStaffStfDAO(staffDAO);
-                ccaseCasesCmcDAO.setCmcAssignedTs(commonRepository.getCurrentTimestamp());
-                ccaseCasesCmcDAO.setCmcCaseNewInd(INDICATOR.Y.name());
-                ccaseCasesCmcDAO.setCmcLastUpdBy(ccaseActivitiesCmaDAO.getCmaCreatedBy());
-                ccaseCasesCmcDAO.setCmcLastUpdUsing(ACTIVITY_DETAILS_GENERAL);
-                ccaseCasesCmcRepository.save(ccaseCasesCmcDAO);
-            }
-        }
-    }
-
-    private void processResearchIB(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
-        List<StaffStfDAO> staffStfDAOList = null;
-        StaffStfDAO staffStfDAO = null;
-        if (UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaActivityTypeCd(),
-                ACTIVITY_TYPE_RESEARCH_IB8606)
-                && UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcCaseStatus(),
-                CASE_STATUS_CLOSED)) {
-            staffStfDAOList = staffStfRepository.getStaffInfoByUserId(UtilFunction.stringToLong
-                    .apply(ccaseActivitiesCmaDAO.getCmaLastUpdBy()));
-            if (CollectionUtils.isNotEmpty(staffStfDAOList)) {
-                staffStfDAO = staffStfDAOList.get(0);
-            }
-            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcCaseStatus(CASE_STATUS_REOPEN);
-            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcCasePriority(CASE_PRIORITY_HI);
-            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcCaseNewInd(INDICATOR.Y.name());
-            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setStaffStfDAO(staffStfDAO);
-            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcAssignedTs(commonRepository.getCurrentTimestamp());
-            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
-            ccaseCasesCmcRepository.save(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO());
-
-            CreateActivityDTO createActivityDTO = new CreateActivityDTO();
-            CcaseRemedyActivityCraDAO ccaseRemedyActivityCraDAO = ccaseRemedyActivityCraRepository.
-                    getCaseRemedyActivityInfo(ACTIVITY_TYPE_REOPEN_CASE,
-                            REMEDY_GENERAL);
-
-            createActivityDTO.setCaseId(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId());
-            if (ccaseActivitiesCmaDAO.getFkEmpIdWg() != null) {
-                createActivityDTO.setEmployerId(ccaseActivitiesCmaDAO.getFkEmpIdWg());
-            }
-            createActivityDTO.setRemedyTypeCd(REMEDY_GENERAL);
-            createActivityDTO.setActivityTypeCd(ACTIVITY_TYPE_REOPEN_CASE);
-            createActivityDTO.setActivityDt(commonRepository.getCurrentDate());
-            createActivityDTO.setActivityTime(TIME_FORMAT
-                    .format(commonRepository.getCurrentDate()));
-            createActivityDTO.setActivitySpecifics(ccaseRemedyActivityCraDAO.getCraActivitySpecifics());
-
-            createActivityDTO.setActivityCasePriority(CASE_PRIORITY_HI);
-            createActivityDTO.setCallingUser(ccaseActivitiesCmaDAO.getCmaCreatedBy());
-            createActivityDTO.setUsingProgramName(ccaseActivitiesCmaDAO.getCmaCreatedUsing());
-            createActivity(createActivityDTO);
-        }
-    }
-
-    private void processResearchNHProperty(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
-        List<CcaseActivitiesCmaDAO> ccaseActivitiesCmaList = null;
-        CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = null;
-        if (UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaActivityTypeCd(),
+    private void updateGeneralRemedyInActivity(GeneralActivityDTO generalActivityDTO, CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO, CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO) {
+        if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
                 ACTIVITY_TYPE_RESEARCH_NH_PROPERTY)) {
-            ccaseActivitiesCmaList = ccaseActivitiesCmaRepository
-                    .getActivityByActivityCdAndRemedyCd(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
-                            REMEDY_SECOND_DEMAND_LETTER,
-                            ACTIVITY_TYPE_USER_ALERTED_RESEARCH_POT_LIEN);
-
-            if (CollectionUtils.isNotEmpty(ccaseActivitiesCmaList)) {
-                CcaseActivitiesCmaDAO activitiesCmaDAO = getCcaseActivitiesCmaDAO(ccaseActivitiesCmaDAO,
-                        ccaseActivitiesCmaList);
-                ccaseActivitiesCmaRepository.save(activitiesCmaDAO);
+            if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityRemedyTypeCd(),
+                    REMEDY_SECOND_DEMAND_LETTER)) {
+                ccaseActivitiesCmaDAO.setCmaRemedyStageCd(CMR_STAGE_INPROCESS);
+                ccaseActivitiesCmaDAO.setCmaRemedyStatusCd(CMR_STATUS_NO_COUNTY);
+                ccaseActivitiesCmaDAO
+                        .setCmaRemedyNextStepCd(CMR_NEXT_STEP_SECOND_DEMAND_LETTER);
             }
-            ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository
-                    .getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
-                            List.of(REMEDY_LIEN));
-            if (!UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaNHFkCtyCd(),
-                    COUNTY_NONE)) {
-                ccaseCaseRemedyCmrDAO.setCmrStatusCd(CMR_STATUS_LIEN_FILED);
-                ccaseCaseRemedyCmrDAO.setCmrStageCd(CMR_STAGE_INEFFECT);
-                ccaseCaseRemedyCmrDAO.setCmrNextStepCd(CMR_NEXT_STEP_NONE);
-                ccaseCaseRemedyCmrDAO.setCmrLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-                ccaseCaseRemedyCmrDAO.setCmrLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
-                ccaseCaseRemedyCmrRepository.save(ccaseCaseRemedyCmrDAO);
-            } else {
-                ccaseCaseRemedyCmrDAO.setCmrStatusCd(CMR_STATUS_UNKNOWN);
-                ccaseCaseRemedyCmrDAO.setCmrStageCd(CMR_STAGE_INELIGIBLE);
-                ccaseCaseRemedyCmrDAO.setCmrNextStepCd(CMR_NEXT_STEP_NONE);
-                ccaseCaseRemedyCmrDAO.setCmrLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-                ccaseCaseRemedyCmrDAO.setCmrLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
-                ccaseCaseRemedyCmrRepository.save(ccaseCaseRemedyCmrDAO);
+        }
+        if (!UtilFunction.compareLongObject.test(generalActivityDTO.getPropertyLien(),
+                COUNTY_NONE)) {
+            if (ccaseCaseRemedyCmrDAO.getCmrStatusCd().compareTo(CMR_STATUS_UNKNOWN) == 0
+                    || ccaseCaseRemedyCmrDAO.getCmrStatusCd()
+                    .compareTo(CMR_STATUS_USER_ALERT_LIEN) == 0
+                    || ccaseCaseRemedyCmrDAO.getCmrStatusCd()
+                    .compareTo(CMR_STATUS_NO_COUNTY) == 0) {
+                ccaseActivitiesCmaDAO.setCmaRemedyStatusCd(CMR_STATUS_COUNTY_SELECTED);
             }
         }
     }
 
-    @NotNull
-    private CcaseActivitiesCmaDAO getCcaseActivitiesCmaDAO(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO,
-                                                           List<CcaseActivitiesCmaDAO> ccaseActivitiesCmaList) {
-        CcaseActivitiesCmaDAO activitiesCmaDAO = ccaseActivitiesCmaList.get(0);
-        activitiesCmaDAO.setCmaFollowupComplBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-        activitiesCmaDAO.setCmaFollowupComplDt(commonRepository.getCurrentDate());
-        activitiesCmaDAO.setCmaFollowupComplete(INDICATOR.Y.name());
-        activitiesCmaDAO.setCmaFollowCompShNote(activitiesCmaDAO
-                .getCcaseRemedyActivityCraDAO().getCraAutoCompleteShNote());
-        activitiesCmaDAO.setCmaLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-        activitiesCmaDAO.setCmaLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
-        return activitiesCmaDAO;
-    }
-
-    public void processCorrespondence(List<Map<String, Object>> sendNoticesList, List<String> resendNoticeList,
-                                      List<String> manualNoticeList, CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO,
-                                      Long cwgId) {
-        CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO;
-        CorrespondenceCorDAO correspondenceCorDAO;
-        Long crcId;
-        List<Integer> multipleRecieptList = new ArrayList<Integer>();
-        Map<String, Object> createCorrespondence;
-        for (Map<String, Object> inputParamMap : sendNoticesList) {
-            if (inputParamMap.get(PIN_CRC_ID).equals(NOTICE_OF_CHANGED_WG)
-                    || inputParamMap.get(PIN_CRC_ID)
-                    .equals(NOTICE_OF_SUSPENDED_WG)
-                    || inputParamMap.get(PIN_CRC_ID)
-                    .equals(NOTICE_OF_GARNISHMENT)
-                    || inputParamMap.get(PIN_CRC_ID)
-                    .equals(NOTICE_OF_COURT_ORDERED_WG)) {
-                multipleRecieptList.add(COR_RECEIPT_EMPLOYER);
-                multipleRecieptList.add(COR_RECEIPT_CLAIMANT);
-            } else {
-                multipleRecieptList.add(COR_RECEIPT_EMPLOYER);
-            }
-            for (Integer receiptVal : multipleRecieptList) {
-                crcId = (Long) inputParamMap.get(PIN_CRC_ID);
-                ccaseCraCorrespondenceCrcDAO = new CcaseCraCorrespondenceCrcDAO();
-                ccaseCraCorrespondenceCrcDAO.setCrcId(crcId);
-                if (Objects.equals(receiptVal, COR_RECEIPT_CLAIMANT)) {
-                    inputParamMap.put(PIN_WLP_I720_COR_RECEIP_IFK,
-                            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getClaimantCmtDAO().getCmtId());
-                }
-                createCorrespondence = correspondenceCorRepository.createCorrespondence(
-                        (Integer) inputParamMap.get(PIN_WLP_I720_RPT_ID),
-                        (Integer) inputParamMap.get(PIN_WLP_I720_CLM_ID),
-                        (Integer) inputParamMap.get(PIN_WLP_I720_EMP_ID),
-                        (Integer) inputParamMap.get(PIN_WLP_I720_CMT_ID),
-                        (String) inputParamMap.get(PIN_WLP_I720_COR_COE_IND),
-                        (String) inputParamMap.get(PIN_WLP_I720_FORCED_IND),
-                        (Integer) inputParamMap.get(PIN_WLP_I720_COR_STATUS_CD),
-                        (Integer) inputParamMap.get(PIN_WLP_I720_COR_DEC_ID_IFK),
-                        (Integer) inputParamMap.get(PIN_WLP_I720_COR_RECEIP_IFK),
-                        (Integer) inputParamMap.get(PIN_WLP_I720_COR_RECEIP_CD),
-                        (Timestamp) inputParamMap.get(PIN_WLP_I720_COR_TS),
-                        (String) inputParamMap.get(PIN_WLP_I720_COE_STRING));
-
-                if (createCorrespondence != null
-                        && createCorrespondence.get(POUT_WLP_O720_RETURN_CD) != null
-                        && NHUIS_RETURN_SUCCESS.equals((Integer) createCorrespondence.get(POUT_WLP_O720_RETURN_CD))) {
-                    Long corId = ((Integer) createCorrespondence.get(POUT_WLP_O720_COR_ID)).longValue();
-                    correspondenceCorDAO = correspondenceCorRepository.findById(corId)
-                            .orElseThrow(() -> new NotFoundException("Invalid COR ID:" + corId, COR_ID_NOT_FOUND));
-
-                    if (UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(),
-                            REMEDY_WAGE_GARNISHMENT)) {
-                        if (ccaseActivitiesCmaDAO.getFkEmpIdWg() != null &&
-                                CollecticaseUtilFunction.greaterThanLongObject
-                                        .test(ccaseActivitiesCmaDAO.getFkEmpIdWg(), 0L)) {//SAT25570
-                            correspondenceCorDAO.setCorSourceIfk(COR_SOURCE_IFK_CD_FOR_CMC);
-                            correspondenceCorDAO.setCorSourceIfkCd(ccaseActivitiesCmaDAO
-                                    .getCcaseCasesCmcDAO().getCmcId());
-                            correspondenceCorDAO.setCorReceipIfk(receiptVal.longValue());
-                        }
-                    } else {
-                        correspondenceCorDAO.setCorSourceIfk(COR_SOURCE_IFK_CD_FOR_CMC);
-                        correspondenceCorDAO.setCorSourceIfkCd(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId());
-                        correspondenceCorDAO.setCorReceipIfk(COR_RECEIPT_CLAIMANT.longValue());
-                    }
-                    correspondenceCorRepository.save(correspondenceCorDAO);
-                    createCMN(ccaseActivitiesCmaDAO, corId, ccaseCraCorrespondenceCrcDAO, cwgId);
-                }
-            }
-        }
-        for (String cmnId : resendNoticeList) {
-            createResendCMN(ccaseActivitiesCmaDAO, UtilFunction.stringToLong.apply(cmnId));
-        }
-        for (String manualCrcId : manualNoticeList) {
-            createManualCMN(ccaseActivitiesCmaDAO, UtilFunction.stringToLong.apply(manualCrcId), cwgId);
-            if (UtilFunction.compareLongObject.test(TEMP_REDUCTION_LIEN,
-                    UtilFunction.stringToLong.apply(manualCrcId))) {
-                addSystemActivity(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO(),
-                        ACTIVITY_TYPE_SENT_TEMP_PP_REDUCTION_LTR,
-                        REMEDY_PAYMENT_PLAN, ACTIVITY_SPECIFICS_TEMP_REDUCTION,
-                        ccaseActivitiesCmaDAO.getCmaActivityNotes(), ccaseActivitiesCmaDAO.getCmaPriority());
-            }
-            if (UtilFunction.compareLongObject.test(TEMP_SUSPENSION_LIEN,
-                    UtilFunction.stringToLong.apply(manualCrcId))) {
-                addSystemActivity(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO(),
-                        ACTIVITY_TYPE_SENT_TEMP_PP_SUSPENSION_LTR,
-                        REMEDY_PAYMENT_PLAN,
-                        ACTIVITY_SPECIFICS_TEMP_SUSPENSION,
-                        ccaseActivitiesCmaDAO.getCmaActivityNotes(), ccaseActivitiesCmaDAO.getCmaPriority());
-            }
-        }
-    }
-
-    private void createManualCMN(CcaseActivitiesCmaDAO ccaseActivitiesCma, Long crcId, Long cwgId) {
-        CcaseCmaNoticesCmnDAO ccaseCmaNoticesCmnDAO = new CcaseCmaNoticesCmnDAO();
-        ccaseCmaNoticesCmnDAO.setCcaseActivitiesCmaDAO(ccaseActivitiesCma);
-        ccaseCmaNoticesCmnDAO.setCmnAutoReqUi(USER_INTERFACE);
-        ccaseCmaNoticesCmnDAO.setCmnCreatedBy(ccaseActivitiesCma.getCmaCreatedBy());
-        ccaseCmaNoticesCmnDAO.setCmnCreatedUsing(ccaseActivitiesCma.getCmaCreatedUsing());
-        ccaseCmaNoticesCmnDAO.setCmnLastUpdBy(ccaseActivitiesCma.getCmaLastUpdBy());
-        ccaseCmaNoticesCmnDAO.setCmnLastUpdUsing(ccaseActivitiesCma.getCmaLastUpdUsing());
-        ccaseCmaNoticesCmnDAO.setCmnResendReq(INDICATOR.N.name());
-        ccaseCmaNoticesCmnDAO.setCorrespondenceCorDAO(null);
-        CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO = new CcaseCraCorrespondenceCrcDAO();
-        ccaseCraCorrespondenceCrcDAO.setCrcId(crcId);
-        ccaseCmaNoticesCmnDAO.setFkCwgId(cwgId);
-        ccaseCmaNoticesCmnDAO.setCcaseCraCorrespondenceCrcDAO(ccaseCraCorrespondenceCrcDAO);
-        ccaseCmaNoticesCmnRepository.save(ccaseCmaNoticesCmnDAO);
-    }
-
-    public void createResendCMN(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO, Long cmnId) {
-        CcaseCmaNoticesCmnDAO existingCmnDAO = ccaseCmaNoticesCmnRepository.findById(cmnId)
-                .orElseThrow(() -> new NotFoundException("Invalid Activity Notices ID:" + cmnId, CMN_ID_NOT_FOUND));
-        CcaseCmaNoticesCmnDAO ccaseCmaNoticesCmnDAO = new CcaseCmaNoticesCmnDAO();
-        ccaseCmaNoticesCmnDAO.setCcaseActivitiesCmaDAO(ccaseActivitiesCmaDAO);
-        ccaseCmaNoticesCmnDAO.setCmnAutoReqUi(USER_INTERFACE);
-        ccaseCmaNoticesCmnDAO.setCmnCreatedBy(ccaseActivitiesCmaDAO.getCmaCreatedBy());
-        ccaseCmaNoticesCmnDAO.setCmnCreatedUsing(ccaseActivitiesCmaDAO.getCmaCreatedUsing());
-        ccaseCmaNoticesCmnDAO.setCmnLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-        ccaseCmaNoticesCmnDAO.setCmnLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
-        ccaseCmaNoticesCmnDAO.setCmnResendReq(INDICATOR.Y.name());
-        ccaseCmaNoticesCmnDAO.setCorrespondenceCorDAO(existingCmnDAO.getCorrespondenceCorDAO());
-        ccaseCmaNoticesCmnDAO.setFkCwgId(existingCmnDAO.getFkCwgId());
-        ccaseCmaNoticesCmnDAO.setCcaseCraCorrespondenceCrcDAO(existingCmnDAO.getCcaseCraCorrespondenceCrcDAO());
-        ccaseCmaNoticesCmnRepository.save(ccaseCmaNoticesCmnDAO);
-    }
-
-
-    private void createCMN(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO, Long corId,
-                           CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO, Long cwgId) {
-        CcaseCmaNoticesCmnDAO ccaseCmaNoticesCmnDAO = new CcaseCmaNoticesCmnDAO();
-        ccaseCmaNoticesCmnDAO.setCcaseActivitiesCmaDAO(ccaseActivitiesCmaDAO);
-        ccaseCmaNoticesCmnDAO.setCmnAutoReqUi(USER_INTERFACE);
-        ccaseCmaNoticesCmnDAO.setCmnCreatedBy(ccaseActivitiesCmaDAO.getCmaCreatedBy());
-        ccaseCmaNoticesCmnDAO.setCmnCreatedUsing(ccaseActivitiesCmaDAO.getCmaCreatedUsing());
-        ccaseCmaNoticesCmnDAO.setCmnLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-        ccaseCmaNoticesCmnDAO.setCmnLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
-        ccaseCmaNoticesCmnDAO.setCmnResendReq(INDICATOR.N.name());
-        CorrespondenceCorDAO correspondenceCorDAO = new CorrespondenceCorDAO();
-        correspondenceCorDAO.setCorId(corId);
-        ccaseCmaNoticesCmnDAO.setCorrespondenceCorDAO(correspondenceCorDAO);
-        ccaseCmaNoticesCmnDAO.setCcaseCraCorrespondenceCrcDAO(ccaseCraCorrespondenceCrcDAO);
-        ccaseCmaNoticesCmnDAO.setFkCwgId(cwgId);
-        ccaseCmaNoticesCmnRepository.save(ccaseCmaNoticesCmnDAO);
-    }
-
-    private void createNHUISNotes(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO, Timestamp currentTimestamp) {
-        if (StringUtils.isNotBlank(ccaseActivitiesCmaDAO.getCmaActivityNotesNhuis())) {
-            CmtNotesCnoDAO cmtNotesCnoDAO = new CmtNotesCnoDAO();
-            cmtNotesCnoDAO.setClaimantCmtDAO(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getClaimantCmtDAO());
-            cmtNotesCnoDAO.setCnoEnteredTs(currentTimestamp);
-            cmtNotesCnoDAO.setCnoEnteredBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-            cmtNotesCnoDAO.setCnoSubjectTxt(NHUIS_NOTES_SUBJECT);
-            cmtNotesCnoDAO.setCnoNotesTxt(ccaseActivitiesCmaDAO.getCmaActivityNotesNhuis());
-            cmtNotesCnoDAO.setCnoLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
-            cmtNotesCnoDAO.setCnoLastUpdTs(currentTimestamp);
-            cmtNotesCnoRepository.save(cmtNotesCnoDAO);
+    private void setEntityValueIdType(GeneralActivityDTO generalActivityDTO, CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
+        List<VwCcaseEntityDAO> vwCcaseEntityDAOList =
+                vwCcaseEntityRepository.getCaseEntityInfo(UtilFunction.stringToLong
+                                .apply(generalActivityDTO.getActivityEntityContact()),
+                        generalActivityDTO.getCaseId(),
+                        INDICATOR.Y.name());
+        VwCcaseEntityDAO vwCcaseEntityDAO = null;
+        if (CollectionUtils.isNotEmpty(vwCcaseEntityDAOList)) {
+            vwCcaseEntityDAO = vwCcaseEntityDAOList.get(0);
+            ccaseActivitiesCmaDAO.setCmaEntityContTypeCd(vwCcaseEntityDAO.getCmeRole());
+            ccaseActivitiesCmaDAO.setCmaEntityConttypeIfk(vwCcaseEntityDAO.getEntityId());
+            ccaseActivitiesCmaDAO.setCmaEntityContact(vwCcaseEntityDAO.getEntityName());
         }
     }
 
@@ -1349,113 +1065,18 @@ public class ActivityService extends CollecticaseBaseService {
         }
     }
 
-    private Map<String, Object> createActivity(GeneralActivityDTO generalActivityDTO) {
-
-        return createCollecticaseActivity(generalActivityDTO.getCaseId(),
-                null, generalActivityDTO.getActivityTypeCd(),
-                generalActivityDTO.getActivityRemedyTypeCd(), generalActivityDTO.getActivityDate(),
-                generalActivityDTO.getActivityTime(), generalActivityDTO.getActivitySpecifics(),
-                generalActivityDTO.getActivityNotes(), generalActivityDTO.getActivityAdditionalNotes(),
-                generalActivityDTO.getActivityNHUISNotes(), generalActivityDTO.getActivityCommunicationMethod(),
-                generalActivityDTO.getActivityCaseCharacteristics(),
-                generalActivityDTO.getActivityClaimantRepresentative(),
-                generalActivityDTO.getCasePriorityCd(), generalActivityDTO.getActivityFollowupDate(),
-                generalActivityDTO.getActivityFollowupShortNote(), null,
-                generalActivityDTO.getCallingUser(), generalActivityDTO.getUsingProgramName());
-    }
-
-    @Transactional
-    public void createPaymentPlanActivity(PaymentPlanActivityDTO paymentPlanActivityDTO) {
-        //Functional Validation
-        ValidationHelper.validateGeneralActivity(generalActivityValidator, paymentPlanActivityDTO);
-        ValidationHelper.validatePaymentPlanActivity(paymentPlanActivityValidator, paymentPlanActivityDTO);
-
-        boolean activityCreated = false;
-        Map<String, Object> createCollecticaseActivity = null;
-        CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = null;
-        CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = null;
-        Long activityId;
-        Date currentDate = null;
-        Timestamp currentTimeStamp = null;
-        List<Map<String, Object>> sendNoticeList = new ArrayList<>();
-        List<String> resendNoticeList = new ArrayList<>();
-        List<String> manualNoticeList = new ArrayList<>();
-        CcaseCasesCmcDAO ccaseCasesCmcDAO = ccaseCasesCmcRepository.findById(paymentPlanActivityDTO.getCaseId())
-                .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + paymentPlanActivityDTO.getCaseId(),
-                        CASE_ID_NOT_FOUND));
-        paymentPlanActivityDTO.setClaimantId(ccaseCasesCmcDAO.getClaimantCmtDAO().getCmtId());
-        createCollecticaseActivity = createActivity(paymentPlanActivityDTO);
-        if (createCollecticaseActivity != null &&
-                createCollecticaseActivity.get(POUT_SUCCESS) != null &&
-                UtilFunction.compareLongObject.test((Long) createCollecticaseActivity
-                        .get(POUT_SUCCESS), 1L)) {
-            activityId = (Long) createCollecticaseActivity.get(POUT_CMA_ID);
-        } else {
-            activityId = null;
+    private void createNHUISNotes(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO, Timestamp currentTimestamp) {
+        if (StringUtils.isNotBlank(ccaseActivitiesCmaDAO.getCmaActivityNotesNhuis())) {
+            CmtNotesCnoDAO cmtNotesCnoDAO = new CmtNotesCnoDAO();
+            cmtNotesCnoDAO.setClaimantCmtDAO(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getClaimantCmtDAO());
+            cmtNotesCnoDAO.setCnoEnteredTs(currentTimestamp);
+            cmtNotesCnoDAO.setCnoEnteredBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+            cmtNotesCnoDAO.setCnoSubjectTxt(NHUIS_NOTES_SUBJECT);
+            cmtNotesCnoDAO.setCnoNotesTxt(ccaseActivitiesCmaDAO.getCmaActivityNotesNhuis());
+            cmtNotesCnoDAO.setCnoLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+            cmtNotesCnoDAO.setCnoLastUpdTs(currentTimestamp);
+            cmtNotesCnoRepository.save(cmtNotesCnoDAO);
         }
-        if (activityId != null) {
-            currentDate = commonRepository.getCurrentDate();
-            currentTimeStamp = commonRepository.getCurrentTimestamp();
-            ccaseActivitiesCmaDAO = ccaseActivitiesCmaRepository.findById(activityId)
-                    .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + activityId,
-                            ACTIVITY_ID_NOT_FOUND));
-            activityCreated = true;
-
-            ccaseActivitiesCmaDAO.setCmaPpRespToCd(paymentPlanActivityDTO.getPaymentPlanResponseToCd());
-            ccaseActivitiesCmaDAO.setCmaPpRespToOther(paymentPlanActivityDTO.getPaymentPlanResponseToOther());
-            ccaseActivitiesCmaDAO.setCmaPpGuidelineAmt(paymentPlanActivityDTO.getPaymentPlanGuideLineAmount());
-            ccaseActivitiesCmaDAO.setCmaPpSignedDt(paymentPlanActivityDTO.getPaymentPlanSignedDate());
-            ccaseActivitiesCmaDAO.setCmaPpFaSignedDt(paymentPlanActivityDTO.getPaymentPlanFinAffidavitSignedDate());
-            ccaseActivitiesCmaDAO.setCmaPpPaymentAmt(paymentPlanActivityDTO.getPaymentPlanPaymentAmount());
-            ccaseActivitiesCmaDAO.setCmaPpPaymentCatgCd(paymentPlanActivityDTO.getPaymentPlanPaymentCategory());
-            ccaseActivitiesCmaDAO.setCmaPpEffectiveUntil(paymentPlanActivityDTO.getPaymentPlanEffectiveUntilDate());
-            ccaseActivitiesCmaDAO.setCmaPpEffectiveMonths(paymentPlanActivityDTO.getPaymentPlanMonths());
-
-            ccaseActivitiesCmaRepository.save(ccaseActivitiesCmaDAO);
-
-            ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository
-                    .getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
-                            List.of(ccaseActivitiesCmaDAO.getCmaRemedyType()));
-
-            if (!(UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(), REMEDY_GENERAL)
-                    || UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(), REMEDY_BANKRUPTCY))) {
-                if (!GENERAL_ACTIVITY_TEMPLATE.equals(ccaseActivitiesCmaDAO
-                        .getCcaseRemedyActivityCraDAO().getCraTemplatePage())) {
-                    ccaseActivitiesCmaDAO.setCmaNHFkCtyCd(paymentPlanActivityDTO.getPropertyLien() != null ?
-                            paymentPlanActivityDTO.getPropertyLien() : ccaseCaseRemedyCmrDAO.getCmrGnFkCtyCd());
-                } else {
-                    ccaseCaseRemedyCmrDAO.setCmrGnFkCtyCd(paymentPlanActivityDTO.getPropertyLien());
-                }
-            }
-            updatePPRemedy(ccaseActivitiesCmaDAO);
-            entityManager.flush();
-            Map<String, Object> mapObject = ccaseCaseRemedyCmrRepository.updateCaseRemedy(activityId, null);
-            System.out.println(" mapObject " + mapObject);
-            createNHUISNotes(ccaseActivitiesCmaDAO, currentTimeStamp);
-            prepareCorrespondenceMapFromDTO(paymentPlanActivityDTO);
-            resendNoticeList = prepareResendNoticesList(paymentPlanActivityDTO, resendNoticeList);
-            manualNoticeList = prepareManualNoticesList(paymentPlanActivityDTO, manualNoticeList);
-            processCorrespondence(sendNoticeList, resendNoticeList, manualNoticeList,
-                    ccaseActivitiesCmaDAO, null);
-            processAutoCompleteAct(ccaseActivitiesCmaDAO);
-            processClosedCasePPActivity(ccaseActivitiesCmaDAO);
-        }
-    }
-
-    private List<String> prepareResendNoticesList(PaymentPlanActivityDTO paymentPlanActivityDTO,
-                                                  List<String> resendNoticeList) {
-        if (paymentPlanActivityDTO.getActivityReSendCorrespondence() != null) {
-            resendNoticeList = Arrays.asList(paymentPlanActivityDTO.getActivityReSendCorrespondence());
-        }
-        return resendNoticeList;
-    }
-
-    private List<String> prepareManualNoticesList(PaymentPlanActivityDTO paymentPlanActivityDTO,
-                                                  List<String> manualNoticeList) {
-        if (paymentPlanActivityDTO.getActivityManualCorrespondence() != null) {
-            manualNoticeList = Arrays.asList(paymentPlanActivityDTO.getActivityManualCorrespondence());
-        }
-        return manualNoticeList;
     }
 
     public List<Map<String, Object>> prepareCorrespondenceMapFromDTO(
@@ -1562,6 +1183,391 @@ public class ActivityService extends CollecticaseBaseService {
         return coeString;
     }
 
+    private List<String> prepareNoticesList(String[] correspondenceArray) {
+        List<String> resendNoticeList = null;
+        if (correspondenceArray != null) {
+            resendNoticeList = Arrays.asList(correspondenceArray);
+        }
+        return resendNoticeList;
+    }
+
+    public void processCorrespondence(List<Map<String, Object>> sendNoticesList, List<String> resendNoticeList,
+                                      List<String> manualNoticeList, CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO,
+                                      Long cwgId) {
+        CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO;
+        CorrespondenceCorDAO correspondenceCorDAO;
+        Long crcId;
+        List<Integer> multipleRecieptList = new ArrayList<Integer>();
+        Map<String, Object> createCorrespondence;
+        for (Map<String, Object> inputParamMap : sendNoticesList) {
+            if (inputParamMap.get(PIN_CRC_ID).equals(NOTICE_OF_CHANGED_WG)
+                    || inputParamMap.get(PIN_CRC_ID)
+                    .equals(NOTICE_OF_SUSPENDED_WG)
+                    || inputParamMap.get(PIN_CRC_ID)
+                    .equals(NOTICE_OF_GARNISHMENT)
+                    || inputParamMap.get(PIN_CRC_ID)
+                    .equals(NOTICE_OF_COURT_ORDERED_WG)) {
+                multipleRecieptList.add(COR_RECEIPT_EMPLOYER);
+                multipleRecieptList.add(COR_RECEIPT_CLAIMANT);
+            } else {
+                multipleRecieptList.add(COR_RECEIPT_EMPLOYER);
+            }
+            for (Integer receiptVal : multipleRecieptList) {
+                crcId = (Long) inputParamMap.get(PIN_CRC_ID);
+                ccaseCraCorrespondenceCrcDAO = new CcaseCraCorrespondenceCrcDAO();
+                ccaseCraCorrespondenceCrcDAO.setCrcId(crcId);
+                if (Objects.equals(receiptVal, COR_RECEIPT_CLAIMANT)) {
+                    inputParamMap.put(PIN_WLP_I720_COR_RECEIP_IFK,
+                            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getClaimantCmtDAO().getCmtId());
+                }
+                createCorrespondence = correspondenceCorRepository.createCorrespondence(
+                        (Integer) inputParamMap.get(PIN_WLP_I720_RPT_ID),
+                        (Integer) inputParamMap.get(PIN_WLP_I720_CLM_ID),
+                        (Integer) inputParamMap.get(PIN_WLP_I720_EMP_ID),
+                        (Integer) inputParamMap.get(PIN_WLP_I720_CMT_ID),
+                        (String) inputParamMap.get(PIN_WLP_I720_COR_COE_IND),
+                        (String) inputParamMap.get(PIN_WLP_I720_FORCED_IND),
+                        (Integer) inputParamMap.get(PIN_WLP_I720_COR_STATUS_CD),
+                        (Integer) inputParamMap.get(PIN_WLP_I720_COR_DEC_ID_IFK),
+                        (Integer) inputParamMap.get(PIN_WLP_I720_COR_RECEIP_IFK),
+                        (Integer) inputParamMap.get(PIN_WLP_I720_COR_RECEIP_CD),
+                        (Timestamp) inputParamMap.get(PIN_WLP_I720_COR_TS),
+                        (String) inputParamMap.get(PIN_WLP_I720_COE_STRING));
+
+                if (createCorrespondence != null
+                        && createCorrespondence.get(POUT_WLP_O720_RETURN_CD) != null
+                        && NHUIS_RETURN_SUCCESS.equals((Integer) createCorrespondence.get(POUT_WLP_O720_RETURN_CD))) {
+                    Long corId = ((Integer) createCorrespondence.get(POUT_WLP_O720_COR_ID)).longValue();
+                    correspondenceCorDAO = correspondenceCorRepository.findById(corId)
+                            .orElseThrow(() -> new NotFoundException("Invalid COR ID:" + corId, COR_ID_NOT_FOUND));
+
+                    if (UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(),
+                            REMEDY_WAGE_GARNISHMENT)) {
+                        if (ccaseActivitiesCmaDAO.getFkEmpIdWg() != null &&
+                                CollecticaseUtilFunction.greaterThanLongObject
+                                        .test(ccaseActivitiesCmaDAO.getFkEmpIdWg(), 0L)) {//SAT25570
+                            correspondenceCorDAO.setCorSourceIfk(COR_SOURCE_IFK_CD_FOR_CMC);
+                            correspondenceCorDAO.setCorSourceIfkCd(ccaseActivitiesCmaDAO
+                                    .getCcaseCasesCmcDAO().getCmcId());
+                            correspondenceCorDAO.setCorReceipIfk(receiptVal.longValue());
+                        }
+                    } else {
+                        correspondenceCorDAO.setCorSourceIfk(COR_SOURCE_IFK_CD_FOR_CMC);
+                        correspondenceCorDAO.setCorSourceIfkCd(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId());
+                        correspondenceCorDAO.setCorReceipIfk(COR_RECEIPT_CLAIMANT.longValue());
+                    }
+                    correspondenceCorRepository.save(correspondenceCorDAO);
+                    createCMN(ccaseActivitiesCmaDAO, corId, ccaseCraCorrespondenceCrcDAO, cwgId);
+                }
+            }
+        }
+        for (String cmnId : resendNoticeList) {
+            createResendCMN(ccaseActivitiesCmaDAO, UtilFunction.stringToLong.apply(cmnId));
+        }
+        for (String manualCrcId : manualNoticeList) {
+            createManualCMN(ccaseActivitiesCmaDAO, UtilFunction.stringToLong.apply(manualCrcId), cwgId);
+            if (UtilFunction.compareLongObject.test(TEMP_REDUCTION_LIEN,
+                    UtilFunction.stringToLong.apply(manualCrcId))) {
+                addSystemActivity(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO(),
+                        ACTIVITY_TYPE_SENT_TEMP_PP_REDUCTION_LTR,
+                        REMEDY_PAYMENT_PLAN, ACTIVITY_SPECIFICS_TEMP_REDUCTION,
+                        ccaseActivitiesCmaDAO.getCmaActivityNotes(), ccaseActivitiesCmaDAO.getCmaPriority());
+            }
+            if (UtilFunction.compareLongObject.test(TEMP_SUSPENSION_LIEN,
+                    UtilFunction.stringToLong.apply(manualCrcId))) {
+                addSystemActivity(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO(),
+                        ACTIVITY_TYPE_SENT_TEMP_PP_SUSPENSION_LTR,
+                        REMEDY_PAYMENT_PLAN,
+                        ACTIVITY_SPECIFICS_TEMP_SUSPENSION,
+                        ccaseActivitiesCmaDAO.getCmaActivityNotes(), ccaseActivitiesCmaDAO.getCmaPriority());
+            }
+        }
+    }
+
+    private void processResearchNHProperty(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
+        List<CcaseActivitiesCmaDAO> ccaseActivitiesCmaList = null;
+        CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = null;
+        if (UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaActivityTypeCd(),
+                ACTIVITY_TYPE_RESEARCH_NH_PROPERTY)) {
+            ccaseActivitiesCmaList = ccaseActivitiesCmaRepository
+                    .getActivityByActivityCdAndRemedyCd(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
+                            REMEDY_SECOND_DEMAND_LETTER,
+                            ACTIVITY_TYPE_USER_ALERTED_RESEARCH_POT_LIEN);
+
+            if (CollectionUtils.isNotEmpty(ccaseActivitiesCmaList)) {
+                CcaseActivitiesCmaDAO activitiesCmaDAO = getCcaseActivitiesCmaDAO(ccaseActivitiesCmaDAO,
+                        ccaseActivitiesCmaList);
+                ccaseActivitiesCmaRepository.save(activitiesCmaDAO);
+            }
+            ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository
+                    .getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
+                            List.of(REMEDY_LIEN));
+            if (!UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaNHFkCtyCd(),
+                    COUNTY_NONE)) {
+                ccaseCaseRemedyCmrDAO.setCmrStatusCd(CMR_STATUS_LIEN_FILED);
+                ccaseCaseRemedyCmrDAO.setCmrStageCd(CMR_STAGE_INEFFECT);
+                ccaseCaseRemedyCmrDAO.setCmrNextStepCd(CMR_NEXT_STEP_NONE);
+                ccaseCaseRemedyCmrDAO.setCmrLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+                ccaseCaseRemedyCmrDAO.setCmrLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
+                ccaseCaseRemedyCmrRepository.save(ccaseCaseRemedyCmrDAO);
+            } else {
+                ccaseCaseRemedyCmrDAO.setCmrStatusCd(CMR_STATUS_UNKNOWN);
+                ccaseCaseRemedyCmrDAO.setCmrStageCd(CMR_STAGE_INELIGIBLE);
+                ccaseCaseRemedyCmrDAO.setCmrNextStepCd(CMR_NEXT_STEP_NONE);
+                ccaseCaseRemedyCmrDAO.setCmrLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+                ccaseCaseRemedyCmrDAO.setCmrLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
+                ccaseCaseRemedyCmrRepository.save(ccaseCaseRemedyCmrDAO);
+            }
+        }
+    }
+
+    private void processResearchIB(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
+        List<StaffStfDAO> staffStfDAOList = null;
+        StaffStfDAO staffStfDAO = null;
+        if (UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaActivityTypeCd(),
+                ACTIVITY_TYPE_RESEARCH_IB8606)
+                && UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcCaseStatus(),
+                CASE_STATUS_CLOSED)) {
+            staffStfDAOList = staffStfRepository.getStaffInfoByUserId(UtilFunction.stringToLong
+                    .apply(ccaseActivitiesCmaDAO.getCmaLastUpdBy()));
+            if (CollectionUtils.isNotEmpty(staffStfDAOList)) {
+                staffStfDAO = staffStfDAOList.get(0);
+            }
+            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcCaseStatus(CASE_STATUS_REOPEN);
+            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcCasePriority(CASE_PRIORITY_HI);
+            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcCaseNewInd(INDICATOR.Y.name());
+            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setStaffStfDAO(staffStfDAO);
+            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcAssignedTs(commonRepository.getCurrentTimestamp());
+            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+            ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().setCmcLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
+            ccaseCasesCmcRepository.save(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO());
+
+            CreateActivityDTO createActivityDTO = new CreateActivityDTO();
+            CcaseRemedyActivityCraDAO ccaseRemedyActivityCraDAO = ccaseRemedyActivityCraRepository.
+                    getCaseRemedyActivityInfo(ACTIVITY_TYPE_REOPEN_CASE,
+                            REMEDY_GENERAL);
+
+            createActivityDTO.setCaseId(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId());
+            if (ccaseActivitiesCmaDAO.getFkEmpIdWg() != null) {
+                createActivityDTO.setEmployerId(ccaseActivitiesCmaDAO.getFkEmpIdWg());
+            }
+            createActivityDTO.setRemedyTypeCd(REMEDY_GENERAL);
+            createActivityDTO.setActivityTypeCd(ACTIVITY_TYPE_REOPEN_CASE);
+            createActivityDTO.setActivityDt(commonRepository.getCurrentDate());
+            createActivityDTO.setActivityTime(TIME_FORMAT
+                    .format(commonRepository.getCurrentDate()));
+            createActivityDTO.setActivitySpecifics(ccaseRemedyActivityCraDAO.getCraActivitySpecifics());
+
+            createActivityDTO.setActivityCasePriority(CASE_PRIORITY_HI);
+            createActivityDTO.setCallingUser(ccaseActivitiesCmaDAO.getCmaCreatedBy());
+            createActivityDTO.setUsingProgramName(ccaseActivitiesCmaDAO.getCmaCreatedUsing());
+            createActivity(createActivityDTO);
+        }
+    }
+
+    private void processReassignCaseToSelf(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
+        List<StaffStfDAO> staffList = null;
+        StaffStfDAO staffDAO = null;
+        CcaseCasesCmcDAO ccaseCasesCmcDAO = null;
+        if (UtilFunction.compareLongObject.test(ACTIVITY_TYPE_ASSIGN_TO_SELF,
+                ccaseActivitiesCmaDAO.getCmaActivityTypeCd())) {
+            staffList = staffStfRepository.getStaffInfoByUserId(UtilFunction.stringToLong
+                    .apply(ccaseActivitiesCmaDAO.getCmaCreatedBy()));
+
+            if (CollectionUtils.isNotEmpty(staffList)) {
+                staffDAO = staffList.get(0);
+                ccaseCasesCmcDAO = ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO();
+                if (!UtilFunction.compareLongObject.test(staffDAO.getStfId(), ccaseCasesCmcDAO.getStaffStfDAO()
+                        .getStfId())) {
+                    ccaseCasesCmcDAO.setStaffStfDAO(staffDAO);
+                    ccaseCasesCmcDAO.setCmcAssignedTs(commonRepository.getCurrentTimestamp());
+                    ccaseCasesCmcDAO.setCmcCaseNewInd(INDICATOR.Y.name());
+                    ccaseCasesCmcDAO.setCmcLastUpdBy(ccaseActivitiesCmaDAO.getCmaCreatedBy());
+                    ccaseCasesCmcDAO.setCmcLastUpdUsing(ACTIVITY_DETAILS_GENERAL);
+                    ccaseCasesCmcRepository.save(ccaseCasesCmcDAO);
+                }
+            }
+        }
+    }
+
+    public void processAutoCompleteAct(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
+        CcaseRemedyActivityCraDAO ccaseRemedyActivityCraDAO = null;
+        CcaseActivitiesCmaDAO activitiesCmaDAO = null;
+        List<CcaseActivitiesCmaDAO> ccaseActivitiesCmaDAOList = null;
+        ccaseRemedyActivityCraDAO = ccaseRemedyActivityCraRepository
+                .getCaseRemedyActivityInfo(ccaseActivitiesCmaDAO.getCmaActivityTypeCd(),
+                        ccaseActivitiesCmaDAO.getCmaRemedyType());
+        if (ccaseRemedyActivityCraDAO.getCraAutoComplete() != null) {
+            CcaseRemedyActivityCraDAO finalCcaseRemedyActivityCraDAO = ccaseRemedyActivityCraDAO;
+            ccaseRemedyActivityCraDAO = ccaseRemedyActivityCraRepository
+                    .findById(ccaseRemedyActivityCraDAO.getCraAutoComplete()).orElseThrow(() ->
+                            new NotFoundException("Invalid CRA ID:" +
+                                    finalCcaseRemedyActivityCraDAO.getCraAutoComplete(), CRA_ID_NOT_FOUND));
+            ccaseActivitiesCmaDAOList = ccaseActivitiesCmaRepository
+                    .getActivityByActivityCdAndRemedyCd(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
+                            ccaseRemedyActivityCraDAO.getCraActivityCd(), ccaseRemedyActivityCraDAO.getCraRemedyCd());
+            for (CcaseActivitiesCmaDAO autoActivity : ccaseActivitiesCmaDAOList) {
+                if (autoActivity.getFkEmpIdWg() == null || (UtilFunction.compareLongObject
+                        .test(ccaseActivitiesCmaDAO.getFkEmpIdWg(), autoActivity.getFkEmpIdWg()))) {
+                    activitiesCmaDAO = ccaseActivitiesCmaRepository.findById(autoActivity.getCmaId()).orElseThrow(() ->
+                            new NotFoundException("Invalid Activity ID:" + autoActivity.getCmaId(),
+                                    CASE_REMEDY_ACTIVITY_ID_NOT_FOUND));
+                    activitiesCmaDAO.setCmaFollowupComplBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+                    activitiesCmaDAO.setCmaFollowupComplDt(commonRepository.getCurrentDate());
+                    activitiesCmaDAO.setCmaFollowupComplete(INDICATOR.Y.name());
+                    activitiesCmaDAO.setCmaFollowCompShNote(ccaseActivitiesCmaDAO.getCcaseRemedyActivityCraDAO()
+                            .getCraAutoCompleteShNote());
+                    activitiesCmaDAO.setCmaLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+                    activitiesCmaDAO.setCmaLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
+                    ccaseActivitiesCmaRepository.save(activitiesCmaDAO);
+                    break;
+                }
+            }
+        }
+    }
+
+    @NotNull
+    private CcaseActivitiesCmaDAO getCcaseActivitiesCmaDAO(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO,
+                                                           List<CcaseActivitiesCmaDAO> ccaseActivitiesCmaList) {
+        CcaseActivitiesCmaDAO activitiesCmaDAO = ccaseActivitiesCmaList.get(0);
+        activitiesCmaDAO.setCmaFollowupComplBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+        activitiesCmaDAO.setCmaFollowupComplDt(commonRepository.getCurrentDate());
+        activitiesCmaDAO.setCmaFollowupComplete(INDICATOR.Y.name());
+        activitiesCmaDAO.setCmaFollowCompShNote(activitiesCmaDAO
+                .getCcaseRemedyActivityCraDAO().getCraAutoCompleteShNote());
+        activitiesCmaDAO.setCmaLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+        activitiesCmaDAO.setCmaLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
+        return activitiesCmaDAO;
+    }
+
+    private void createManualCMN(CcaseActivitiesCmaDAO ccaseActivitiesCma, Long crcId, Long cwgId) {
+        CcaseCmaNoticesCmnDAO ccaseCmaNoticesCmnDAO = new CcaseCmaNoticesCmnDAO();
+        ccaseCmaNoticesCmnDAO.setCcaseActivitiesCmaDAO(ccaseActivitiesCma);
+        ccaseCmaNoticesCmnDAO.setCmnAutoReqUi(USER_INTERFACE);
+        ccaseCmaNoticesCmnDAO.setCmnCreatedBy(ccaseActivitiesCma.getCmaCreatedBy());
+        ccaseCmaNoticesCmnDAO.setCmnCreatedUsing(ccaseActivitiesCma.getCmaCreatedUsing());
+        ccaseCmaNoticesCmnDAO.setCmnLastUpdBy(ccaseActivitiesCma.getCmaLastUpdBy());
+        ccaseCmaNoticesCmnDAO.setCmnLastUpdUsing(ccaseActivitiesCma.getCmaLastUpdUsing());
+        ccaseCmaNoticesCmnDAO.setCmnResendReq(INDICATOR.N.name());
+        ccaseCmaNoticesCmnDAO.setCorrespondenceCorDAO(null);
+        CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO = new CcaseCraCorrespondenceCrcDAO();
+        ccaseCraCorrespondenceCrcDAO.setCrcId(crcId);
+        ccaseCmaNoticesCmnDAO.setFkCwgId(cwgId);
+        ccaseCmaNoticesCmnDAO.setCcaseCraCorrespondenceCrcDAO(ccaseCraCorrespondenceCrcDAO);
+        ccaseCmaNoticesCmnRepository.save(ccaseCmaNoticesCmnDAO);
+    }
+
+    public void createResendCMN(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO, Long cmnId) {
+        CcaseCmaNoticesCmnDAO existingCmnDAO = ccaseCmaNoticesCmnRepository.findById(cmnId)
+                .orElseThrow(() -> new NotFoundException("Invalid Activity Notices ID:" + cmnId, CMN_ID_NOT_FOUND));
+        CcaseCmaNoticesCmnDAO ccaseCmaNoticesCmnDAO = new CcaseCmaNoticesCmnDAO();
+        ccaseCmaNoticesCmnDAO.setCcaseActivitiesCmaDAO(ccaseActivitiesCmaDAO);
+        ccaseCmaNoticesCmnDAO.setCmnAutoReqUi(USER_INTERFACE);
+        ccaseCmaNoticesCmnDAO.setCmnCreatedBy(ccaseActivitiesCmaDAO.getCmaCreatedBy());
+        ccaseCmaNoticesCmnDAO.setCmnCreatedUsing(ccaseActivitiesCmaDAO.getCmaCreatedUsing());
+        ccaseCmaNoticesCmnDAO.setCmnLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+        ccaseCmaNoticesCmnDAO.setCmnLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
+        ccaseCmaNoticesCmnDAO.setCmnResendReq(INDICATOR.Y.name());
+        ccaseCmaNoticesCmnDAO.setCorrespondenceCorDAO(existingCmnDAO.getCorrespondenceCorDAO());
+        ccaseCmaNoticesCmnDAO.setFkCwgId(existingCmnDAO.getFkCwgId());
+        ccaseCmaNoticesCmnDAO.setCcaseCraCorrespondenceCrcDAO(existingCmnDAO.getCcaseCraCorrespondenceCrcDAO());
+        ccaseCmaNoticesCmnRepository.save(ccaseCmaNoticesCmnDAO);
+    }
+
+
+    private void createCMN(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO, Long corId,
+                           CcaseCraCorrespondenceCrcDAO ccaseCraCorrespondenceCrcDAO, Long cwgId) {
+        CcaseCmaNoticesCmnDAO ccaseCmaNoticesCmnDAO = new CcaseCmaNoticesCmnDAO();
+        ccaseCmaNoticesCmnDAO.setCcaseActivitiesCmaDAO(ccaseActivitiesCmaDAO);
+        ccaseCmaNoticesCmnDAO.setCmnAutoReqUi(USER_INTERFACE);
+        ccaseCmaNoticesCmnDAO.setCmnCreatedBy(ccaseActivitiesCmaDAO.getCmaCreatedBy());
+        ccaseCmaNoticesCmnDAO.setCmnCreatedUsing(ccaseActivitiesCmaDAO.getCmaCreatedUsing());
+        ccaseCmaNoticesCmnDAO.setCmnLastUpdBy(ccaseActivitiesCmaDAO.getCmaLastUpdBy());
+        ccaseCmaNoticesCmnDAO.setCmnLastUpdUsing(ccaseActivitiesCmaDAO.getCmaLastUpdUsing());
+        ccaseCmaNoticesCmnDAO.setCmnResendReq(INDICATOR.N.name());
+        CorrespondenceCorDAO correspondenceCorDAO = new CorrespondenceCorDAO();
+        correspondenceCorDAO.setCorId(corId);
+        ccaseCmaNoticesCmnDAO.setCorrespondenceCorDAO(correspondenceCorDAO);
+        ccaseCmaNoticesCmnDAO.setCcaseCraCorrespondenceCrcDAO(ccaseCraCorrespondenceCrcDAO);
+        ccaseCmaNoticesCmnDAO.setFkCwgId(cwgId);
+        ccaseCmaNoticesCmnRepository.save(ccaseCmaNoticesCmnDAO);
+    }
+
+
+    private Map<String, Object> createActivity(GeneralActivityDTO generalActivityDTO) {
+
+        return createCollecticaseActivity(generalActivityDTO.getCaseId(),
+                null, generalActivityDTO.getActivityTypeCd(),
+                generalActivityDTO.getActivityRemedyTypeCd(), generalActivityDTO.getActivityDate(),
+                generalActivityDTO.getActivityTime(), generalActivityDTO.getActivitySpecifics(),
+                generalActivityDTO.getActivityNotes(), generalActivityDTO.getActivityAdditionalNotes(),
+                generalActivityDTO.getActivityNHUISNotes(), generalActivityDTO.getActivityCommunicationMethod(),
+                generalActivityDTO.getActivityCaseCharacteristics(),
+                generalActivityDTO.getActivityClaimantRepresentative(),
+                generalActivityDTO.getCasePriorityCd(), generalActivityDTO.getActivityFollowupDate(),
+                generalActivityDTO.getActivityFollowupShortNote(), null,
+                generalActivityDTO.getCallingUser(), generalActivityDTO.getUsingProgramName());
+    }
+
+    @Transactional
+    public void createPaymentPlanActivity(PaymentPlanActivityDTO paymentPlanActivityDTO) {
+        //Functional Validation
+        ValidationHelper.validateGeneralActivity(generalActivityValidator, paymentPlanActivityDTO);
+        ValidationHelper.validatePaymentPlanActivity(paymentPlanActivityValidator, paymentPlanActivityDTO);
+
+        CcaseCasesCmcDAO ccaseCasesCmcDAO = ccaseCasesCmcRepository.findById(paymentPlanActivityDTO.getCaseId())
+                .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + paymentPlanActivityDTO.getCaseId(),
+                        CASE_ID_NOT_FOUND));
+        paymentPlanActivityDTO.setClaimantId(ccaseCasesCmcDAO.getClaimantCmtDAO().getCmtId());
+
+        Map<String, Object> createCollecticaseActivity = createActivity(paymentPlanActivityDTO);
+        if (createCollecticaseActivity != null &&
+                createCollecticaseActivity.get(POUT_SUCCESS) != null &&
+                UtilFunction.compareLongObject.test((Long) createCollecticaseActivity
+                        .get(POUT_SUCCESS), 1L)) {
+            paymentPlanActivityDTO.setActivityId((Long) createCollecticaseActivity.get(POUT_CMA_ID));
+
+            Date currentDate = commonRepository.getCurrentDate();
+            Timestamp currentTimeStamp = commonRepository.getCurrentTimestamp();
+
+            CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = ccaseActivitiesCmaRepository.
+                    findById(paymentPlanActivityDTO.getActivityId())
+                    .orElseThrow(() ->
+                            new NotFoundException("Invalid Activity ID:" + paymentPlanActivityDTO.getActivityId(),
+                                    ACTIVITY_ID_NOT_FOUND));
+            assignFormValueToActivitiesDAO(paymentPlanActivityDTO, ccaseActivitiesCmaDAO);
+            ccaseActivitiesCmaRepository.save(ccaseActivitiesCmaDAO);
+
+            CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository
+                    .getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO.getCcaseCasesCmcDAO().getCmcId(),
+                            List.of(ccaseActivitiesCmaDAO.getCmaRemedyType()));
+
+            updateCountyForRemedyAndActivity(paymentPlanActivityDTO, ccaseActivitiesCmaDAO, ccaseCaseRemedyCmrDAO);
+            updatePPRemedy(ccaseActivitiesCmaDAO);
+            ccaseCaseRemedyCmrRepository.updateCaseRemedy(paymentPlanActivityDTO.getActivityId(), null);
+            createNHUISNotes(ccaseActivitiesCmaDAO, currentTimeStamp);
+            processCorrespondence(prepareCorrespondenceMapFromDTO(paymentPlanActivityDTO),
+                    prepareNoticesList(paymentPlanActivityDTO.getActivityReSendCorrespondence()),
+                    prepareNoticesList(paymentPlanActivityDTO.getActivityManualCorrespondence()),
+                    ccaseActivitiesCmaDAO, null);
+            processAutoCompleteAct(ccaseActivitiesCmaDAO);
+            processClosedCasePPActivity(ccaseActivitiesCmaDAO);
+        }
+
+    }
+
+    private void assignFormValueToActivitiesDAO(PaymentPlanActivityDTO paymentPlanActivityDTO, CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
+        ccaseActivitiesCmaDAO.setCmaPpRespToCd(paymentPlanActivityDTO.getPaymentPlanResponseToCd());
+        ccaseActivitiesCmaDAO.setCmaPpRespToOther(paymentPlanActivityDTO.getPaymentPlanResponseToOther());
+        ccaseActivitiesCmaDAO.setCmaPpGuidelineAmt(paymentPlanActivityDTO.getPaymentPlanGuideLineAmount());
+        ccaseActivitiesCmaDAO.setCmaPpSignedDt(paymentPlanActivityDTO.getPaymentPlanSignedDate());
+        ccaseActivitiesCmaDAO.setCmaPpFaSignedDt(paymentPlanActivityDTO.getPaymentPlanFinAffidavitSignedDate());
+        ccaseActivitiesCmaDAO.setCmaPpPaymentAmt(paymentPlanActivityDTO.getPaymentPlanPaymentAmount());
+        ccaseActivitiesCmaDAO.setCmaPpPaymentCatgCd(paymentPlanActivityDTO.getPaymentPlanPaymentCategory());
+        ccaseActivitiesCmaDAO.setCmaPpEffectiveUntil(paymentPlanActivityDTO.getPaymentPlanEffectiveUntilDate());
+        ccaseActivitiesCmaDAO.setCmaPpEffectiveMonths(paymentPlanActivityDTO.getPaymentPlanMonths());
+    }
+
     private void updatePPRemedy(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
         List<RepaymentRpmDAO> repaymentRpmList = null;
         List<OpmPayPlanOppDAO> opmPayPlanOppList = null;
@@ -1598,7 +1604,6 @@ public class ActivityService extends CollecticaseBaseService {
             }
         }
     }
-
 
     private void processClosedCasePPActivity(
             CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO) {
@@ -1647,39 +1652,6 @@ public class ActivityService extends CollecticaseBaseService {
         }
     }
 
-    private void createActivity(CreateActivityDTO createActivityDTO) {
-
-        createCollecticaseActivity(createActivityDTO.getCaseId(),
-                null, createActivityDTO.getActivityTypeCd(),
-                createActivityDTO.getRemedyTypeCd(), createActivityDTO.getActivityDt(),
-                createActivityDTO.getActivityTime(), createActivityDTO.getActivitySpecifics(),
-                createActivityDTO.getActivityNotes(), createActivityDTO.getActivityNotesAdditional(),
-                createActivityDTO.getActivityNotesNHUIS(), createActivityDTO.getCommunicationMethod(),
-                createActivityDTO.getCaseCharacteristics(), createActivityDTO.getActivityCmtRepCd(),
-                createActivityDTO.getActivityCasePriority(), createActivityDTO.getFollowupDt(),
-                createActivityDTO.getFollowupShortNote(), null,
-                createActivityDTO.getCallingUser(), createActivityDTO.getUsingProgramName());
-    }
-
-    public Map<String, Object> createCollecticaseActivity
-            (Long caseId, Long employerId, Long activityTypeCd,
-             Long remedyTypeCd, Date activityDt, String activityTime, String activitySpecifics,
-             String activityNotes, String activityNotesAdditional, String activityNotesNHUIS,
-             Long communicationMethod, String caseCharacteristics, Long activityCmtRepCd,
-             Long activityCasePriority, Date followupDt, String followupShortNote,
-             String followupCompleteShortNote, String callingUser, String usingProgramName) {
-
-        Map<String, Object> createCollecticaseActivity;
-
-        createCollecticaseActivity = ccaseActivitiesCmaRepository.createCollecticaseActivity(caseId, employerId,
-                activityTypeCd, remedyTypeCd, activityDt, activityTime, activitySpecifics, activityNotes,
-                activityNotesAdditional, activityNotesNHUIS, communicationMethod, caseCharacteristics, activityCmtRepCd,
-                activityCasePriority, followupDt, followupShortNote, followupCompleteShortNote, callingUser,
-                usingProgramName);
-
-        return createCollecticaseActivity;
-    }
-
     public void addSystemActivity(CcaseCasesCmcDAO ccaseCasesCmcDAO,
                                   Long activityTypeCd, Long remedyCd,
                                   String activitySpecifics, String activityNotes, Long casePriority) {
@@ -1711,50 +1683,24 @@ public class ActivityService extends CollecticaseBaseService {
         ValidationHelper.validateGeneralActivity(generalActivityValidator, wageGarnishmentActivityDTO);
         ValidationHelper.validateWageGarnishActivity(wageGarnishmentValidator, wageGarnishmentActivityDTO);
 
-        boolean activityCreated = false;
-        Map<String, Object> createCollecticaseActivity = null;
-        CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = null;
-        CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = null;
-        CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO = null;
-        Long cwgId = null;
-        Long activityId;
-        Date currentDate = null;
-        Timestamp currentTimeStamp = null;
-        List<Map<String, Object>> sendNoticeList = new ArrayList<>();
-        List<String> resendNoticeList = new ArrayList<>();
-        List<String> manualNoticeList = new ArrayList<>();
-
-        createCollecticaseActivity = createActivity(wageGarnishmentActivityDTO);
+        Map<String, Object> createCollecticaseActivity = createActivity(wageGarnishmentActivityDTO);
         if (createCollecticaseActivity != null &&
                 createCollecticaseActivity.get(POUT_SUCCESS) != null &&
                 UtilFunction.compareLongObject.test((Long) createCollecticaseActivity
                         .get(POUT_SUCCESS), 1L)) {
-            activityId = (Long) createCollecticaseActivity.get(POUT_CMA_ID);
-        } else {
-            activityId = null;
-        }
-        if (activityId != null) {
-            currentDate = commonRepository.getCurrentDate();
-            currentTimeStamp = commonRepository.getCurrentTimestamp();
-            ccaseActivitiesCmaDAO = ccaseActivitiesCmaRepository.findById(activityId)
-                    .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + activityId,
-                            ACTIVITY_ID_NOT_FOUND));
-            activityCreated = true;
+            wageGarnishmentActivityDTO.setActivityId((Long) createCollecticaseActivity.get(POUT_CMA_ID));
 
-            ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository.getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO
+            Date currentDate = commonRepository.getCurrentDate();
+            Timestamp currentTimeStamp = commonRepository.getCurrentTimestamp();
+
+            CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO = ccaseActivitiesCmaRepository.findById(wageGarnishmentActivityDTO.getActivityId())
+                    .orElseThrow(() -> new NotFoundException("Invalid Activity ID:" + wageGarnishmentActivityDTO.getActivityId(),
+                            ACTIVITY_ID_NOT_FOUND));
+
+            CcaseCaseRemedyCmrDAO ccaseCaseRemedyCmrDAO = ccaseCaseRemedyCmrRepository.getCaseRemedyByCaseRemedy(ccaseActivitiesCmaDAO
                     .getCcaseCasesCmcDAO().getCmcId(), List.of(ccaseActivitiesCmaDAO.getCmaRemedyType()));
 
-            if (!(UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO.getCmaRemedyType(), REMEDY_GENERAL)
-                    || UtilFunction.compareLongObject.test(ccaseActivitiesCmaDAO
-                    .getCmaRemedyType(), REMEDY_BANKRUPTCY))) {
-                if (!GENERAL_ACTIVITY_TEMPLATE.equals(ccaseActivitiesCmaDAO
-                        .getCcaseRemedyActivityCraDAO().getCraTemplatePage())) {
-                    ccaseActivitiesCmaDAO.setCmaNHFkCtyCd(wageGarnishmentActivityDTO.getPropertyLien() != null ?
-                            wageGarnishmentActivityDTO.getPropertyLien() : ccaseCaseRemedyCmrDAO.getCmrGnFkCtyCd());
-                } else {
-                    ccaseCaseRemedyCmrDAO.setCmrGnFkCtyCd(wageGarnishmentActivityDTO.getPropertyLien());
-                }
-            }
+            updateCountyForRemedyAndActivity(wageGarnishmentActivityDTO, ccaseActivitiesCmaDAO, ccaseCaseRemedyCmrDAO);
 
             if (CollecticaseUtilFunction.greaterThanLongObject.test(wageGarnishmentActivityDTO.getEmployerId(), 0L)) {
                 ccaseActivitiesCmaDAO.setFkEmpIdWg(wageGarnishmentActivityDTO.getEmployerId());
@@ -1773,15 +1719,19 @@ public class ActivityService extends CollecticaseBaseService {
             }
             ccaseActivitiesCmaDAO.setCmaEmpRepTypeCd(wageGarnishmentActivityDTO.getEmployerRepresentativeCd());
             updateWGRemedy(ccaseActivitiesCmaDAO, wageGarnishmentActivityDTO.getEmployerId());
-            ccaseCaseRemedyCmrRepository.updateCaseRemedy(activityId, wageGarnishmentActivityDTO.getEmployerId());
+            ccaseCaseRemedyCmrRepository.updateCaseRemedy(wageGarnishmentActivityDTO.getActivityId(), wageGarnishmentActivityDTO.getEmployerId());
             createNHUISNotes(ccaseActivitiesCmaDAO, currentTimeStamp);
-            ccaseWageGarnishmentCwgDAO = processWageGarnish(ccaseActivitiesCmaDAO);
+            CcaseWageGarnishmentCwgDAO ccaseWageGarnishmentCwgDAO = processWageGarnish(ccaseActivitiesCmaDAO);
+            Long cwgId = null;
             if (ccaseWageGarnishmentCwgDAO != null) {
                 cwgId = ccaseWageGarnishmentCwgDAO.getCwgId();
             }
-            processCorrespondence(sendNoticeList, resendNoticeList, manualNoticeList, ccaseActivitiesCmaDAO, cwgId);
+            processCorrespondence(prepareCorrespondenceMapFromDTO(wageGarnishmentActivityDTO),
+                    prepareNoticesList(wageGarnishmentActivityDTO.getActivityReSendCorrespondence()),
+                    prepareNoticesList(wageGarnishmentActivityDTO.getActivityManualCorrespondence()), ccaseActivitiesCmaDAO, cwgId);
             processAutoCompleteAct(ccaseActivitiesCmaDAO);
         }
+
     }
 
     private void updateWGRemedy(CcaseActivitiesCmaDAO ccaseActivitiesCmaDAO,

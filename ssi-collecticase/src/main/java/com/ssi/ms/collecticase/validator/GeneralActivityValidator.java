@@ -4,7 +4,6 @@ import com.ssi.ms.collecticase.constant.CollecticaseConstants;
 import com.ssi.ms.collecticase.constant.ErrorMessageConstant;
 import com.ssi.ms.collecticase.database.dao.CcaseCraCorrespondenceCrcDAO;
 import com.ssi.ms.collecticase.database.dao.VwCcaseHeaderDAO;
-import com.ssi.ms.collecticase.database.dao.VwCcaseOpmDAO;
 import com.ssi.ms.collecticase.database.repository.CcaseCraCorrespondenceCrcRepository;
 import com.ssi.ms.collecticase.database.repository.VwCcaseCaseloadRepository;
 import com.ssi.ms.collecticase.dto.GeneralActivityDTO;
@@ -14,7 +13,6 @@ import com.ssi.ms.platform.dto.DynamicErrorDTO;
 import com.ssi.ms.platform.util.UtilFunction;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +23,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 @AllArgsConstructor
@@ -99,30 +96,17 @@ public class GeneralActivityValidator {
     private void validateRepenActivity(GeneralActivityDTO generalActivityDTO, List<CollecticaseErrorEnum> errorEnums) {
         if (UtilFunction.compareLongObject.test(generalActivityDTO.getActivityTypeCd(),
                 CollecticaseConstants.ACTIVITY_TYPE_REOPEN_CASE)) {
-            List<VwCcaseOpmDAO> vwCcaseOpmDAOList = vwCcaseCaseloadRepository
-                    .getClaimantOpmInfoByCaseId(generalActivityDTO.getCaseId());
-            VwCcaseOpmDAO vwCcaseOpmDAO = null;
-            if (CollectionUtils.isNotEmpty(vwCcaseOpmDAOList)) {
-                vwCcaseOpmDAO = vwCcaseOpmDAOList.get(0);
-            }
-
-            List<VwCcaseHeaderDAO> vwCcaseHeaderDAOList = vwCcaseCaseloadRepository
+            VwCcaseHeaderDAO vwCcaseHeaderDAO = vwCcaseCaseloadRepository
                     .getCaseHeaderInfoByCaseId(generalActivityDTO.getCaseId());
-            VwCcaseHeaderDAO vwCcaseHeaderDAO = null;
-            if (CollectionUtils.isNotEmpty(vwCcaseHeaderDAOList)) {
-                vwCcaseHeaderDAO = vwCcaseHeaderDAOList.get(0);
-            }
 
-            if (vwCcaseHeaderDAO != null && !UtilFunction.compareLongObject.test(vwCcaseHeaderDAO.getCaseStatus(),
-                    CollecticaseConstants.CASE_STATUS_CLOSED)) {
-                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.REOPEN_CASE_CLOSED);
-            }
-
-            if (vwCcaseOpmDAO != null &&
-                    vwCcaseOpmDAO.getOpmBal() == null ||
-                    (Objects.requireNonNull(vwCcaseOpmDAO).getOpmBal().compareTo(BigDecimal.ZERO) == 0)) {
-                errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.REOPEN_OPM_BAL_ZERO);
-            }
+            if (vwCcaseHeaderDAO != null)
+                if (!UtilFunction.compareLongObject.test(vwCcaseHeaderDAO.getCaseStatus(),
+                        CollecticaseConstants.CASE_STATUS_CLOSED)) {
+                    errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.REOPEN_CASE_CLOSED);
+                } else if (vwCcaseHeaderDAO.getOpBal() == null ||
+                        vwCcaseHeaderDAO.getOpBal().compareTo(BigDecimal.ZERO) == 0) {
+                    errorEnums.add(ErrorMessageConstant.GeneralActivityDTODetail.REOPEN_OPM_BAL_ZERO);
+                }
         }
     }
 
@@ -155,5 +139,5 @@ public class GeneralActivityValidator {
             }
         }
     }
-    
+
 }

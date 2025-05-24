@@ -131,9 +131,8 @@ public class CaseService extends CollecticaseBaseService {
     @Autowired
     private CaseLookupValidator caseLookupValidator;
 
-    public List<VwCcaseHeaderDTO> getCaseHeaderInfoByCaseId(Long caseId) {
-        return vwCcaseCaseloadRepository.getCaseHeaderInfoByCaseId(caseId).stream().map(dao ->
-                vwCcaseHeaderMapper.daoToDto(dao)).toList();
+    public VwCcaseHeaderDTO getCaseHeaderInfoByCaseId(Long caseId) {
+        return vwCcaseHeaderMapper.daoToDto(vwCcaseCaseloadRepository.getCaseHeaderInfoByCaseId(caseId));
     }
 
     public List<VwCcaseOpmDTO> getClaimantOpmInfoByCaseId(Long caseId) {
