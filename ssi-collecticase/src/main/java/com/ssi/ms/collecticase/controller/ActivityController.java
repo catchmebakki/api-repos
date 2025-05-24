@@ -290,46 +290,30 @@ public class ActivityController {
 
     @PostMapping(path = "/add-general", produces = "application/json")
     public ResponseEntity<GeneralActivityDTO> addGeneralActivity(
-            @Valid @RequestBody final GeneralActivityDTO generalActivityDTO, BindingResult result) {
-        if (!result.hasErrors()) {
-            activityService.createGeneralActivity(generalActivityDTO);
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(generalActivityDTO);
-        } else {
-            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
-        }
+            @Valid @RequestBody final GeneralActivityDTO generalActivityDTO) {
+        activityService.createGeneralActivity(generalActivityDTO);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(generalActivityDTO);
     }
 
     @PostMapping(path = "/add-paymentplan", produces = "application/json")
     public ResponseEntity<PaymentPlanActivityDTO> addPaymentPlanActivity(
-            @Valid @RequestBody final PaymentPlanActivityDTO paymentPlanActivityDTO, BindingResult result) {
-        if (!result.hasErrors()) {
-            activityService.createPaymentPlanActivity(paymentPlanActivityDTO);
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(paymentPlanActivityDTO);
-        } else {
-            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
-        }
+            @Valid @RequestBody final PaymentPlanActivityDTO paymentPlanActivityDTO) {
+        activityService.createPaymentPlanActivity(paymentPlanActivityDTO);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(paymentPlanActivityDTO);
     }
 
     @PostMapping(path = "/add-wagegarnish", produces = "application/json")
     public ResponseEntity<WageGarnishmentActivityDTO> addWageGarnishActivity(
-            @Valid @RequestBody final WageGarnishmentActivityDTO wageGarnishmentActivityDTO, BindingResult result) {
-        if (!result.hasErrors()) {
-            activityService.createWageGarnishmentActivity(wageGarnishmentActivityDTO);
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(wageGarnishmentActivityDTO);
-        } else {
-            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
-        }
+            @Valid @RequestBody final WageGarnishmentActivityDTO wageGarnishmentActivityDTO) {
+        activityService.createWageGarnishmentActivity(wageGarnishmentActivityDTO);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(wageGarnishmentActivityDTO);
     }
 
     @PostMapping(path = "/add-updatecontact", produces = "application/json")
     public ResponseEntity<UpdateContactActivityDTO> addUpdateContactActivity(
-            @Valid @RequestBody final UpdateContactActivityDTO updateContactActivityDTO, BindingResult result) {
-        if (!result.hasErrors()) {
-            activityService.createUpdateContactActivity(updateContactActivityDTO);
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(updateContactActivityDTO);
-        } else {
-            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).build();
-        }
+            @Valid @RequestBody final UpdateContactActivityDTO updateContactActivityDTO) {
+        activityService.createUpdateContactActivity(updateContactActivityDTO);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(updateContactActivityDTO);
     }
 
 }

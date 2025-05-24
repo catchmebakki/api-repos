@@ -97,6 +97,8 @@ public class GeneralActivityDTO {
 
     private Long claimantId;
 
+    private Long activityId;
+
     private Long caseStatusCd;
 
     private Long casePriorityCd;

@@ -45,7 +45,7 @@ public interface VwCcaseCaseloadRepository extends CrudRepository<VwCcaseCaseloa
     @Query("""          
             from VwCcaseHeaderDAO vwCcaseHeader where vwCcaseHeader.caseNo = :caseId
             """)
-    List<VwCcaseHeaderDAO> getCaseHeaderInfoByCaseId(Long caseId);
+    VwCcaseHeaderDAO getCaseHeaderInfoByCaseId(Long caseId);
 
     @Query("""          
             from VwCcaseOpmDAO vwCcaseOpm

@@ -16,6 +16,8 @@ public interface ErrorMessageConstant {
 
     String CMO_ID_NOT_FOUND = "cmoId.notFound";
 
+    String CRA_ID_NOT_FOUND = "craId.notFound";
+
     String CRC_ID_NOT_FOUND = "crcId.notFound";
 
     String CME_ID_NOT_FOUND = "entityId.notFound";
@@ -95,31 +97,33 @@ public interface ErrorMessageConstant {
     @AllArgsConstructor
     enum GeneralActivityDTODetail implements CollecticaseErrorEnum {
         FOLLOWUP_DT_REQUIRED("activityFollowupDt", "followupDt.required",
-                "Activity Followup Date is required.", 0),
+                "Activity Follow-up Date is required when the activity Type is Record new Follow-up.", 0),
 
         FOLLOWUP_SHORT_NOTE_NA("activityFollowupShortNote",
                 "activityFollowupShortNote.notApplicable",
-                "Activity Followup Short Note not applicable.", 0),
+                "Activity Follow-up Short Note is not applicable when" +
+                        " activity Follow-up date is not provided.", 0),
 
         FOLLOWUP_SHORT_NOTE_REQUIRED("activityFollowupShortNote",
                 "activityFollowupShortNote.required",
-                "Activity Followup Short Note is required", 0),
+                "Activity Follow-up Short Note is required when " +
+                        "activity Follow-up date is provided.", 0),
 
         PROPERTY_LIEN_REQUIRED("propertyLien", "propertyLien.required",
-                "Property Lien is required.", 0),
+                "Property Lien is mandatory when the activity is Research for NH Property.", 0),
 
         ENTITY_CONTACT_REQUIRED("activityEntityContact", "activityEntityContact.required",
-                "Activity Entity Contact is required.", 0),
+                "Please select the entity contact.", 0),
 
         CORRESPONDENCE_NOT_APPLICABLE_FOR_PROPERTY_LIEN("activityCorrespondence",
                 "activityCorrespondence.notApplicable",
                 "'{0}' Notices can be sent when the Property Lien is None.", 1),
 
         REOPEN_CASE_CLOSED("activityTypeCd", "activityTypeCd.reopen.case.closed",
-                "Reopen activity cannot be added when case is not closed", 0),
+                "Case cannot be reopened when the case status is open.", 0),
 
         REOPEN_OPM_BAL_ZERO("activityTypeCd", "activityTypeCd.reopen.opm.bal.zero",
-                "Reopen activity cannot be added when opm balance is zero", 0);
+                "Case cannot be reopened when the overpayment is zero.", 0);
 
         private final String frontendField;
         private final String frontendErrorCode;
@@ -132,41 +136,41 @@ public interface ErrorMessageConstant {
     enum PaymentPlanActivityDTODetail implements CollecticaseErrorEnum {
         GUIDE_LINE_AMOUNT_REQUIRED("paymentPlanGuideLineAmount",
                 "paymentPlanGuideLineAmount.required",
-                "Payment Plan Guide Line Amount is required.", 0),
+                "Please provide the Guideline Amount.", 0),
 
         GUIDE_LINE_AMOUNT_ZERO("paymentPlanGuideLineAmount",
                 "paymentPlanGuideLineAmount.zero",
-                "Payment Plan Guide Line Amount cannot be zero.", 0),
+                "lease provide a valid positive number for Guideline Amount.", 0),
 
         GUIDE_LINE_AMOUNT_INVALID("paymentPlanGuideLineAmount",
                 "paymentPlanGuideLineAmount.invalid",
-                "Payment Plan Guide Line Amount should be 4 digit with 2 decimal.", 0),
+                "Please provide a valid Guideline Amount.", 0),
 
         RESPONSE_TO_REQUIRED("paymentPlanReponseToCd",
                 "paymentPlanResponseToCd.required",
-                "Payment Plan Response To is mandatory.", 0),
+                "Please provide Response To.", 0),
 
         RESPONSE_TO_OTHER_REQUIRED("paymentPlanReponseToOther",
                 "paymentPlanReponseToOther.required",
-                "Payment Plan Response To Other is mandatory.", 0),
+                "Please provide Other.", 0),
 
         SIGNED_DATE_REQUIRED("paymentPlanSignedDate", "paymentPlanSignedDate.required",
-                "Payment Plan Signed Date is required.", 0),
+                "Please provide the Payment Plan Signed On Date.", 0),
 
         SIGNED_DATE_FUTURE("paymentPlanSignedDate", "paymentPlanSignedDate.future",
-                "Payment Plan Signed Date cannot be in future.", 0),
+                "Payment Plan Signed On Date cannot be in future.", 0),
 
         FA_SIGNED_DATE_REQUIRED("paymentPlanFinAffidavitSignedDate",
                 "paymentPlanFinAffidavitSignedDate.required",
-                "Payment Plan FA Signed Date is required.", 0),
+                "Please provide the Fin Affidavit Signed On Date.", 0),
 
         FA_SIGNED_DATE_FUTURE("paymentPlanFinAffidavitSignedDate",
                 "paymentPlanFinAffidavitSignedDate.future",
-                "Payment Plan FA Signed Date cannot be in future.", 0),
+                "Fin Affidavit Signed On Date cannot be in future.", 0),
 
         PAYMENT_AMOUNT_REQUIRED("paymentPlanPaymentAmount",
                 "paymentPlanPaymentAmount.required",
-                "Payment Plan Payment Amount is required.", 0),
+                "Please provide the Payment Amount.", 0),
 
         PAYMENT_AMOUNT_ZERO("paymentPlanPaymentAmount",
                 "paymentPlanPaymentAmount.zero",
@@ -174,11 +178,12 @@ public interface ErrorMessageConstant {
 
         PAYMENT_AMOUNT_INVALID("paymentPlanPaymentAmount",
                 "paymentPlanPaymentAmount.invalid",
-                "Payment Plan Payment Amount should be 4 digit with 2 decimal.", 0),
+                "Please provide a valid Payment Amount.", 0),
 
         GUIDE_LINE_PAYMENT_AMOUNT_NOT_SAME("paymentPlanPaymentAmount",
                 "guideLineAmount.paymentAmount.not.same",
-                "Payment Plan Payment and Guideline Amount are not same.", 0),
+                "Payment Amount and Guideline Amount should be the same" +
+                        " when Payment Category is Guideline Payment.", 0),
 
         PAYMENT_AMOUNT_SHOULD_BE_ZERO("paymentPlanPaymentAmount",
                 "PaymentAmount.should.be.zero",
@@ -186,15 +191,16 @@ public interface ErrorMessageConstant {
 
         PAYMENT_AMOUNT_LESS_THAN_GUIDELINE_AMOUNT("paymentPlanPaymentAmount",
                 "paymentAmount.less.than.guideline.amount",
-                "Payment Plan Payment Amount should be less than guideline amount.", 0),
+                "Payment amount cannot be greater than or equal to Guideline" +
+                        " Amount when the Payment category is Reduced or Variable.", 0),
 
         PAYMENT_PLAN_PAYMENT_CATEGORY_REQUIRED("paymentPlanPaymentCategory",
                 "paymentPlanPaymentCategory.required",
-                "Payment Plan Payment category when payment plan amount is entered.", 0),
+                "Please provide the Payment Category when Payment Amount is entered.", 0),
 
         PAYMENT_PLAN_PAYMENT_AMOUNT_NOT_APPLICABLE("paymentPlanPaymentAmount",
                 "paymentPlanPaymentCategory.invalid",
-                "Payment Plan Payment category is not applicable when payment plan amount is not entered.",
+                "Payment Category is not applicable when Payment Amount is not entered.",
                 0),
 
         PAYMENT_PLAN_PAYMENT_CATEGORY_NOT_APPLICABLE("paymentPlanPaymentCategory",
@@ -204,23 +210,24 @@ public interface ErrorMessageConstant {
 
         PAYMENT_PLAN_EFF_UNITL_REQUIRED("paymentPlanEffectiveUntilDate",
                 "paymentPlanEffectiveUntilDate.required",
-                "Payment Plan Effective Until is required when payment amount is entered.", 0),
+                "Please provide the Effective Until when the Payment Category is not Guideline Payment.", 0),
 
         PAYMENT_PLAN_EFF_UNITL_NOT_APPLICABLE("paymentPlanEffectiveUntilDate",
                 "paymentPlanEffectiveUntilDate.notapplicable",
-                "Payment Plan Effective Until is not applicable for payment category guideline.", 0),
+                "Effective Until cannot be entered when the Payment Category is Guideline Payment.", 0),
 
         PAYMENT_PLAN_EFF_UNITL_MORE_THAN_6_MONTHS("paymentPlanEffectiveUntilDate",
                 "paymentPlanEffectiveUntilDate.morethan.6months",
-                "Payment Plan Effective Until is more than 6 months.", 0),
+                "Effective Until cannot be more than 6 Months.", 0),
 
         PAYMENT_PLAN_NO_ACTIVE_PAYMENT_PLAN("paymentPlanPaymentAmount",
                 "paymentPlanPaymentAmount.noactiveplan",
-                "Payment Plan with no active payment plan.", 0),
+                "Activity cannot be added when the Claimant does not have an Active Payment Plan in NHUIS.", 0),
 
         PAYMENT_PLAN_PAYMENT_AMOUNT_NOT_SAME("paymentPlanPaymentAmount",
                 "paymentPlanPaymentAmount.paymentplan.amount",
-                "Payment Plan payment amount not same as nhuis payment plan amount .", 0),
+                "Activity cannot be added when the NHUIS Payment Plan Monthly amount " +
+                        "and Activity Payment amount is not same and NHUIS Payment Plan monthly amount is '{0}'", 1),
 
         PAYMENT_PLAN_COR_PAYMENT_CATEGORY_NA("activityCorrespondence",
                 "activityCorrespondence.pmtcategory.notapplicable",
@@ -260,102 +267,116 @@ public interface ErrorMessageConstant {
     @AllArgsConstructor
     enum WageGarnishmentActivityDTODetail implements CollecticaseErrorEnum {
         WG_EMPLOYER_ID_REQUIRED("employerId", "employerId.required",
-                "Employer is required.", 0),
+                "Please select the Employer.", 0),
 
         WG_EMPLOYER_NA_FOR_SUSPEND("employerId", "employerId.suspend.notapplicable",
-                "Employer is not eligible for Suspend Wage Garnishment.", 0),
+                "No employer must be selected when the request pertains to Suspension of " +
+                        "Wage Garnishment prior to the Notice of Wage Garnishment being issued.", 0),
 
         WG_EMPLOYER_NA_FOR_UNKNOWN("employerId", "employerId.unknown.notapplicable",
-                "Unknown Employer is not eligible for this activity.", 0),
+                "No Known NH employer is not applicable when claimant has a current Wage Garnishment.", 0),
 
         WG_EMPLOYER_UNKNOWN_NA_FOR_WAGE_EMP("employerId", "employerId.unknown.wage.emp",
-                "Unknown Employer is not eligible for this case.", 0),
+                "No Known NH employer is only applicable for Research for Employment Activity.", 0),
 
         WG_EMPLOYER_CONTACT_REQUIRED("employerContactId", "employerContactId.required",
-                "Employer contact is required.", 0),
+                "Employer Contact is mandatory when the employer is selected.", 0),
 
         WG_EMPLOYER_REPRESENTATIVE_REQUIRED("employerRepresentativeCd",
                 "employerRepresentativeCd.required",
-                "Employer Representative is required.", 0),
+                "Employer Rep is mandatory when the employer is selected.", 0),
 
         WG_AMOUNT_REQUIRED("wageAmount", "wageAmount.required",
-                "Wage Amount is required.", 0),
+                "Please provide the Wage Amount.", 0),
 
         WG_FREQUENCY_REQUIRED("wageFrequency", "wageFrequency.required",
-                "Wage Frequency is required.", 0),
+                "Please select the Wage Frequency.", 0),
 
         WG_AMOUNT_VALID_EMPLOYER_INVALID("wageAmount", "wageAmount.valid.employer.invalid",
-                "Wage amount is valid but employer not selected.", 0),
+                "Please select the employer when the wage amount is provided.", 0),
 
         WG_AMOUNT_POSITIVE_NUMBER("wageAmount", "wageAmount.should.be.positive.number",
-                "Wage amount should be positive number.", 0),
+                "Please provide a valid positive number for Wage Amount.", 0),
 
         WG_AMOUNT_INVALID("wageAmount", "wageAmount.should.be.four.digit.two.decimal",
-                "Wage amount should be Four digit with two decimal.", 0),
+                "Wage Amount is invalid.", 0),
 
         WG_EMPLOYER_MANDATORY_DO_NOT_GARNISH("doNotGarnishInd",
                 "doNotGarnishInd.employer.mandatory",
-                "Employer mandatory when Do Not garnish is checked.", 0),
+                "Please select the employer when Do Not Garnish is checked off.", 0),
 
         WG_FREQUENCY_DO_NOT_GRANISH("doNotGarnishInd",
                 "doNotGarnishInd.wage.frequency.exists",
-                "Wage Frequency is not applicable when Do n0t garnish exists", 0),
+                "Do Not Garnish cannot be checked off when Wage Frequency is selected.", 0),
 
         WG_FREQUENCY_NO_EMPLOYER("wageFrequency", "employer.notexists.frequency.exists",
-                "Wage Frequency is not applicable when employer doesnot exists", 0),
+                "Employer needs to be selected when Wage Frequency is selected.", 0),
 
         WG_FREQUENCY_WG_AMOUNT_POSITIVE_NUMBER("wageFrequency",
                 "wage.frequency.wage.amount.non.positive.number",
-                "Wage Frequency is not applicable when wage amount is not positive number", 0),
+                "Wage Amount should be greater than zero when Wage Frequency is selected.", 0),
 
         WG_NON_COMPLIANCE_REQUIRED("wageNonCompliance", "wageNonCompliance.required",
-                "Wage non compliance required", 0),
+                "Please select the Non-compliance.", 0),
 
         WG_NON_COMPLIANCE_REPAYMENT_EXISTS("wageNonCompliance",
                 "wageNonCompliance.repayment.exists",
-                "Wage non compliance Failure to implement but repayment exists", 0),
+                "Employer Non-Compliance cannot be Failure to implement garnishment when re-payment" +
+                        " happened in the past 40 days via Wage Garnishment.", 0),
 
         WG_NON_COMPLIANCE_CMT_NO_LONGER("wageNonCompliance",
                 "wageNonCompliance.cmt.no.longer",
-                "Wage non compliance Failure to implement but claimant no longer activity exists", 0),
+                "Employer Non-Compliance cannot be Failure to implement garnishment when termination" +
+                        " has been recorded via Claimant No longer employed activity.", 0),
 
         WG_MOTION_FILED_ON_REQUIRED("wageMotionFiledOn", "wageMotionFiledOn.required",
-                "Wage Motion filed on is required", 0),
+                "Please provide the Motion Filed on.", 0),
 
         WG_MOTION_FILED_ON_DATE_FUTURE("wageMotionFiledOn", "wageMotionFiledOn.future",
-                "Wage Motion filed on cannot be in future", 0),
+                "Motion Filed on cannot be in the future.", 0),
 
         WG_MOTION_FILED_ON_EMPLOYER_NONE("wageMotionFiledOn",
                 "wageMotionFiledOn.employer.none",
-                "Wage Motion filed is not applicable when no employer selected", 0),
+                "Please select the employer when Motion Filed on is provided.", 0),
+
+        WG_CHANGE_REQ_DATE_REQUIRED("wageMotionFiledOn", "wageChangeReqDateOn.required",
+                "Please provide the Change Request Date.", 0),
+
+        WG_CHANGE_REQ_DATE_FUTURE("wageMotionFiledOn", "wageChangeReqDate.future",
+                "hange Request Date cannot be in the future.", 0),
+
+        WG_CHANGE_REQ_DATE_EMPLOYER_NONE("wageMotionFiledOn",
+                "wageChangeReqDate.employer.none",
+                "Please select the employer when Change Request Date is provided.", 0),
 
         WG_EFFECTIVE_DT_REQUIRED("wageEffectiveFrom", "wageEffectiveFrom.required",
-                "Wage Effective Date is required", 0),
+                "Please provide the Effective From date.", 0),
 
         WG_EFFECTIVE_DT_EMPLOYER_NONE("wageEffectiveFrom",
                 "wageEffectiveFrom.employer.none",
-                "Wage Effective Date exist when no employer selected", 0),
+                "Please select the employer when Effective From is provided.", 0),
 
         WG_EFFECTIVE_UNILT_DT_EFF_DT_NONE("wageEffectiveUntil",
                 "wageEffectiveUntil.wageEffectiveFrom.none",
-                "Wage Effective Until Date exist when no Effective Date", 0),
+                "Effective From is mandatory when Effective Until is provided.", 0),
 
         WG_EFFECTIVE_DT_GREATER_THAN_UNTIL_DT("wageEffectiveUntil",
                 "wageEffectiveFrom.greaterthan.wageEffectiveUntil",
-                "Wage Effective Date greater than Until Date", 0),
+                "Effective From cannot be greater than Effective Until date.", 0),
 
         WG_COURT_ORDERED_NO_WAGE_SUSPENDED("courtOrderedInd",
                 "courtOrderedInd.no.wagesuspended",
-                "Court Ordered No when Wage Suspended", 0),
+                "Wage Garnishment has been suspended. You cannot send the Notice of Wage garnishment " +
+                        "unless it is court ordered.", 0),
 
         WG_COURT_ORDERED_REQUIRED("courtOrderedInd", "courtOrderedInd.required",
-                "Court Ordered mandatory", 0),
+                "Please indicate whether Court Ordered or not.", 0),
 
         WG_COURT_ORDERED_DATE_REQUIRED("courtOrderedDate", "courtOrderedDate.required",
-                "Court Ordered date mandatory", 0),
+                "Please provide the Court Ordered Date.", 0),
 
         WG_COURT_ORDERED_DATE_FUTURE("courtOrderedDate", "courtOrderedDate.future",
-                "Court Ordered date canot be in future", 0),
+                "Court Ordered date cannot be in future.", 0),
 
         WG_CORR_NA_DO_NOT_GARNISH("activityCorrespondence",
                 "activityCorrespondence.na.dont.garnish",
